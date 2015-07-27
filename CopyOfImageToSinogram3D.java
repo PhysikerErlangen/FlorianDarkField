@@ -2,11 +2,11 @@
 // This part of the code is not to be published under GPL before Oct 31st 2017.
 // author@ Florian Schiffers July 10st, 2014
 //
-package edu.stanford.rsl.science.darkfield.Florian;
+package edu.stanford.rsl.science.darkfield.FlorianDarkField;
 
 import ij.ImagePlus;
 import edu.stanford.rsl.conrad.data.numeric.Grid2D;
-import edu.stanford.rsl.science.darkfield.Florian.DarkField3DSinogram;
+import edu.stanford.rsl.science.darkfield.FlorianDarkField.DarkField3DSinogram;
 
 
 public class CopyOfImageToSinogram3D {

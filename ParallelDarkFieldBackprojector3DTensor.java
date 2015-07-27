@@ -4,10 +4,10 @@
 //
 
 
-package edu.stanford.rsl.science.darkfield.Florian;
+package edu.stanford.rsl.science.darkfield.FlorianDarkField;
 
 
-import edu.stanford.rsl.science.darkfield.Florian.DarkField3DTensorVolume;
+import edu.stanford.rsl.science.darkfield.FlorianDarkField.DarkField3DTensorVolume;
 
 
 

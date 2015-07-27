@@ -3,7 +3,7 @@
 // author@ Florian Schiffers July 1st, 2015
 //
 
-package edu.stanford.rsl.science.darkfield.Florian;
+package edu.stanford.rsl.science.darkfield.FlorianDarkField;
 
 
 
@@ -14,11 +14,11 @@ import edu.stanford.rsl.conrad.utils.Configuration;
 
 
 // Used for solving the 3D Gradientsolver in the tensor framework
-import edu.stanford.rsl.science.darkfield.Florian.GradientSolverTensor3D;
+import edu.stanford.rsl.science.darkfield.FlorianDarkField.GradientSolverTensor3D;
 
 // Contains the reconstructed sample
-import edu.stanford.rsl.science.darkfield.Florian.DarkField3DTensorVolume;
-import edu.stanford.rsl.science.darkfield.Florian.ImageToSinogram3D;
+import edu.stanford.rsl.science.darkfield.FlorianDarkField.DarkField3DTensorVolume;
+import edu.stanford.rsl.science.darkfield.FlorianDarkField.ImageToSinogram3D;
 import ij.IJ;
 import ij.ImageJ;
 import ij.ImagePlus;

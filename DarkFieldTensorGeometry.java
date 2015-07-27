@@ -3,7 +3,7 @@
 // author@ Florian Schiffers July 1st, 2015
 //
 
-package edu.stanford.rsl.science.darkfield.Florian;
+package edu.stanford.rsl.science.darkfield.FlorianDarkField;
 
 
 import edu.stanford.rsl.conrad.geometry.Projection.CameraAxisDirection;

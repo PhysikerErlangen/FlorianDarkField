@@ -2,7 +2,7 @@
 //This part of the code is not to be published under GPL before Oct 31st 2017.
 //author@ Florian Schiffers July 1st, 2015
 //
-package edu.stanford.rsl.science.darkfield.Florian;
+package edu.stanford.rsl.science.darkfield.FlorianDarkField;
 import ij.ImagePlus;
 import edu.stanford.rsl.conrad.data.numeric.Grid3D;
 import edu.stanford.rsl.conrad.data.numeric.Grid4D;

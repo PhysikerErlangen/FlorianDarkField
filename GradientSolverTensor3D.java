@@ -3,12 +3,12 @@
 // author@ Florian Schiffers July 1st, 2015
 //
 
-package edu.stanford.rsl.science.darkfield.Florian;
+package edu.stanford.rsl.science.darkfield.FlorianDarkField;
 
 // Specialized backprojector and projector methods are required for solving the system with gradient decent
-import edu.stanford.rsl.science.darkfield.Florian.ParallelDarkFieldBackprojector3DTensor; 
-import edu.stanford.rsl.science.darkfield.Florian.ParallelDarkFieldProjector3DTensor;
-import edu.stanford.rsl.science.darkfield.Florian.DarkField3DTensorVolume;
+import edu.stanford.rsl.science.darkfield.FlorianDarkField.ParallelDarkFieldBackprojector3DTensor; 
+import edu.stanford.rsl.science.darkfield.FlorianDarkField.ParallelDarkFieldProjector3DTensor;
+import edu.stanford.rsl.science.darkfield.FlorianDarkField.DarkField3DTensorVolume;
 import edu.stanford.rsl.conrad.utils.Configuration;
 
 

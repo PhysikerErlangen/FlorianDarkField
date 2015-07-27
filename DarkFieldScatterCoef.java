@@ -1,4 +1,4 @@
-package edu.stanford.rsl.science.darkfield.Florian;
+package edu.stanford.rsl.science.darkfield.FlorianDarkField;
 
 
 import edu.stanford.rsl.conrad.numerics.SimpleVector;

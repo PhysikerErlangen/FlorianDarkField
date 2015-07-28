@@ -234,50 +234,45 @@ public class ParallelDarkFieldBackprojector3DTensor extends  DarkFieldTensorGeom
 			
 			
 			// get detector grid
-			Grid2D subgrid = sino3D.getSubGrid(curTheta);		
-			
+			Grid2D detectorImageAtTheta = sino3D.getSubGrid(curTheta);		
+						
 			// Create direction Vector of the detector at given angle Theta
 			// Remember: Third coordinate is 0
-			SimpleVector dirDetector = calculateRotatedVector(cosTheta, sinTheta,0).getAbstractVector();
-
-			
+			SimpleVector dirU = calculateRotatedVector(cosTheta, sinTheta,0).getAbstractVector();
+			SimpleVector dirV = calculateRotatedVector(0,0,1f).getAbstractVector();
 			
 			// Loop through complete volume to do pixel based backprojection
-			for (int z = 0; z < imgSizeZ; z++) {
-				
-				// precalculate detector column 						
-				double curV_index = calculateDetectorRow(z);  
-				
 				for (int x = 0; x < imgSizeX; x++) {
 					for (int y = 0; y < imgSizeY; y++) {
-										
+						for (int z = 0; z < imgSizeZ; z++) {
+							
 					// compute world coordinate of current pixel
 					double[] w = grid.indexToPhysical(x, y,z);
 					
 					// Create current voxel element
 					SimpleVector voxel = new SimpleVector(w[0], w[1],w[2]);
 					
-					// Calculate innerproduct between voxel element and direction of detector
-					// As Inner Product is projection onto on axis, it gives
-					// the distance on the detector
-					double distDetector = SimpleOperators.multiplyInnerProd(voxel,
-							dirDetector);					
+					// Calcualte detector coodinates
+					SimpleVector orthProj = calcDetectorCoordinates(voxel,dirU,dirV);
 					
 					// Calculates the subpixel detector coordinate curU
-					double curU_index = calculateCurU(distDetector);
-					
+					double curU_index = calcU_index(orthProj.getElement(0));
+					// precalculate detector column 						
+					double curV_index = calcV_index(orthProj.getElement(1));  
 						
 					// check detector bounds, continue if out of borders
 					if ( 		maxU_index <= curU_index + 1
 							||  curU_index < 0
 							||  maxV_index < curV_index + 1
 							||  curV_index < 0
-							)
+							){
 						continue; // Do nothing if projected point does not lie on detector
+					}
 					
 					// Calculate the interpolated darkField value of the current voxel point
 					// of the current projection image
-					float darkFieldValue = InterpolationOperators.interpolateLinear(subgrid,curU_index,curV_index);
+					float darkFieldValue = InterpolationOperators.interpolateLinear(detectorImageAtTheta,curU_index,curV_index);
+					
 					
 					for (int scatterChannel = 0; scatterChannel < numScatterVectors; scatterChannel++){
 						
@@ -286,16 +281,28 @@ public class ParallelDarkFieldBackprojector3DTensor extends  DarkFieldTensorGeom
 
 						grid.addAtIndexDarkfield(x, y, z, scatterChannel, (float)(scatterWeight*darkFieldValue));
 						
-					} // END LOOP DARK FIELD SCATTERER
+					} 
+					
+					
+					
+					// END LOOP DARK FIELD SCATTERER
 					} // END LOOP Z
+						
+						
+						
 				} // END LOOP Y
+					
 			} // END LOOP X
 		} // END LOOP ANGLES
+		
+		
 		
 		// TODO Normalization factors
 		NumericPointwiseOperators.divideBy(grid, (float) (maxTheta_index / Math.PI));
 		return grid;
 	}
+	
+	
 	
 
 }

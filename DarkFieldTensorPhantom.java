@@ -138,8 +138,13 @@ public class DarkFieldTensorPhantom  extends  DarkFieldTensorGeometry  {
 		ParallelDarkFieldProjector3DTensor projector2 = new
 				ParallelDarkFieldProjector3DTensor(config2, scatterCoef2);
 		
-		DarkField3DSinogram sino1 = projector1.projectRayDriven(phantom);
-		DarkField3DSinogram sino2 = projector2.projectRayDriven(phantom);
+		//DarkField3DSinogram sino1 = projector1.projectRayDriven(phantom);
+		//DarkField3DSinogram sino2 = projector2.projectRayDriven(phantom);
+		
+		DarkField3DSinogram sino1 = projector1.projectPixelDriven(phantom);
+		DarkField3DSinogram sino2 = projector2.projectPixelDriven(phantom);
+		
+		
 		
 		sinogramList.add(sino1);
 		sinogramList.add(sino2);

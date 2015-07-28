@@ -156,9 +156,15 @@ public class DarkFieldTensorGeometry {
 	}
 	
 	// Calculates the detector column in pixel coordinates  
-	public double calculateCurU(double s){
-		double curU_index = s/deltaU - offSetU_index + maxU_index/2.0; 
+	public double calcU_index(double uWorld){
+		double curU_index = uWorld/deltaU - offSetU_index + maxU_index/2.0; 
 		return curU_index;
+	}
+	
+	public double calcV_index(double vWorld){
+		double curV_index = vWorld/deltaV - offSetV_index + maxV_index/2.0; 
+		return curV_index;
+		
 	}
 	
 	public double calculateDetectorCoordinate(int curU_index){
@@ -166,6 +172,8 @@ public class DarkFieldTensorGeometry {
 		double s = deltaU * curU_index + this.offSetU_world - maxU_world/2.0;
 		return s;
 	}
+	
+	
 	
 	// Calculates the parallel projection of a "voxel" coordinate
 	// onto the detector column in world coordinates
@@ -228,12 +236,39 @@ public class DarkFieldTensorGeometry {
 	}	else if(trajectoryFlag.equals("010")){
 		return new PointND(-u_worldY,v_worldZ,u_worldX);
 	}else{
-		
 		return null;
+	}
+}
+	
+	// Calculate orthogonal projection onto arbitrary plane by formula given by
+	// https://de.wikipedia.org/wiki/Orthogonalprojektion
+	// Returns: iamge coordinates in world coordinates (need to be transformed to image coordinates later)
+	public static SimpleVector calcDetectorCoordinates(SimpleVector x, SimpleVector uVec, SimpleVector vVec){
+		
+		double inner1 = SimpleOperators.multiplyInnerProd(x,uVec);
+		double inner2 = SimpleOperators.multiplyInnerProd(x,vVec);
+				
+		SimpleVector res = new SimpleVector(inner1,inner2);
+		return res; 
+		
+	}
+
+	
+	
+	// Calculate orthogonal projection onto arbitrary plane by formula given by
+	// https://de.wikipedia.org/wiki/Orthogonalprojektion
+	public static SimpleVector calcOrthogonalProjection(SimpleVector x, SimpleVector uVec, SimpleVector vVec){
+		
+		double inner1 = SimpleOperators.multiplyInnerProd(x,uVec);
+		double inner2 = SimpleOperators.multiplyInnerProd(x,vVec);
+		
+		uVec.multiplyBy(inner1);
+		vVec.multiplyBy(inner2);
+		
+		SimpleVector res = SimpleOperators.add(uVec,vVec);
+		return res; 
 		
 	}
 	
-	
-}
 	
 }

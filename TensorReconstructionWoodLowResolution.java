@@ -36,7 +36,7 @@ public class TensorReconstructionWoodLowResolution{
 
 	public static void main (String [] args) throws Exception{
 
-		String fileNameConfig1 = "C:\\Users\\schiffers\\workspace\\Configurations\\HalfAngleCropped_Cut_60_38_100_Date_07-24-15.xml";
+		String fileNameConfig1 = "C:\\Users\\schiffers\\workspace\\Configurations\\HalfAngleCropped_Cut_60_38_100_Date_07-27-15.xml";
 		
 		// Load configuration wooden case
 
@@ -105,7 +105,7 @@ public class TensorReconstructionWoodLowResolution{
 		//Stepsize for Gradient decent
 		float stepSize = 0.003f;
 		// Number of maximal iterations in gradient decent
-		int maxIt = 4;
+		int maxIt = 1;
 		
 		// Initialize the GradientSolver3D
 	GradientSolverTensor3D gradientSolver = new GradientSolverTensor3D(Configuration1, Configuration2, sinoDCI1, sinoDCI2, stepSize, maxIt, numScatterVectors);

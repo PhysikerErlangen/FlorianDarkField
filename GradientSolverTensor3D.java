@@ -64,7 +64,7 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry{
 		boolean debug = true;
 		
 		boolean reconVertical = true;
-		boolean reconHorizontal = true;
+		boolean reconHorizontal = false;
 		
 		// Initialize to be constructed volume
 		DarkField3DTensorVolume reconImage = new DarkField3DTensorVolume(
@@ -111,10 +111,10 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry{
 
 				// Calculate projection of first reconstruction
 				if(reconVertical){
-				projectionSinogram1 = projector1.projectRayDriven(reconImage);
+				projectionSinogram1 = projector1.projectPixelDriven(reconImage);
 				}
 				if(reconHorizontal){
-				projectionSinogram2 = projector2.projectRayDriven(reconImage);
+				projectionSinogram2 = projector2.projectPixelDriven(reconImage);
 				}
 			
 				if(debug){

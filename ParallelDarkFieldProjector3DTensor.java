@@ -9,6 +9,7 @@ package edu.stanford.rsl.science.darkfield.FlorianDarkField;
 
 import java.util.ArrayList;
 
+import edu.stanford.rsl.conrad.data.numeric.Grid2D;
 import edu.stanford.rsl.conrad.data.numeric.InterpolationOperators;
 import edu.stanford.rsl.conrad.geometry.shapes.simple.Box;
 import edu.stanford.rsl.conrad.geometry.shapes.simple.PointND;
@@ -77,13 +78,15 @@ public class ParallelDarkFieldProjector3DTensor extends  DarkFieldTensorGeometry
 			// compute current angle theta [rad] and angular functions.
 			double theta = deltaTheta * curTheta;
 			// angular functions, precalculate for efficiency reasons
+		
+			double cosTheta = Math.cos(theta);
+			double sinTheta = Math.sin(theta);
+			
 			
 			// Console ouput: Uncomment if you debug in the DarkFieldProjector
 			System.out.println("Cur Proj: " +curTheta +"/" +maxTheta_index 
 					+ " (" +((10000*curTheta/maxTheta_index)/100.0) +"% done.)");
 			
-			double cosTheta = Math.cos(theta);
-			double sinTheta = Math.sin(theta);
 
 			// Go through detector line
 			for (int curU = 0; curU < maxU_index; ++curU) {
@@ -188,7 +191,81 @@ public class ParallelDarkFieldProjector3DTensor extends  DarkFieldTensorGeometry
 		return sino;
 }
 	
+
+
+//// SHOULD NOT WORK
+// Project the Volume onto one projection
+public DarkField3DSinogram projectPixelDriven(DarkField3DTensorVolume darkFieldVolume) {
+	
+	// Create sinogram to be reconstructed
+	DarkField3DSinogram sino = new DarkField3DSinogram(this.maxU_index,this.maxV_index,this.maxTheta_index);
+	
+for( int curTheta = 0; curTheta < maxTheta_index; curTheta++){
+	
+	
+	// Debug Output: Uncomment if you need to debug the Backprojector
+	System.out.println("Cur BackProj: " +curTheta +"/" +maxTheta_index 
+			+ " (" +((10000*curTheta/maxTheta_index)/100.0) +"% done.)");
+	
+	// compute current angle theta [rad] and angular functions.
+	double theta = deltaTheta * curTheta;
+	// angular functions, precalculate for efficiency reasons
+
+	double cosTheta = Math.cos(theta);
+	double sinTheta = Math.sin(theta);
+	
+	SimpleVector dirU = calculateRotatedVector(cosTheta, sinTheta,0).getAbstractVector();
+	SimpleVector dirV = calculateRotatedVector(0,0,1.0f).getAbstractVector();
+	
+	// Loop through all 3 dimensions
+	for ( int x = 0; x < imgSizeX - 1; x++){
+		for(int y = 0; y < imgSizeY - 1; y++){
+			for(int z = 0; z < imgSizeZ -1; z++){
+				
+			// compute world coordinate of current pixel
+			 double[] w = darkFieldVolume.indexToPhysical(x, y,z);
+				
+			// Calculate current voxel element
+			SimpleVector voxel = new SimpleVector(w[0],w[1],w[2]);				
+			
+			// Calcualte detector coodinates
+			SimpleVector orthProj = calcDetectorCoordinates(voxel,dirU,dirV);
+			
+			// Calculates the subpixel detector coordinate curU
+			double curU_index = calcU_index(orthProj.getElement(0));
+			// precalculate detector column 						
+			double curV_index = calcV_index(orthProj.getElement(1));  
+				
+			// check detector bounds, continue if out of borders
+			if ( 		maxU_index <= curU_index + 1
+					||  curU_index < 0
+					||  maxV_index < curV_index + 1
+					||  curV_index < 0
+					)
+				continue; // Do nothing if projected point does not lie on detector
+			
+			float val = 0;
+			
+			for (int scatterChannel = 0; scatterChannel < this.numScatterVectors; scatterChannel++){
+				// Get weight for current projection
+				double scatterWeight = scatterCoefficients.getWeight(curTheta, scatterChannel);
+				// getValue of current voxel element
+				val += darkFieldVolume.getAtIndex(x,y,z)*scatterWeight;
+			}
+			
+			
+			Grid2D projectedImage = sino.getSubGrid(curTheta);
+			InterpolationOperators.addInterpolateLinear(projectedImage,curU_index,curV_index,val);
+			
+			} // END Z				
+		}	// END Y
+	} // END Z
+} // END THETA
+	return sino;
+	}
 }
+
+
 
 //	
 //	
@@ -461,59 +538,4 @@ public class ParallelDarkFieldProjector3DTensor extends  DarkFieldTensorGeometry
 //
 //	
 //	
-//	// SHOULD NOT WORK
-//	// Project the Volume onto one projection
-//	public Grid2D projectPixelDriven(DarkField3DTensorVolume grid, int projIdx) {
-//
-//		// Check if index of used projection index is too large
-//		if(projIdx+1 > maxProjs || 0 > projIdx){
-//			System.err.println("ConeBeamProjector: Invalid projection index");
-//			return null;
-//		}
-//		
-//		// Create sinogram to be reconstructed
-//		
-//		Grid2D sino = new Grid2D(maxU,maxV); //
-//		
-//		// Loop through all 3 dimensions
-//		for ( int x = 0; x < imgSizeX - 1; x++){
-//			// Calculate current xValue
-//			double xTrans = x*spacingX - originX;
-//			
-//			for(int y = 0; y < imgSizeY - 1; y++){
-//				// 	Calculate current yValue
-//				double yTrans = y*spacingY - originY;
-//				for(int z = 0; z < imgSizeZ -1; z++){
-//				// Calculate current zValue
-//				double zTrans = z*spacingZ - originZ;
-//				
-//				// Vector [in homogeneous coordinates] represents point in space and pixel valued point
-//				SimpleVector point3D = new SimpleVector(xTrans,yTrans,zTrans,1);				
-//				SimpleVector point2D = SimpleOperators.multiply(projMats[projIdx].computeP(), point3D);
-//				
-//				// Calculate pixel out of projection model
-//				double coordU = point2D.getElement(0)/point2D.getElement(2);
-//				double coordV = point2D.getElement(1)/point2D.getElement(2);
-//				
-//				// Check if values are out of border (too large/ to small)
-//				if (coordU >= maxU - 1 || coordV >= maxV - 1 || coordU <= 0 || coordV <=0){
-//					continue;
-//				}
-//				
-//				float val = 0;
-//				
-//				for (int scatterVec = 0; scatterVec < this.numScatterVectors; scatterVec++){
-//					// Get weight for current projection
-//					double weight = scatterCoefficients.getWeight(projIdx, scatterVec);
-//					// getValue of current voxel element
-//					val += grid.getAtIndex(x,y,z)*weight;
-//				}
-//				
-//				
-//				InterpolationOperators.addInterpolateLinear(sino,coordU,coordV,val);
-//				}				
-//			}	
-//		}
-//		return sino;
-//		}
-//}
+

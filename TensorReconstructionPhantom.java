@@ -58,7 +58,7 @@ public class TensorReconstructionPhantom{
 		
 
 		// display the phantom
-		// phantom.phantom.show("Phantom Volume");
+		phantom.phantom.show("Phantom Volume");
 		
 		phantom.calculateDarkFieldProjection(Configuration1, Configuration2);
  		
@@ -97,7 +97,7 @@ public class TensorReconstructionPhantom{
 		// Number of scatter vectors
 		int numScatterVectors = 3;
 		//Stepsize for Gradient decent
-		float stepSize = 0.003f;
+		float stepSize = 0.03f;
 		// Number of maximal iterations in gradient decent
 		int maxIt = 5;
 		

@@ -84,6 +84,7 @@ public class DarkField3DTensorVolume extends DarkFieldGrid3DTensor{
 	@Override
 	public void show(String reconTitle){
 		
+		
 		for(int channel = 0; channel < this.getNumberOfChannels(); channel++){
 			
 			Grid3D curGrid = this.getChannel(channel);

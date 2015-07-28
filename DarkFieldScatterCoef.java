@@ -109,9 +109,9 @@ public class DarkFieldScatterCoef extends  DarkFieldTensorGeometry{
 			
 			this.scatteringVectors = new SimpleVector[3];
 			
-			this.scatteringVectors[0] = new SimpleVector(1f,1f,0f); 
-			this.scatteringVectors[1] = new SimpleVector(0f,1f,1f);
-			this.scatteringVectors[2] = new SimpleVector(1f,0f,1f);
+			this.scatteringVectors[0] = new SimpleVector(1f,0f,0f); 
+			this.scatteringVectors[1] = new SimpleVector(0f,1f,0f);
+			this.scatteringVectors[2] = new SimpleVector(0f,0f,1f);
 		}	
 		
 		else if(this.numScatterVectors == 1){

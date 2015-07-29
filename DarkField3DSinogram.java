@@ -90,6 +90,13 @@ public class DarkField3DSinogram extends Grid3D {
 		
 		Grid3D mySinoGrid = new Grid3D(maxThetaIndex,maxU,maxV);
 		
+		double[] mySpacing = this.getSpacing();
+		mySinoGrid.setSpacing(mySpacing[2],mySpacing[1],mySpacing[0]);
+		
+		double[] myOrigin = this.getOrigin();
+		
+		mySinoGrid.setOrigin(getOrigin());
+		
 		for(int curTheta = 0; curTheta < maxThetaIndex; curTheta++){ // Start with Stack 1 so Matlab convention
 			for(int curU = 0; curU < maxU; curU++){
 				for(int curV = 0; curV < maxV; curV++){
@@ -101,7 +108,7 @@ public class DarkField3DSinogram extends Grid3D {
 		ImagePlus img = ImageUtil.wrapGrid3D(mySinoGrid, title);
 		
 		img.show();
-		IJ.run(img, "Enhance Contrast", "saturated=0.35");
+		
 		
 	
 	}

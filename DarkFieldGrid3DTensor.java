@@ -66,7 +66,10 @@ public class DarkFieldGrid3DTensor extends MultiChannelGrid3D {
 		// Loop through all channels and multiply with factor
 		for (int channel = 0; channel < this.getNumberOfChannels() ; channel++){
 			// Multiply current value with factor
-			putPixelValue(x,y,z,channel,getPixelValue(x, y,z, channel)*factor);
+			float value = getPixelValue(x,y,z,channel);
+			value = value*factor;
+			putPixelValue(x,y,z,channel,value);
+			
 		}		
 	}
 

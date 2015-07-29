@@ -3,6 +3,7 @@
 //author@ Florian Schiffers July 1st, 2015
 //
 package edu.stanford.rsl.science.darkfield.FlorianDarkField;
+import ij.IJ;
 import ij.ImagePlus;
 import edu.stanford.rsl.conrad.data.numeric.Grid3D;
 import edu.stanford.rsl.conrad.data.numeric.Grid4D;
@@ -75,28 +76,33 @@ public class DarkField3DTensorVolume extends DarkFieldGrid3DTensor{
 	
 	
 	
-	
-	@Override
-	public void show(){
-		show("");
-	}
-	
-	@Override
-	public void show(String reconTitle){
-		
-		
-		for(int channel = 0; channel < this.getNumberOfChannels(); channel++){
-			
-			Grid3D curGrid = this.getChannel(channel);
-			
-			String title = reconTitle + "Channel Nr. "+channel;
-			ImageUtil.wrapGrid3D(curGrid, title).show();
-			
-			// curGrid.show();
-			
-		}
-			
-			
-	}
+//	
+//	@Override
+//	public void show(){
+//		show("");
+//		
+//	}
+//	
+//	@Override
+//	public void show(String reconTitle){
+//		
+//		this.getMultichannelData().show();
+//		
+//		
+//		for(int channel = 0; channel < this.getNumberOfChannels(); channel++){
+//			
+//			Grid3D curGrid = this.getChannel(channel);
+//			
+//			String title = reconTitle + "Channel Nr. "+channel;
+//			ImagePlus myImg = ImageUtil.wrapGrid3D(curGrid, title);
+//			
+//			myImg.show();
+//		
+//			IJ.run(myImg, "Volume Viewer", "");
+//			// curGrid.show();
+//		}
+//			
+//			
+//	}
 	
 }

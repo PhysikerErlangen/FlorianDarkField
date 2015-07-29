@@ -84,12 +84,18 @@ public class DarkFieldTensorPhantom  extends  DarkFieldTensorGeometry  {
 	
 	public void calcPhantom(){
 		
+		SimpleVector scatterDir1 = null;
 		
 		// USE THREE DIFFERENT SCATTER DIRECTION
-		
-		SimpleVector scatterDir1 = new SimpleVector(1,0,0);
+		if(this.numScatterVectors == 3){
+		scatterDir1 = new SimpleVector(1,0,0);
 		SimpleVector scatterDir2 = new SimpleVector(0,1,0);
 		SimpleVector scatterDir3 = new SimpleVector(0,0,1);
+		} else if(this.numScatterVectors == 1){
+			
+		scatterDir1 = new SimpleVector(1f);	
+		
+		}
 		
 		
 		int a = (int)( 0.2*imgSizeX);

@@ -204,7 +204,7 @@ for( int curTheta = 0; curTheta < maxTheta_index; curTheta++){
 	
 	
 	// Debug Output: Uncomment if you need to debug the Backprojector
-	System.out.println("Cur BackProj: " +curTheta +"/" +maxTheta_index 
+	System.out.println("Cur Proj: " +curTheta +"/" +maxTheta_index 
 			+ " (" +((10000*curTheta/maxTheta_index)/100.0) +"% done.)");
 	
 	// compute current angle theta [rad] and angular functions.
@@ -249,6 +249,9 @@ for( int curTheta = 0; curTheta < maxTheta_index; curTheta++){
 			for (int scatterChannel = 0; scatterChannel < this.numScatterVectors; scatterChannel++){
 				// Get weight for current projection
 				double scatterWeight = scatterCoefficients.getWeight(curTheta, scatterChannel);
+
+				scatterWeight = 1;
+				
 				// getValue of current voxel element
 				val += darkFieldVolume.getAtIndex(x,y,z)*scatterWeight;
 			}

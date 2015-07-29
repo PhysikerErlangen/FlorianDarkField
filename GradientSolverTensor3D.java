@@ -9,6 +9,8 @@ package edu.stanford.rsl.science.darkfield.FlorianDarkField;
 import edu.stanford.rsl.science.darkfield.FlorianDarkField.ParallelDarkFieldBackprojector3DTensor; 
 import edu.stanford.rsl.science.darkfield.FlorianDarkField.ParallelDarkFieldProjector3DTensor;
 import edu.stanford.rsl.science.darkfield.FlorianDarkField.DarkField3DTensorVolume;
+import edu.stanford.rsl.conrad.data.numeric.NumericPointwiseOperators;
+import edu.stanford.rsl.conrad.data.numeric.iterators.NumericPointwiseIteratorND;
 import edu.stanford.rsl.conrad.utils.Configuration;
 
 
@@ -61,7 +63,7 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry{
 	
 	public DarkField3DTensorVolume Gradient3D() throws Exception{
 		
-		boolean debug = true;
+		boolean debug = false;
 		
 		boolean reconVertical = true;
 		boolean reconHorizontal = true;
@@ -131,35 +133,33 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry{
 			// Calculate difference between observation and current projection
 			if(reconVertical){
 			differenceSinogram1 = DarkField3DSinogram.sub(projectionSinogram1,darkFieldSinogram1);
-			differenceSinogram1.showSinogram("Sinogram1 of differences at iteration: " +it);
+			// differenceSinogram1.showSinogram("Sinogram1 of differences at iteration: " +it);
 
 			// Backprojection difference between observation (Sinogram) and current iteration
 			DarkField3DTensorVolume backProjectionDifference1 = backProjector1.backprojectPixelDriven(differenceSinogram1);
+			
 			// First multiply this with the gradient step size
 			backProjectionDifference1.multiply(stepSize);
 			reconImage.sub(backProjectionDifference1);
 			}
 			
-			
 			if(reconHorizontal){
 			differenceSinogram2 = DarkField3DSinogram.sub(projectionSinogram2,darkFieldSinogram2);
-			differenceSinogram2.showSinogram("Sinogram2 of differences at iteration: " +it);
+			// differenceSinogram2.showSinogram("Sinogram2 of differences at iteration: " +it);
 			// Backprojection difference between observation (Sinogram) and current iteration
 			DarkField3DTensorVolume backProjectionDifference2 = backProjector2.backprojectPixelDriven(differenceSinogram2);
-
 			// Apply gradient step by adding difference on top of current reconstruction
 			backProjectionDifference2.multiply(stepSize);
 			reconImage.sub(backProjectionDifference2);
 			}
 			
-//			if(debug){
-//				backProjectionDifference1.show("Backprojection1 of difference at it:" +it);
-//				backProjectionDifference2.show("Backprojection2 of difference at it:" +it);
-//			}
-//			
+			if(debug){
+				reconImage.show("reconstruction at iteration: " +it);
+			}
+			
 			
 
-			reconImage.show("reconstruction at iteration: " +it);
+
 			
 			long endTime = System.currentTimeMillis();
 			long deltaT = endTime - startTime;

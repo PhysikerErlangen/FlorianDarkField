@@ -234,7 +234,7 @@ public class DarkFieldTensorGeometry {
 		// Calculate Point when Rotation Axis is standard y - axis
 		return new PointND(u_worldX,u_worldY,v_worldZ);
 	}	else if(trajectoryFlag.equals("010")){
-		return new PointND(-u_worldY,v_worldZ,u_worldX);
+		return new PointND(-v_worldZ,u_worldX,-u_worldY);
 	}else{
 		return null;
 	}

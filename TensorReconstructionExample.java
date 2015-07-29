@@ -94,7 +94,7 @@ public class TensorReconstructionExample{
 		//Stepsize for Gradient decent
 		float stepSize = 0.003f;
 		// Number of maximal iterations in gradient decent
-		int maxIt = 10;
+		int maxIt = 2;
 		
 		// Initialize the GradientSolver3D
 		GradientSolverTensor3D gradientSolver = new GradientSolverTensor3D(Configuration1, Configuration2, sinoDCI1, sinoDCI1, stepSize, maxIt, numScatterVectors);

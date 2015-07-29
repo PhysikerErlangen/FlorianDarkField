@@ -31,7 +31,7 @@ public class TensorReconstructionPhantom{
 
 	public static void main (String [] args) throws Exception{
  
-		String fileNameConfig1 = "C:\\Users\\schiffers\\workspace\\Configurations\\PhantomHalfLarge.xml";
+		String fileNameConfig1 = "C:\\Users\\schiffers\\workspace\\Configurations\\PhantomHalfLarge_unsymetric.xml";
 		
 		// Load configuration wooden case
 
@@ -53,8 +53,13 @@ public class TensorReconstructionPhantom{
 		System.out.println("ImageJ started.");
 		
 		
+		// Number of scatter vectors
+		int numScatterVectors = 1;
+
+
+		
 		// Create Dark Field Phantom
-		DarkFieldTensorPhantom phantom = new DarkFieldTensorPhantom(Configuration1,3);
+		DarkFieldTensorPhantom phantom = new DarkFieldTensorPhantom(Configuration1,numScatterVectors);
 		
 
 		// display the phantom
@@ -94,23 +99,23 @@ public class TensorReconstructionPhantom{
 		 * INITILIAZATION OF SOME DATA
 		 */
 		
-		// Number of scatter vectors
-		int numScatterVectors = 3;
+		
 		//Stepsize for Gradient decent
-		float stepSize = 0.03f;
+		float stepSize = 0.009f;
 		// Number of maximal iterations in gradient decent
-		int maxIt = 1;
+		int maxIt = 3;
 		
 		// Initialize the GradientSolver3D
 		GradientSolverTensor3D gradientSolver = new GradientSolverTensor3D(Configuration1, Configuration2, sinoDCI1, sinoDCI1, stepSize, maxIt, numScatterVectors);
 		
 		DarkField3DTensorVolume reconImage = gradientSolver.Gradient3D();
 		
-		// reconImage.show();
+		reconImage.show();
 		
-		ImagePlus test = edu.stanford.rsl.conrad.utils.ImageUtil.wrapGrid4D(reconImage.getMultichannelData(), "test");
+		System.out.println("END ALGORITHM");
+		//ImagePlus test = edu.stanford.rsl.conrad.utils.ImageUtil.wrapGrid4D(reconImage.getMultichannelData(), "test");
 		
-		IJ.save(test,"C:\\Users\\schiffers\\workspace\\MeasuredData\\testObjectRecon.tif");
+//		IJ.save(test,"C:\\Users\\schiffers\\workspace\\MeasuredData\\testObjectRecon.tif");
 		
        
 //		

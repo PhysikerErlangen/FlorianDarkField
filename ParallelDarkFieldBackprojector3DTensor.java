@@ -279,6 +279,8 @@ public class ParallelDarkFieldBackprojector3DTensor extends  DarkFieldTensorGeom
 						// Works only for parallel beam, as weight is the same for every parallel ray!
 						double scatterWeight = scatterCoefficients.getWeight(curTheta, scatterChannel);
 
+						scatterWeight = 1;
+						
 						grid.addAtIndexDarkfield(x, y, z, scatterChannel, (float)(scatterWeight*darkFieldValue));
 						
 					} 

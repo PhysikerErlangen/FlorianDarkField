@@ -95,11 +95,17 @@ public class DarkFieldTensorPhantom  extends  DarkFieldTensorGeometry  {
 		int a = (int)( 0.2*imgSizeX);
 		int b = (int) (0.8*imgSizeY);
 		
+		int a2 = (int)( 0.4*imgSizeX);
+		int b2 = (int) (0.6*imgSizeY);
+		
+		int a3 = (int)( 0.3*imgSizeX);
+		int b3 = (int) (0.7*imgSizeY);
+		
 		System.out.println("a:" + a + "b: " + b);
 		
 		for(int x = a; x < b; x ++){
-			for(int y = a; y < b; y ++){
-				for(int z = a; z < b; z ++){
+			for(int y = a2; y < b2; y ++){
+				for(int z = a3; z < b3; z ++){
 
 					// Creates a phantom of 3 Layers, each Layer contains voxel with a constant scatter direction!
 					

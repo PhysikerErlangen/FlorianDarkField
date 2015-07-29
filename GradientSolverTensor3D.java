@@ -64,7 +64,7 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry{
 		boolean debug = true;
 		
 		boolean reconVertical = true;
-		boolean reconHorizontal = false;
+		boolean reconHorizontal = true;
 		
 		// Initialize to be constructed volume
 		DarkField3DTensorVolume reconImage = new DarkField3DTensorVolume(

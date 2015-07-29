@@ -71,8 +71,10 @@ public class DarkField3DSinogram extends Grid3D {
 	
 	public void show(String title){
 		ImagePlus img = ImageUtil.wrapGrid3D(this, title);
-		 
+				
 		img.show();
+		
+		IJ.run(img, "Enhance Contrast", "saturated=0.35");
 
 	}
 	
@@ -96,7 +98,10 @@ public class DarkField3DSinogram extends Grid3D {
 			}
 		}
 
-		ImageUtil.wrapGrid3D(mySinoGrid, title).show();
+		ImagePlus img = ImageUtil.wrapGrid3D(mySinoGrid, title);
+		
+		img.show();
+		IJ.run(img, "Enhance Contrast", "saturated=0.35");
 		
 	
 	}

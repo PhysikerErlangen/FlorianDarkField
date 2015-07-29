@@ -31,7 +31,7 @@ public class TensorReconstructionPhantom{
 
 	public static void main (String [] args) throws Exception{
  
-		String fileNameConfig1 = "C:\\Users\\schiffers\\workspace\\Configurations\\PhantomConfigurationFlorian-001-axis.xml";
+		String fileNameConfig1 = "C:\\Users\\schiffers\\workspace\\Configurations\\PhantomHalfLarge.xml";
 		
 		// Load configuration wooden case
 
@@ -99,7 +99,7 @@ public class TensorReconstructionPhantom{
 		//Stepsize for Gradient decent
 		float stepSize = 0.03f;
 		// Number of maximal iterations in gradient decent
-		int maxIt = 5;
+		int maxIt = 1;
 		
 		// Initialize the GradientSolver3D
 		GradientSolverTensor3D gradientSolver = new GradientSolverTensor3D(Configuration1, Configuration2, sinoDCI1, sinoDCI1, stepSize, maxIt, numScatterVectors);

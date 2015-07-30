@@ -4,6 +4,7 @@
 //
 package edu.stanford.rsl.science.darkfield.FlorianDarkField;
 
+import weka.core.pmml.jaxbbindings.SetPredicate;
 import edu.stanford.rsl.conrad.data.numeric.Grid3D;
 import edu.stanford.rsl.conrad.data.numeric.Grid4D;
 import edu.stanford.rsl.conrad.data.numeric.MultiChannelGrid3D;
@@ -129,6 +130,14 @@ public class DarkFieldGrid3DTensor extends MultiChannelGrid3D {
 					myVec[channel] = getPixelValue(x, y, z, channel);
 	}
 		return myVec;
+	}
+	
+	@Override
+	// Careful overwrides ALL channels
+	public void setAtIndex(int i, int j, int k, float val) {
+		for(int channel = 0; channel < this.getNumberOfChannels(); channel++){
+			setValueAtChannelN(i, j, k, channel, val);
+		}
 	}
 	
 	

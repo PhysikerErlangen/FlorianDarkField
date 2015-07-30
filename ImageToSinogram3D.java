@@ -6,6 +6,7 @@ package edu.stanford.rsl.science.darkfield.FlorianDarkField;
 
 import ij.ImagePlus;
 import edu.stanford.rsl.conrad.data.numeric.Grid2D;
+import edu.stanford.rsl.conrad.data.numeric.Grid3D;
 import edu.stanford.rsl.science.darkfield.FlorianDarkField.DarkField3DSinogram;
 
 
@@ -41,15 +42,31 @@ public class ImageToSinogram3D {
 				for(int curU = 0; curU < maxU; curU++){
 					for(int curV = 0; curV < maxV; curV++){
 						
+						int ind = curV*maxU+curU;
+						
 						// Do a interpolation of neighbor points of current value is 0
-						if(sliceValues[curV*maxU+curU]==0.f){
+						if(sliceValues[ind]==0.f){
 							// Add both neighbors up and take mean
-							sliceValues[curV*maxU+curU]=(sliceValues[curV*maxV+curU+1]+sliceValues[curV*maxU+curU-1])/2.f;
+							 if(ind == 0){
+							sliceValues[ind]=sliceValues[ind+1];
+							 } else if(ind == maxU*maxV -1){
+							sliceValues[ind]=sliceValues[ind-1];
+							 } else{
+							sliceValues[ind]=(sliceValues[ind+1]+sliceValues[ind-1])/2.f;
+							 } 
+							 
+							 if (sliceValues[ind] == 0.f){
+								 sliceValues[ind] = 0.0001f; 
+							 }
+							 
 						}
-					if( -Math.log( sliceValues[curV*maxU+curU]) < 0.f){
+						
+					double threshold = -Math.log( sliceValues[ind]); 
+						
+					if(  threshold < 0.f || Double.isNaN(threshold)){
 						grid.setAtIndex(curU,curV,theta-1,0);
 					}else{
-						grid.setAtIndex(curU,curV,theta-1,(float) -Math.log( sliceValues[curV*maxU+curU]));
+						grid.setAtIndex(curU,curV,theta-1,(float) threshold);
 						
 				}
 			}
@@ -60,8 +77,57 @@ public class ImageToSinogram3D {
 	
 	}
 	
-//	
-//	public static Grid2D imagePlusToGridAMP(DarkField3DSinogram img,int k){
+	public static DarkField3DSinogram imagePlusToImagePlus3D_for_Absorption(ImagePlus img){
+		
+		int maxThetaIndex =  img.getNSlices();
+		int maxU = img.getWidth();
+		int maxV = img.getHeight();
+		
+		DarkField3DSinogram grid = new DarkField3DSinogram(maxU,maxV,maxThetaIndex);
+
+		for(int theta = 1; theta < maxThetaIndex +1; theta++){ // Start with Stack 1 so Matlab convention
+
+			// An Image is actually saved as ONE vector, not a 2 dimensional image
+			float[] sliceValues = ( float[]) img.getStack().getPixels(theta);
+			
+				for(int curU = 0; curU < maxU; curU++){
+					for(int curV = 0; curV < maxV; curV++){
+						
+						int ind = curV*maxU+curU;
+						
+						// Do a interpolation of neighbor points of current value is 0
+						if(sliceValues[ind]==0.f){
+							// Add both neighbors up and take mean
+							 if(ind == 0){
+							sliceValues[ind]=sliceValues[ind+1];
+							 } else if(ind == maxU*maxV -1){
+							sliceValues[ind]=sliceValues[ind-1];
+							 } else{
+							sliceValues[ind]=(sliceValues[ind+1]+sliceValues[ind-1])/2.f;
+							 } 
+							 
+							 if (sliceValues[ind] == 0.f){
+								 sliceValues[ind] = 0.0001f; 
+							 }
+							 
+						}
+						
+						double threshol = 0.0014; //TODO This is arbitrarly
+						
+					if(  sliceValues[ind]  < 0.f || Float.isNaN(sliceValues[ind]) ){
+						grid.setAtIndex(curU,curV,theta-1,0);
+					}else{
+						grid.setAtIndex(curU,curV,theta-1,sliceValues[ind]);
+					}
+				}
+			}
+		}
+		grid.setSpacing(1.d, 1.d,Math.PI*2/img.getNSlices());
+		return grid;
+	
+	}
+
+//	public static Grid2D imagePlusToGridAMP(Grid3D img,int k){
 //		Grid2D grid = new Grid2D(img.getSize()[1], img.getSize()[0]);
 //		for(int j=0;j<img.getSize()[1];j++)
 //			for(int i=0;i<img.getSize()[0];i++){
@@ -76,6 +142,7 @@ public class ImageToSinogram3D {
 //		return grid;
 //	}
 
+	
 	
 
 }

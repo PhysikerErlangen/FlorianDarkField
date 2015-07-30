@@ -1,0 +1,69 @@
+package edu.stanford.rsl.science.darkfield.FlorianDarkField;
+
+import ij.IJ;
+import ij.ImageJ;
+import ij.ImagePlus;
+import edu.stanford.rsl.conrad.data.numeric.Grid2D;
+import edu.stanford.rsl.conrad.numerics.SimpleVector;
+import edu.stanford.rsl.conrad.utils.Configuration;
+import edu.stanford.rsl.science.darkfield.darkfieldgrid.ImageToGrid3D;
+
+public class TensorAbsorptionRecon {
+
+	
+	public TensorAbsorptionRecon(){
+		
+		
+	}
+	
+	public static void main(String[] args){
+		
+		
+		String fileNameConfig1 = "C:\\Users\\schiffers\\workspace\\Configurations\\Config_Full_Resolution_100_cubic.xml";
+		// Load configuration wooden case
+
+		Configuration config = Configuration.loadConfiguration(fileNameConfig1);
+		System.out.println("Configuration 1 loaded.");
+		
+		//  Configuration Configuration2 = Configuration.loadConfiguration(fileNameConfig2);
+		//	System.out.println("Configuration 2 loaded.");
+
+		Configuration Configuration2 = Configuration.loadConfiguration(fileNameConfig1);
+		// Reset rotation axis for Config2
+		SimpleVector rotationAxis2 = new SimpleVector(0.0d,1.0d,0.0);
+		Configuration2.getGeometry().setRotationAxis(rotationAxis2);
+				
+		// Load ImageJ
+		new ImageJ();
+		System.out.println("ImageJ started.");
+
+		//Choose dark-field projections. Sinogram is calculated from projections.
+		
+		String fileNameAMP1 = "C:\\Users\\schiffers\\workspace\\MeasuredData\\WoodAMP1.tif";
+		String fileNameAMP2 = "C:\\Users\\schiffers\\workspace\\MeasuredData\\WoodAMP2.tif";
+		
+		/* 
+		 * Load dark field images
+		 */
+		
+		// Load dark field image of orientation 1
+		ImagePlus imgAMP1 = IJ.openImage(fileNameAMP1);
+		DarkField3DSinogram sinoAMP1   = ImageToSinogram3D.imagePlusToImagePlus3D_for_Absorption(imgAMP1);
+		
+		
+		
+		
+		// Load dark field image of orientation 2
+		ImagePlus imgAMP2 = IJ.openImage(fileNameAMP2);
+		DarkField3DSinogram sinoAMP2   = ImageToSinogram3D.imagePlusToImagePlus3D_for_Absorption(imgAMP2);		
+	
+		
+		DarkFieldAbsorptionRecon3D reconAMP = new DarkFieldAbsorptionRecon3D(config, 1);
+		
+		reconAMP.reconstructAbsorptionVolume(sinoAMP1);
+		
+		
+	}
+	
+	
+}

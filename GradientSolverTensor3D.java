@@ -31,10 +31,19 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry{
 	DarkFieldScatterCoef scatterCoef1;
 	DarkFieldScatterCoef scatterCoef2;
 	
+	// MASKING Images for zero constraint
+	DarkField3DTensorVolume reconAMP1;
+	DarkField3DTensorVolume reconAMP2;
+	
+	public GradientSolverTensor3D( Configuration configuration1, Configuration configuration2, DarkField3DSinogram darkFieldSinogram1, 	DarkField3DSinogram darkFieldSinogram2, 
+			float stepSize, int maxIt, int numScatterVectors){
+		 this( configuration1, configuration2, darkFieldSinogram1, darkFieldSinogram2, 
+					stepSize, maxIt, numScatterVectors, null, null);
+	}
 	
 	// Constructor of GradientSolver3D
 	public GradientSolverTensor3D( Configuration configuration1, Configuration configuration2, DarkField3DSinogram darkFieldSinogram1, 	DarkField3DSinogram darkFieldSinogram2, 
-			float stepSize, int maxIt, int numScatterVectors){
+			float stepSize, int maxIt, int numScatterVectors, DarkField3DTensorVolume reconAMP1, DarkField3DTensorVolume reconAMP2){
 
 		
 		// Open super operator of geometry class
@@ -51,7 +60,9 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry{
 		this.configuration1 = configuration1;
 		this.configuration2 = configuration2;
 		
-	
+		this.reconAMP1 = reconAMP1;
+		this.reconAMP2 = reconAMP2;
+		
 		// Create instances of both scatter coef classes
 		// One for each direction
 		scatterCoef1 = new DarkFieldScatterCoef(configuration1,numScatterVectors);
@@ -147,6 +158,11 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry{
 			
 			// First multiply this with the gradient step size
 			backProjectionDifference1.multiply(stepSize);
+			
+			backProjectionDifference1.maskWithVolume(reconAMP1);
+			
+			
+		
 			reconImage.sub(backProjectionDifference1);
 			}
 			
@@ -158,6 +174,9 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry{
 			DarkField3DTensorVolume backProjectionDifference2 = backProjector2.backprojectPixelDriven(differenceSinogram2);
 			// Apply gradient step by adding difference on top of current reconstruction
 			backProjectionDifference2.multiply(stepSize);
+			
+			backProjectionDifference2.maskWithVolume(reconAMP2);
+			
 			reconImage.sub(backProjectionDifference2);
 			}
 			
@@ -183,4 +202,8 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry{
 		return reconImage;
 		
 	}	
+	
+	
+	
+	
 }

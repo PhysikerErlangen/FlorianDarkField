@@ -54,7 +54,7 @@ public class TensorReconstructionPhantom{
 		
 		
 		// Number of scatter vectors
-		int numScatterVectors = 1;
+		int numScatterVectors = 3;
 
 
 		
@@ -101,9 +101,9 @@ public class TensorReconstructionPhantom{
 		
 		
 		//Stepsize for Gradient decent
-		float stepSize = 0.009f;
+		float stepSize = 0.008f;
 		// Number of maximal iterations in gradient decent
-		int maxIt = 3;
+		int maxIt = 10;
 		
 		// Initialize the GradientSolver3D
 		GradientSolverTensor3D gradientSolver = new GradientSolverTensor3D(Configuration1, Configuration2, sinoDCI1, sinoDCI1, stepSize, maxIt, numScatterVectors);

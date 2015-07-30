@@ -101,11 +101,11 @@ public class TensorReconstructionWoodLowResolution{
 		 */
 		
 		// Number of scatter vectors
-		int numScatterVectors = 3;
+		int numScatterVectors = 7;
 		//Stepsize for Gradient decent
-		float stepSize = 0.003f;
+		float stepSize = 0.01f;
 		// Number of maximal iterations in gradient decent
-		int maxIt = 1;
+		int maxIt = 20;
 		
 		// Initialize the GradientSolver3D
 	GradientSolverTensor3D gradientSolver = new GradientSolverTensor3D(Configuration1, Configuration2, sinoDCI1, sinoDCI2, stepSize, maxIt, numScatterVectors);

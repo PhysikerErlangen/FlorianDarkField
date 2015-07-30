@@ -9,6 +9,7 @@ package edu.stanford.rsl.science.darkfield.FlorianDarkField;
 
 import com.jogamp.opengl.util.awt.ImageUtil;
 
+import edu.stanford.rsl.conrad.numerics.SimpleVector;
 import edu.stanford.rsl.conrad.utils.Configuration;
 
 
@@ -30,17 +31,20 @@ public class TensorReconstructionExample{
 
 	public static void main (String [] args) throws Exception{
 
-		String fileNameConfig1 = "C:\\Users\\schiffers\\workspace\\Configurations\\ConfigurationFlorian-001-axis.xml";
-		String fileNameConfig2 = "C:\\Users\\schiffers\\workspace\\Configurations\\ConfigurationFlorian-010-axis.xml";
-		
+		String fileNameConfig1 = "C:\\Users\\schiffers\\workspace\\Configurations\\Config_Full_Resolution_100_cubic.xml";
 		// Load configuration wooden case
 
 		Configuration Configuration1 = Configuration.loadConfiguration(fileNameConfig1);
 		System.out.println("Configuration 1 loaded.");
 		
-		
-		Configuration Configuration2 = Configuration.loadConfiguration(fileNameConfig2);
-		System.out.println("Configuration 2 loaded.");
+//		Configuration Configuration2 = Configuration.loadConfiguration(fileNameConfig2);
+//		System.out.println("Configuration 2 loaded.");
+
+		Configuration Configuration2 = Configuration.loadConfiguration(fileNameConfig1);
+		// Reset rotation axis for Config2
+		SimpleVector rotationAxis2 = new SimpleVector(0.0d,1.0d,0.0);
+		Configuration2.getGeometry().setRotationAxis(rotationAxis2);
+				
 		// Load ImageJ
 		new ImageJ();
 		System.out.println("ImageJ started.");
@@ -90,7 +94,7 @@ public class TensorReconstructionExample{
 		 */
 		
 		// Number of scatter vectors
-		int numScatterVectors = 3;
+		int numScatterVectors = 7;
 		//Stepsize for Gradient decent
 		float stepSize = 0.003f;
 		// Number of maximal iterations in gradient decent

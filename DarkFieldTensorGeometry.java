@@ -27,6 +27,7 @@ public class DarkFieldTensorGeometry {
 	// maximum Detector size
 	int maxU_index;	  
 	int maxV_index;	   
+	
 	// Step size projector
 	double deltaU;	   // [mm]
 	double deltaV;	   // [mm]
@@ -234,21 +235,23 @@ public class DarkFieldTensorGeometry {
 		// Calculate Point when Rotation Axis is standard y - axis
 		return new PointND(u_worldX,u_worldY,v_worldZ);
 	}	else if(trajectoryFlag.equals("010")){
-		return new PointND(-v_worldZ,u_worldX,-u_worldY);
+		return new PointND(-v_worldZ,u_worldY,u_worldX);
 	}else{
 		return null;
 	}
 }
 	
+	
+	
 	// Calculate orthogonal projection onto arbitrary plane by formula given by
 	// https://de.wikipedia.org/wiki/Orthogonalprojektion
-	// Returns: iamge coordinates in world coordinates (need to be transformed to image coordinates later)
+	// Returns: image coordinates in world coordinates (need to be transformed to image coordinates later)
 	public static SimpleVector calcDetectorCoordinates(SimpleVector x, SimpleVector uVec, SimpleVector vVec){
-		
-		double inner1 = SimpleOperators.multiplyInnerProd(x,uVec);
-		double inner2 = SimpleOperators.multiplyInnerProd(x,vVec);
+		// under the assumption that u and v is orthogonal
+		double u = SimpleOperators.multiplyInnerProd(x,uVec);
+		double v = SimpleOperators.multiplyInnerProd(x,vVec);
 				
-		SimpleVector res = new SimpleVector(inner1,inner2);
+		SimpleVector res = new SimpleVector(u,v);
 		return res; 
 		
 	}

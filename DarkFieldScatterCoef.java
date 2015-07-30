@@ -102,6 +102,8 @@ public class DarkFieldScatterCoef extends  DarkFieldTensorGeometry{
 	}
 	
 	
+	
+	
 	// Initialize the scattering vectors
 	public void initializeScatteringVectors(){
 		// For the first test implementations
@@ -113,6 +115,22 @@ public class DarkFieldScatterCoef extends  DarkFieldTensorGeometry{
 			this.scatteringVectors[1] = new SimpleVector(0f,1f,0f);
 			this.scatteringVectors[2] = new SimpleVector(0f,0f,1f);
 		}	
+		
+		if(this.numScatterVectors == 7){
+			
+			this.scatteringVectors = new SimpleVector[7];
+			
+			this.scatteringVectors[0] = new SimpleVector(1f,0f,0f).normalizedL2(); 
+			this.scatteringVectors[1] = new SimpleVector(0f,1f,0f).normalizedL2();
+			this.scatteringVectors[2] = new SimpleVector(0f,0f,1f).normalizedL2();
+			this.scatteringVectors[3] = new SimpleVector(1f,1f,1f).normalizedL2(); 
+			this.scatteringVectors[4] = new SimpleVector(1f,1f,-1f).normalizedL2();
+			this.scatteringVectors[5] = new SimpleVector(1f,-1f,1f).normalizedL2();
+			this.scatteringVectors[6] = new SimpleVector(-1f,1f,1f).normalizedL2();
+			
+		}
+		
+		
 		
 		else if(this.numScatterVectors == 1){
 			

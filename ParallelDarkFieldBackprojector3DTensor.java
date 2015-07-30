@@ -213,6 +213,8 @@ public class ParallelDarkFieldBackprojector3DTensor extends  DarkFieldTensorGeom
 	
 	public	DarkField3DTensorVolume backprojectPixelDriven(DarkField3DSinogram sino3D) {
 		
+		boolean debug = false;
+		
 		// Create empty 3DDarkField Volume
 		DarkField3DTensorVolume grid = new DarkField3DTensorVolume(imgSizeX,imgSizeY,imgSizeZ,numScatterVectors,getSpacing(),getOrigin());
 		
@@ -227,11 +229,11 @@ public class ParallelDarkFieldBackprojector3DTensor extends  DarkFieldTensorGeom
 			double cosTheta = Math.cos(theta);
 			double sinTheta = Math.sin(theta);
 
-			
+			if(debug){
 			// Debug Output: Uncomment if you need to debug the Backprojector
 			System.out.println("Cur BackProj: " +curTheta +"/" +maxTheta_index 
 					+ " (" +((10000*curTheta/maxTheta_index)/100.0) +"% done.)");
-			
+			}
 			
 			// get detector grid
 			Grid2D detectorImageAtTheta = sino3D.getSubGrid(curTheta);		
@@ -278,8 +280,6 @@ public class ParallelDarkFieldBackprojector3DTensor extends  DarkFieldTensorGeom
 						
 						// Works only for parallel beam, as weight is the same for every parallel ray!
 						double scatterWeight = scatterCoefficients.getWeight(curTheta, scatterChannel);
-
-						scatterWeight = 1;
 						
 						grid.addAtIndexDarkfield(x, y, z, scatterChannel, (float)(scatterWeight*darkFieldValue));
 						

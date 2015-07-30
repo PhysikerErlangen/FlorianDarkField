@@ -9,6 +9,7 @@ package edu.stanford.rsl.science.darkfield.FlorianDarkField;
 import edu.stanford.rsl.science.darkfield.FlorianDarkField.ParallelDarkFieldBackprojector3DTensor; 
 import edu.stanford.rsl.science.darkfield.FlorianDarkField.ParallelDarkFieldProjector3DTensor;
 import edu.stanford.rsl.science.darkfield.FlorianDarkField.DarkField3DTensorVolume;
+import edu.stanford.rsl.science.darkfield.iterative.OpMath;
 import edu.stanford.rsl.conrad.data.numeric.NumericPointwiseOperators;
 import edu.stanford.rsl.conrad.data.numeric.iterators.NumericPointwiseIteratorND;
 import edu.stanford.rsl.conrad.utils.Configuration;
@@ -63,10 +64,10 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry{
 	
 	public DarkField3DTensorVolume Gradient3D() throws Exception{
 		
-		boolean debug = false;
+		boolean debug = true;
 		
 		boolean reconVertical = true;
-		boolean reconHorizontal = true;
+		boolean reconHorizontal = false;
 		
 		// Initialize to be constructed volume
 		DarkField3DTensorVolume reconImage = new DarkField3DTensorVolume(
@@ -105,6 +106,11 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry{
 			DarkField3DSinogram projectionSinogram1 = null;
 			DarkField3DSinogram projectionSinogram2 = null;
 			
+			int numElements = maxU_index*maxV_index*maxTheta_index;
+			double error1 = 0,error2=0;
+			
+			
+			
 			if(it == 0){
 				projectionSinogram1 = new DarkField3DSinogram(maxU_index, maxV_index, maxTheta_index);
 				projectionSinogram2 = new DarkField3DSinogram(maxU_index, maxV_index, maxTheta_index);
@@ -133,6 +139,7 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry{
 			// Calculate difference between observation and current projection
 			if(reconVertical){
 			differenceSinogram1 = DarkField3DSinogram.sub(projectionSinogram1,darkFieldSinogram1);
+			error1 =  (float) OpMath.norm2(differenceSinogram1)/numElements;
 			// differenceSinogram1.showSinogram("Sinogram1 of differences at iteration: " +it);
 
 			// Backprojection difference between observation (Sinogram) and current iteration
@@ -145,6 +152,7 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry{
 			
 			if(reconHorizontal){
 			differenceSinogram2 = DarkField3DSinogram.sub(projectionSinogram2,darkFieldSinogram2);
+			error2 =  (float) OpMath.norm2(differenceSinogram2)/numElements;
 			// differenceSinogram2.showSinogram("Sinogram2 of differences at iteration: " +it);
 			// Backprojection difference between observation (Sinogram) and current iteration
 			DarkField3DTensorVolume backProjectionDifference2 = backProjector2.backprojectPixelDriven(differenceSinogram2);
@@ -153,17 +161,21 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry{
 			reconImage.sub(backProjectionDifference2);
 			}
 			
+			
+			
 			if(debug){
 				reconImage.show("reconstruction at iteration: " +it);
 			}
 			
 			
-
-
-			
 			long endTime = System.currentTimeMillis();
 			long deltaT = endTime - startTime;
-			System.out.println("Gradient step completed in " + deltaT + "ms");
+			System.out.println("Gradient step completed in " + deltaT + "ms, It: " +it);
+			
+			
+			double totalError = error1+error2;
+			System.out.println("Error (Difference of Sinograms): " +totalError );
+			
 			
 			}
 		

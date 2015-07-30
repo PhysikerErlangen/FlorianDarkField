@@ -197,15 +197,18 @@ public class ParallelDarkFieldProjector3DTensor extends  DarkFieldTensorGeometry
 // Project the Volume onto one projection
 public DarkField3DSinogram projectPixelDriven(DarkField3DTensorVolume darkFieldVolume) {
 	
+	boolean debug = false;
+	
 	// Create sinogram to be reconstructed
 	DarkField3DSinogram sino = new DarkField3DSinogram(this.maxU_index,this.maxV_index,this.maxTheta_index);
 	
 for( int curTheta = 0; curTheta < maxTheta_index; curTheta++){
 	
-	
+	if(debug){
 	// Debug Output: Uncomment if you need to debug the Backprojector
 	System.out.println("Cur Proj: " +curTheta +"/" +maxTheta_index 
 			+ " (" +((10000*curTheta/maxTheta_index)/100.0) +"% done.)");
+	}
 	
 	// compute current angle theta [rad] and angular functions.
 	double theta = deltaTheta * curTheta;
@@ -218,9 +221,9 @@ for( int curTheta = 0; curTheta < maxTheta_index; curTheta++){
 	SimpleVector dirV = calculateRotatedVector(0,0,1.0f).getAbstractVector();
 	
 	// Loop through all 3 dimensions
-	for ( int x = 0; x < imgSizeX - 1; x++){
-		for(int y = 0; y < imgSizeY - 1; y++){
-			for(int z = 0; z < imgSizeZ -1; z++){
+	for ( int x = 0; x < imgSizeX; x++){
+		for(int y = 0; y < imgSizeY; y++){
+			for(int z = 0; z < imgSizeZ; z++){
 				
 			// compute world coordinate of current pixel
 			 double[] w = darkFieldVolume.indexToPhysical(x, y,z);
@@ -249,8 +252,6 @@ for( int curTheta = 0; curTheta < maxTheta_index; curTheta++){
 			for (int scatterChannel = 0; scatterChannel < this.numScatterVectors; scatterChannel++){
 				// Get weight for current projection
 				double scatterWeight = scatterCoefficients.getWeight(curTheta, scatterChannel);
-
-				scatterWeight = 1;
 				
 				// getValue of current voxel element
 				val += darkFieldVolume.getAtIndex(x,y,z)*scatterWeight;

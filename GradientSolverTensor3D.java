@@ -84,6 +84,8 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry{
 		DarkField3DTensorVolume reconImage = new DarkField3DTensorVolume(
 				imgSizeX,imgSizeY,imgSizeZ,numScatterVectors,getSpacing(),getOrigin());
 
+		reconImage.show("Current Iteration of Reconstructed Volume");
+		
 		
 		// Create instance of the backprojector
 		ParallelDarkFieldBackprojector3DTensor backProjector1 = new ParallelDarkFieldBackprojector3DTensor(configuration1, scatterCoef1);
@@ -120,7 +122,7 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry{
 			int numElements = maxU_index*maxV_index*maxTheta_index;
 			double error1 = 0,error2=0;
 			
-			
+			if(debug) System.out.println("Start projection of current Iteration.");
 			
 			if(it == 0){
 				projectionSinogram1 = new DarkField3DSinogram(maxU_index, maxV_index, maxTheta_index);
@@ -145,56 +147,63 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry{
 				
 			}
 	
+			if(debug) System.out.println("End projection of current Iteration.");
+			
 			DarkField3DSinogram differenceSinogram1 = null,differenceSinogram2 = null;
+			
+			
 			
 			// Calculate difference between observation and current projection
 			if(reconVertical){
+			
+			if(debug) System.out.println("Start reconstruction of Trajectory 1.");
+				
 			differenceSinogram1 = DarkField3DSinogram.sub(projectionSinogram1,darkFieldSinogram1);
 			error1 =  (float) OpMath.norm2(differenceSinogram1)/numElements;
-			// differenceSinogram1.showSinogram("Sinogram1 of differences at iteration: " +it);
-
 			// Backprojection difference between observation (Sinogram) and current iteration
+			
+			if(debug) System.out.println("Start Backprojection of Differences of Trajector 1.");
 			DarkField3DTensorVolume backProjectionDifference1 = backProjector1.backprojectPixelDriven(differenceSinogram1);
-			
+			if(debug) System.out.println("End Backprojection of Differences of Trajector 1.");
 			// First multiply this with the gradient step size
+			differenceSinogram1.showSinogram("Difference of Sinograms");
+			backProjectionDifference1.show();
 			backProjectionDifference1.multiply(stepSize);
-			
 			backProjectionDifference1.maskWithVolume(reconAMP1);
 			
-			
-		
 			reconImage.sub(backProjectionDifference1);
+			
+			if(debug) System.out.println("End reconstruction of Trajectory 1.");
 			}
 			
 			if(reconHorizontal){
+				
+			if(debug) System.out.println("Start reconstruction of Trajectory 2.");
+				
 			differenceSinogram2 = DarkField3DSinogram.sub(projectionSinogram2,darkFieldSinogram2);
 			error2 =  (float) OpMath.norm2(differenceSinogram2)/numElements;
 			// differenceSinogram2.showSinogram("Sinogram2 of differences at iteration: " +it);
+			if(debug) System.out.println("Start Backprojection of Differences of Trajector 1.");
 			// Backprojection difference between observation (Sinogram) and current iteration
 			DarkField3DTensorVolume backProjectionDifference2 = backProjector2.backprojectPixelDriven(differenceSinogram2);
 			// Apply gradient step by adding difference on top of current reconstruction
 			backProjectionDifference2.multiply(stepSize);
-			
 			backProjectionDifference2.maskWithVolume(reconAMP2);
-			
 			reconImage.sub(backProjectionDifference2);
+			
+			if(debug) System.out.println("End reconstruction of Trajectory 2.");
 			}
 			
-			
-			
-			if(debug){
-				reconImage.show("reconstruction at iteration: " +it);
-			}
-			
-			
+						
 			long endTime = System.currentTimeMillis();
 			long deltaT = endTime - startTime;
 			System.out.println("Gradient step completed in " + deltaT + "ms, It: " +it);
 			
 			
 			double totalError = error1+error2;
-			System.out.println("Error (Difference of Sinograms): " +totalError );
+			System.out.println("Error (Difference of Sinograms): " +totalError );			
 			
+			//reconImage.show();
 			
 			}
 		

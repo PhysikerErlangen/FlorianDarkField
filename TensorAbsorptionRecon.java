@@ -50,17 +50,28 @@ public class TensorAbsorptionRecon {
 		ImagePlus imgAMP1 = IJ.openImage(fileNameAMP1);
 		DarkField3DSinogram sinoAMP1   = ImageToSinogram3D.imagePlusToImagePlus3D_for_Absorption(imgAMP1);
 		
-		
+		sinoAMP1.show();
 		
 		
 		// Load dark field image of orientation 2
-		ImagePlus imgAMP2 = IJ.openImage(fileNameAMP2);
-		DarkField3DSinogram sinoAMP2   = ImageToSinogram3D.imagePlusToImagePlus3D_for_Absorption(imgAMP2);		
+		//ImagePlus imgAMP2 = IJ.openImage(fileNameAMP2);
+		//DarkField3DSinogram sinoAMP2   = ImageToSinogram3D.imagePlusToImagePlus3D_for_Absorption(imgAMP2);		
 	
 		
-		DarkFieldAbsorptionRecon3D reconAMP = new DarkFieldAbsorptionRecon3D(config, 1);
+		DarkFieldAbsorptionRecon3D reconAMP = new DarkFieldAbsorptionRecon3D(config);
 		
-		reconAMP.reconstructAbsorptionVolume(sinoAMP1);
+		DarkField3DTensorVolume myRecon = reconAMP.reconstructAbsorptionVolume(sinoAMP1);
+		
+		myRecon.show();
+
+		float th_lower = 0.0005f;
+		float th_higher = 0.004f;
+		
+		DarkField3DTensorVolume myMask = reconAMP.createMask(th_lower, th_higher);
+		
+		myMask.show();
+		
+		
 		
 		
 	}

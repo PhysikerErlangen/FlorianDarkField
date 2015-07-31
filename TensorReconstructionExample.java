@@ -55,6 +55,11 @@ public class TensorReconstructionExample{
 		String fileNameDCI1 = "C:\\Users\\schiffers\\workspace\\MeasuredData\\WoodDCI1.tif";
 		String fileNameDCI2 = "C:\\Users\\schiffers\\workspace\\MeasuredData\\WoodDCI2.tif";
 		
+		
+		String fileNameAMP1 = "C:\\Users\\schiffers\\workspace\\MeasuredData\\WoodAMP1.tif";
+		String fileNameAMP2 = "C:\\Users\\schiffers\\workspace\\MeasuredData\\WoodAMP2.tif";
+		
+		
 		/* 
 		 * Load dark field images
 		 */
@@ -67,8 +72,16 @@ public class TensorReconstructionExample{
 		ImagePlus imgDCI2 = IJ.openImage(fileNameDCI2);
 		DarkField3DSinogram sinoDCI2   = ImageToSinogram3D.imagePlusToImagePlus3D(imgDCI2);		
 	
-
-		boolean showFlag = true;
+		// Load absorption image of orientation 1
+		ImagePlus imgAMP1 = IJ.openImage(fileNameAMP1);
+		DarkField3DSinogram sinoAMP1   = ImageToSinogram3D.imagePlusToImagePlus3D_for_Absorption(imgAMP1);
+	
+		// Load absorption image of orientation 2
+		ImagePlus imgAMP2 = IJ.openImage(fileNameAMP2);
+		DarkField3DSinogram sinoAMP2   = ImageToSinogram3D.imagePlusToImagePlus3D_for_Absorption(imgAMP2);		
+	
+		
+boolean showFlag = false;
 		
 		if(showFlag){
 		
@@ -83,6 +96,13 @@ public class TensorReconstructionExample{
 
 		}
 	    
+		
+		imgAMP1 = null;
+		imgAMP2 = null;
+		imgDCI1 = null;
+		imgDCI2 = null;
+		
+		
 		// END loading dark field images 
 
 		// Runtime calculating starts
@@ -93,15 +113,32 @@ public class TensorReconstructionExample{
 		 * INITILIAZATION OF SOME DATA
 		 */
 		
+		float th_lower = 0.0005f;
+		float th_higher = 0.004f;
+		
+		System.out.println("Load Parallel Beam Reconstruction Pipeline.");
+		// Initialize the Parallel Beam Absorption Reconstruction
+		DarkFieldAbsorptionRecon3D parallellBeamRecon = new DarkFieldAbsorptionRecon3D(Configuration1);
+		// Reconstruct the Absorption volume later used for zero constraint
+		DarkField3DTensorVolume reconAMP = parallellBeamRecon.reconstructAbsorptionVolume(sinoAMP1);
+		// Create Mask out of absorption reconstruction
+		DarkField3DTensorVolume reconMask = parallellBeamRecon.createMask(th_lower, th_higher);
+		if(showFlag)reconMask.show("Mask used for zero constraint in reconstruction.");
+		System.out.println("Mask for reconsruction created.");
+				
+		
+		parallellBeamRecon = null;
+		
 		// Number of scatter vectors
-		int numScatterVectors = 7;
+		int numScatterVectors = 3;
 		//Stepsize for Gradient decent
 		float stepSize = 0.003f;
 		// Number of maximal iterations in gradient decent
 		int maxIt = 2;
 		
 		// Initialize the GradientSolver3D
-		GradientSolverTensor3D gradientSolver = new GradientSolverTensor3D(Configuration1, Configuration2, sinoDCI1, sinoDCI1, stepSize, maxIt, numScatterVectors);
+
+		GradientSolverTensor3D gradientSolver = new GradientSolverTensor3D(Configuration1, Configuration2, sinoDCI1, sinoDCI1, stepSize, maxIt, numScatterVectors,reconMask,reconMask);
 		
 		DarkField3DTensorVolume reconImage = gradientSolver.Gradient3D();
 

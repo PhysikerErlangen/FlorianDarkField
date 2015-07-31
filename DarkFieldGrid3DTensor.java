@@ -36,6 +36,11 @@ public class DarkFieldGrid3DTensor extends MultiChannelGrid3D {
 		
 	}
 	
+	public void write3DTensorToImage(){
+		
+		
+		
+	}
 
 		
 	// Return indexed size of the volume box as an array
@@ -133,7 +138,7 @@ public class DarkFieldGrid3DTensor extends MultiChannelGrid3D {
 	}
 	
 	@Override
-	// Careful overwrides ALL channels
+	// Careful overrides ALL channels
 	public void setAtIndex(int i, int j, int k, float val) {
 		for(int channel = 0; channel < this.getNumberOfChannels(); channel++){
 			setValueAtChannelN(i, j, k, channel, val);

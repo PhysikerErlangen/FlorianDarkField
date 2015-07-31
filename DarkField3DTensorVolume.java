@@ -47,7 +47,6 @@ public class DarkField3DTensorVolume extends DarkFieldGrid3DTensor{
 	}
 	
  // masks a volume with a given mask. Careful, has to have same dimension
-	// Also mask has to have values between 0 and 1
 	public void maskWithVolume(DarkField3DTensorVolume mask){
 		
 		// If there's no mask just return and do nothing
@@ -60,8 +59,9 @@ public class DarkField3DTensorVolume extends DarkFieldGrid3DTensor{
 			for(int y = 0; y < mySize[1]; y++){
 				for(int z = 0; z < mySize[2]; z++){
 					// The mask may only have ! one ! channel as it is as a mask
-					float factor = mask.getPixelValue(x, y, z, 0);
-					this.multiply(factor);
+					if(mask.getPixelValue(x, y, z, 0) == 0f){
+					this.setAtIndex(x, y, z, 0f);
+					}
 			}
 		}
 	}

@@ -13,18 +13,22 @@ import edu.stanford.rsl.tutorial.filters.RamLakKernel;
 
 public class DarkFieldAbsorptionRecon3D  extends  DarkFieldTensorGeometry  {
 
-	public DarkFieldAbsorptionRecon3D(Configuration config, int numScatterVectors){
+	DarkField3DTensorVolume reconAMP;
+	DarkField3DTensorVolume myMask;
+	
+	public DarkFieldAbsorptionRecon3D(Configuration config){
 		// Call super constructor of TensorGeometry
-		super(config,numScatterVectors);
+		super(config,1);
 		
 	}
 	
 	
-	public void reconstructAbsorptionVolume(DarkField3DSinogram sinogram){
+	public DarkField3DTensorVolume reconstructAbsorptionVolume(DarkField3DSinogram sinogram){
 		
-		sinogram.show("Projection Images before Filtering.");
-		sinogram.showSinogram("Sinogram before Filtering.");
 		
+//
+//		sinogram.show("Projection Images before Filtering.");
+//		sinogram.showSinogram("Sinogram before Filtering.");
 		
 		RamLakKernel ramLak = new RamLakKernel(maxU_index,deltaU);
 
@@ -47,18 +51,40 @@ public class DarkFieldAbsorptionRecon3D  extends  DarkFieldTensorGeometry  {
 		}
 		
 
-		sinogram.show("Projection Images after Filtering");
-		sinogram.showSinogram("Sinogram after Filtering");
+
+//		
+//		sinogram.show("Projection Images after Filtering");
+//		sinogram.showSinogram("Sinogram after Filtering");
 
 		
 
-		DarkField3DTensorVolume reconAMP = backProjectAbsorption(sinogram);
+		 reconAMP = backProjectAbsorption(sinogram);
 		
-		reconAMP.show();
-		
+		return reconAMP;
 		
 	}
 
+	
+	public DarkField3DTensorVolume createMask(float th_lower, float th_higher){
+		
+		myMask = new DarkField3DTensorVolume(imgSizeX, imgSizeY, imgSizeZ, 1, getSpacing(), getOrigin());
+		
+		for(int x = 0; x < imgSizeX; x++){
+			for(int y = 0; y < imgSizeY; y++){
+				for(int z = 0; z < imgSizeZ; z++){
+					float val = reconAMP.getPixelValue(x, y, z, 0);
+					// If value is in bounds set Mask to 1
+					if(val > th_lower && val < th_higher){
+						myMask.setValueAtChannelN(x, y, z, 0, 1);
+					} else{ // if value is out of bounds set Mask to 0
+						myMask.setValueAtChannelN(x, y, z, 0, 0);
+					}
+				} // END z
+				} // END y
+				} // END x
+		
+		return myMask;
+	}
 
 	
 	public	DarkField3DTensorVolume backProjectAbsorption(DarkField3DSinogram sino3D) {

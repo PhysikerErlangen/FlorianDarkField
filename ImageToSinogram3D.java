@@ -77,6 +77,10 @@ public class ImageToSinogram3D {
 	
 	}
 	
+	// We need a different "conversion" algorithm for the absorption image
+	// as DarkField Data has to through a logarithm first, while this is not valid for the
+	// absorption image
+	
 	public static DarkField3DSinogram imagePlusToImagePlus3D_for_Absorption(ImagePlus img){
 		
 		int maxThetaIndex =  img.getNSlices();
@@ -97,23 +101,18 @@ public class ImageToSinogram3D {
 						
 						// Do a interpolation of neighbor points of current value is 0
 						if(sliceValues[ind]==0.f){
-							// Add both neighbors up and take mean
-							 if(ind == 0){
+							if(ind == 0){ // Check if one is at the left border
 							sliceValues[ind]=sliceValues[ind+1];
-							 } else if(ind == maxU*maxV -1){
+							 } else if(ind == maxU*maxV -1){  // Check if one is at the right border
 							sliceValues[ind]=sliceValues[ind-1];
-							 } else{
+							 } else{ // Add both neighbors up and take mean
 							sliceValues[ind]=(sliceValues[ind+1]+sliceValues[ind-1])/2.f;
 							 } 
-							 
 							 if (sliceValues[ind] == 0.f){
 								 sliceValues[ind] = 0.0001f; 
 							 }
-							 
 						}
-						
-						double threshol = 0.0014; //TODO This is arbitrarly
-						
+
 					if(  sliceValues[ind]  < 0.f || Float.isNaN(sliceValues[ind]) ){
 						grid.setAtIndex(curU,curV,theta-1,0);
 					}else{
@@ -123,10 +122,11 @@ public class ImageToSinogram3D {
 			}
 		}
 		grid.setSpacing(1.d, 1.d,Math.PI*2/img.getNSlices());
-		return grid;
-	
-	}
 
+		
+		return grid;
+	}
+	}
 //	public static Grid2D imagePlusToGridAMP(Grid3D img,int k){
 //		Grid2D grid = new Grid2D(img.getSize()[1], img.getSize()[0]);
 //		for(int j=0;j<img.getSize()[1];j++)
@@ -145,7 +145,7 @@ public class ImageToSinogram3D {
 	
 	
 
-}
+
 
 
 

@@ -101,14 +101,14 @@ public class TensorReconstructionWoodLowResolution{
 		 */
 		
 		// Number of scatter vectors
-		int numScatterVectors = 7;
+		int numScatterVectors = 3;
 		//Stepsize for Gradient decent
 		float stepSize = 0.01f;
 		// Number of maximal iterations in gradient decent
 		int maxIt = 20;
 		
 		// Initialize the GradientSolver3D
-	GradientSolverTensor3D gradientSolver = new GradientSolverTensor3D(Configuration1, Configuration2, sinoDCI1, sinoDCI2, stepSize, maxIt, numScatterVectors);
+		GradientSolverTensor3D gradientSolver = new GradientSolverTensor3D(Configuration1, Configuration2, sinoDCI1, sinoDCI2, stepSize, maxIt, numScatterVectors);
 		
 		DarkField3DTensorVolume reconImage = gradientSolver.Gradient3D();
 

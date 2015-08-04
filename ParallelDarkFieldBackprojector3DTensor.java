@@ -190,7 +190,7 @@ public class ParallelDarkFieldBackprojector3DTensor extends  DarkFieldTensorGeom
 										
 					
 					// Interpolate point
-					InterpolationOperators.addInterpolateLinear(darkFieldVolume.getChannel(scatterChannel),x_ind, y_ind, z_ind, (float)(darkFieldValue*scatterWeight));
+					InterpolationOperators.addInterpolateLinear(darkFieldVolume.getSubGrid(scatterChannel),x_ind, y_ind, z_ind, (float)(darkFieldValue*scatterWeight));
 					
 					} // END SCATTER LOOP
 				} // END RAY TRACING LOOP
@@ -213,7 +213,7 @@ public class ParallelDarkFieldBackprojector3DTensor extends  DarkFieldTensorGeom
 	
 	public	DarkField3DTensorVolume backprojectPixelDriven(DarkField3DSinogram sino3D) {
 		
-		boolean debug = false;
+		boolean debug = true;
 		
 		// Create empty 3DDarkField Volume
 		DarkField3DTensorVolume grid = new DarkField3DTensorVolume(imgSizeX,imgSizeY,imgSizeZ,numScatterVectors,getSpacing(),getOrigin());
@@ -275,15 +275,18 @@ public class ParallelDarkFieldBackprojector3DTensor extends  DarkFieldTensorGeom
 					// of the current projection image
 					float darkFieldValue = InterpolationOperators.interpolateLinear(detectorImageAtTheta,curU_index,curV_index);
 					
+					float[] values = new float[numScatterVectors];
 					
 					for (int scatterChannel = 0; scatterChannel < numScatterVectors; scatterChannel++){
 						
 						// Works only for parallel beam, as weight is the same for every parallel ray!
 						double scatterWeight = scatterCoefficients.getWeight(curTheta, scatterChannel);
 						float val = (float)(scatterWeight*darkFieldValue);
-						grid.addAtIndexDarkfield(x, y, z, scatterChannel, val);
+						values[scatterChannel] = val;
 						
 					} 
+					
+					grid.addAtDarkFieldScatterTensor(x, y, z, values);
 					
 					
 					

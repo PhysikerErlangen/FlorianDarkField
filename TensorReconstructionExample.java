@@ -120,21 +120,21 @@ boolean showFlag = false;
 		// Initialize the Parallel Beam Absorption Reconstruction
 		DarkFieldAbsorptionRecon3D parallellBeamRecon = new DarkFieldAbsorptionRecon3D(Configuration1);
 		// Reconstruct the Absorption volume later used for zero constraint
-		DarkField3DTensorVolume reconAMP = parallellBeamRecon.reconstructAbsorptionVolume(sinoAMP1);
+		parallellBeamRecon.reconstructAbsorptionVolume(sinoAMP1);
 		// Create Mask out of absorption reconstruction
 		DarkField3DTensorVolume reconMask = parallellBeamRecon.createMask(th_lower, th_higher);
-		if(showFlag)reconMask.show("Mask used for zero constraint in reconstruction.");
+		reconMask.show("Mask used for zero constraint in reconstruction.");
 		System.out.println("Mask for reconsruction created.");
 				
 		
 		parallellBeamRecon = null;
 		
 		// Number of scatter vectors
-		int numScatterVectors = 3;
+		int numScatterVectors = 7;
 		//Stepsize for Gradient decent
 		float stepSize = 0.003f;
 		// Number of maximal iterations in gradient decent
-		int maxIt = 2;
+		int maxIt = 5;
 		
 		// Initialize the GradientSolver3D
 
@@ -143,7 +143,7 @@ boolean showFlag = false;
 		DarkField3DTensorVolume reconImage = gradientSolver.Gradient3D();
 
 		
-		ImagePlus test = edu.stanford.rsl.conrad.utils.ImageUtil.wrapGrid4D(reconImage.getMultichannelData(), "test");
+		ImagePlus test = edu.stanford.rsl.conrad.utils.ImageUtil.wrapGrid4D(reconImage, "test");
 		
 		IJ.save(test,"C:\\Users\\schiffers\\workspace\\MeasuredData\\testObjectRecon.tif");
 		

@@ -166,7 +166,7 @@ public class ParallelDarkFieldProjector3DTensor extends  DarkFieldTensorGeometry
 						// Add to line integral
 						
 						
-						lineIntegral += scatterWeight*InterpolationOperators.interpolateLinear(grid.getChannel(scatterIndex), x_ind, y_ind, z_ind);
+						lineIntegral += scatterWeight*InterpolationOperators.interpolateLinear(grid.getSubGrid(scatterIndex), x_ind, y_ind, z_ind);
 					} // End scatter loop
 				} // End ray tracing loop
 
@@ -197,7 +197,7 @@ public class ParallelDarkFieldProjector3DTensor extends  DarkFieldTensorGeometry
 // Project the Volume onto one projection
 public DarkField3DSinogram projectPixelDriven(DarkField3DTensorVolume darkFieldVolume) {
 	
-	boolean debug = false;
+	boolean debug = true;
 	
 	// Create sinogram to be reconstructed
 	DarkField3DSinogram sino = new DarkField3DSinogram(this.maxU_index,this.maxV_index,this.maxTheta_index);
@@ -254,7 +254,7 @@ for( int curTheta = 0; curTheta < maxTheta_index; curTheta++){
 				double scatterWeight = scatterCoefficients.getWeight(curTheta, scatterChannel);
 				
 				// getValue of current voxel element
-				val += darkFieldVolume.getAtIndex(x,y,z)*scatterWeight;
+				val += darkFieldVolume.getAtIndex(x,y,z,scatterChannel)*scatterWeight;
 			}
 			
 			

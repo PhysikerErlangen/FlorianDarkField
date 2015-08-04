@@ -85,6 +85,7 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry{
 				imgSizeX,imgSizeY,imgSizeZ,numScatterVectors,getSpacing(),getOrigin());
 
 		reconImage.show("Current Iteration of Reconstructed Volume");
+		reconImage.showComponents();
 		
 		
 		// Create instance of the backprojector
@@ -154,7 +155,7 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry{
 			
 			
 			// Calculate difference between observation and current projection
-			if(reconVertical){
+			if(reconVertical){ // Reconstruct vertical trajectory
 			
 			if(debug) System.out.println("Start reconstruction of Trajectory 1.");
 				
@@ -166,8 +167,10 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry{
 			DarkField3DTensorVolume backProjectionDifference1 = backProjector1.backprojectPixelDriven(differenceSinogram1);
 			if(debug) System.out.println("End Backprojection of Differences of Trajector 1.");
 			// First multiply this with the gradient step size
-			differenceSinogram1.showSinogram("Difference of Sinograms");
-			backProjectionDifference1.show();
+			// differenceSinogram1.showSinogram("Difference of Sinograms");
+			
+			//backProjectionDifference1.
+			
 			backProjectionDifference1.multiply(stepSize);
 			backProjectionDifference1.maskWithVolume(reconAMP1);
 			
@@ -176,7 +179,7 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry{
 			if(debug) System.out.println("End reconstruction of Trajectory 1.");
 			}
 			
-			if(reconHorizontal){
+			if(reconHorizontal){// Reconstruct horizontal trajectory
 				
 			if(debug) System.out.println("Start reconstruction of Trajectory 2.");
 				
@@ -191,6 +194,8 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry{
 			backProjectionDifference2.maskWithVolume(reconAMP2);
 			reconImage.sub(backProjectionDifference2);
 			
+			
+			
 			if(debug) System.out.println("End reconstruction of Trajectory 2.");
 			}
 			
@@ -203,7 +208,7 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry{
 			double totalError = error1+error2;
 			System.out.println("Error (Difference of Sinograms): " +totalError );			
 			
-			//reconImage.show();
+			
 			
 			}
 		

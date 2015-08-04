@@ -1,6 +1,7 @@
 package edu.stanford.rsl.science.darkfield.FlorianDarkField;
 
 
+import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
 import edu.stanford.rsl.conrad.numerics.SimpleVector;
 import edu.stanford.rsl.conrad.utils.Configuration;
 import edu.stanford.rsl.science.overexposure.CrossCalibration;
@@ -216,13 +217,15 @@ public class DarkFieldScatterCoef extends  DarkFieldTensorGeometry{
 		 * 
 		 */
 				
+		// Loop through all projections
+		for (int curTheta = 0; curTheta < this.maxTheta_index; curTheta++) {
+			// Sensitivity is dependent on the projection
+			SimpleVector sensitivity = this.getSensitivityVector(curTheta);
+		
 		// Loop through all scatter vectors
 		for (int scatterIndex = 0; scatterIndex < numScatterVectors; scatterIndex++) {
 			SimpleVector scatterDirection = getScatterVector(scatterIndex);
-			// Loop through all projections
-			for (int curTheta = 0; curTheta < this.maxTheta_index; curTheta++) {
-				// Sensitivity is dependent on the projection
-				SimpleVector sensitivity = this.getSensitivityVector(curTheta);
+
 				
 						// Direction of the ray is dependent on projection
 						SimpleVector rayDir = getRayVector(curTheta); 
@@ -269,6 +272,38 @@ public class DarkFieldScatterCoef extends  DarkFieldTensorGeometry{
 	
 }
 
+	public SimpleMatrix getScatterVectorsAsMatrix(){
+		
+		SimpleMatrix scatterMatrix = new SimpleMatrix(3,scatteringVectors.length );
+		
+		for(int channel = 0; channel < numScatterVectors; channel++){
+			scatterMatrix.setColValue(channel, scatteringVectors[channel]);
+		}
+
+		return scatterMatrix;
+		
+	}
+	
+	public static void calcScatterDirections(DarkField3DTensorVolume myVolume, SimpleMatrix scatterMatrix, SimpleVector scatterWeights){
+		
+		for(int x = 0; x <myVolume.imgSizeX; x++){
+			for(int y = 0; y <myVolume.imgSizeY; y++){
+				for(int z = 0; z <myVolume.imgSizeZ; z++){
+					// Initializes the PCA objects
+					DarkFieldPCA myPCA = new DarkFieldPCA(scatterMatrix,scatterWeights);
+					// Performs PCA
+					myPCA.run();
+					// Extract Scatter Direction as smallest component of the ellipsoid.
+					
+				} // End loop z
+			} // End loop y
+		} // End loop z
+		
+		
+		
+	}
+	
+	
 	
 
 }

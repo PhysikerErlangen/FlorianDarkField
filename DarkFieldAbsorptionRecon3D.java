@@ -67,12 +67,16 @@ public class DarkFieldAbsorptionRecon3D  extends  DarkFieldTensorGeometry  {
 	
 	public DarkField3DTensorVolume createMask(float th_lower, float th_higher){
 		
+		if (reconAMP == null){
+			return null;
+		}
+		
 		myMask = new DarkField3DTensorVolume(imgSizeX, imgSizeY, imgSizeZ, 1, getSpacing(), getOrigin());
 		
 		for(int x = 0; x < imgSizeX; x++){
 			for(int y = 0; y < imgSizeY; y++){
 				for(int z = 0; z < imgSizeZ; z++){
-					float val = reconAMP.getPixelValue(x, y, z, 0);
+					float val = reconAMP.getAtIndex(x, y, z, 0);
 					// If value is in bounds set Mask to 1
 					if(val > th_lower && val < th_higher){
 						myMask.setValueAtChannelN(x, y, z, 0, 1);

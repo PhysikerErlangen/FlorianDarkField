@@ -12,12 +12,12 @@ import edu.stanford.rsl.conrad.numerics.SimpleVector;
 
 
 
-public class DarkFieldGrid3DTensor extends MultiChannelGrid3D {
+public class DarkFieldGrid3DTensor extends Grid4D {
 	
 	// Defines dimension of volume box
-	public int width;
-	public int height;
-	public int depth;
+	public int imgSizeX;
+	public int imgSizeY;
+	public int imgSizeZ;
 	
 
 	
@@ -25,12 +25,12 @@ public class DarkFieldGrid3DTensor extends MultiChannelGrid3D {
 	// width, height, depth gives the size of the volume
 	// numChannels takes the number of vector elements to be saved in one voxel element
 	
-	public DarkFieldGrid3DTensor(int width, int height, int depth, int numChannels){
+	public DarkFieldGrid3DTensor(int imgSizeX, int imgSizeY, int imgSizeZ, int numChannels){
 		// Call constructor of MultiChannelGrid3D
-		super(width, height, depth, numChannels);
-		this.width=width;
-		this.height=height;
-		this.depth=depth;
+		super(imgSizeX, imgSizeY, imgSizeZ, numChannels);
+		this.imgSizeX=imgSizeX;
+		this.imgSizeY=imgSizeY;
+		this.imgSizeZ=imgSizeZ;
 	
 		
 		
@@ -42,14 +42,7 @@ public class DarkFieldGrid3DTensor extends MultiChannelGrid3D {
 		
 	}
 
-		
-	// Return indexed size of the volume box as an array
-	public int[] getSize(){
-		int[] size= {this.width, this.height,this.depth};
-		return size;
-	}
-
-	
+			
 	
 	// Multiplies the whole grid with a given factor
 	public void multiply(float factor){
@@ -65,6 +58,18 @@ public class DarkFieldGrid3DTensor extends MultiChannelGrid3D {
 	}
 	
 	
+	public double[] indexToPhysical(double x, double y, double z) {
+		return new double[] { x * this.spacing[0] + this.origin[0],
+				y * this.spacing[1] + this.origin[1],
+				z * this.spacing[2] + this.origin[2]
+		};
+	}
+	
+	public int getNumberOfChannels(){
+		// Return size of the last element of getSize()
+		// This is the number of channels
+		return this.getSize()[3];
+	}
 	
 	
 	// Multiplies the given grid tensor vector with a scalar value factor
@@ -72,9 +77,9 @@ public class DarkFieldGrid3DTensor extends MultiChannelGrid3D {
 		// Loop through all channels and multiply with factor
 		for (int channel = 0; channel < this.getNumberOfChannels() ; channel++){
 			// Multiply current value with factor
-			float value = getPixelValue(x,y,z,channel);
+			float value = getAtIndex(x,y,z,channel);
 			value = value*factor;
-			putPixelValue(x,y,z,channel,value);
+			setAtIndex(x,y,z,channel,value);
 			
 		}		
 	}
@@ -82,19 +87,19 @@ public class DarkFieldGrid3DTensor extends MultiChannelGrid3D {
 	
 	// Multiplies the entry at a given channel with a scalar value
 	public void multiplyAtIndexDarkfield(int x, int y, int z, int channel, float val){
-		putPixelValue(x, y,z, channel,getPixelValue(x, y, z, channel) *val);
+		setAtIndex(x, y,z, channel,getAtIndex(x, y, z, channel) *val);
 	}
 	
 	
 	
 	// Store a channel value to given channel 
 	public void setValueAtChannelN(int x, int y, int z, int channel, float value){
-		putPixelValue(x,y,z,channel,value);
+		setAtIndex(x,y,z,channel,value);
 	}
 
 	// Adds a given value to point at channel n 
 	public void addAtIndexDarkfield(int x, int y, int z, int channel, float val){
-		putPixelValue(x, y,z, channel,getPixelValue(x, y,z, channel) + val);
+		setAtIndex(x, y,z, channel,getAtIndex(x, y,z, channel) + val);
 	}  
 
 	
@@ -108,7 +113,7 @@ public class DarkFieldGrid3DTensor extends MultiChannelGrid3D {
 		
 		// Loop through all channels and set value
 		for (int channel = 0; channel < values.length; channel++){
-			putPixelValue(x,y,z,channel,values[channel]);
+			setAtIndex(x,y,z,channel,values[channel]);
 		}
 	}
 	
@@ -122,7 +127,7 @@ public class DarkFieldGrid3DTensor extends MultiChannelGrid3D {
 		
 		// Loop through all channels and set value
 		for (int channel = 0; channel < values.getLen(); channel++){
-			putPixelValue(x,y,z,channel,values.getElement(channel));
+			setAtIndex(x,y,z,channel,(float)values.getElement(channel));
 		}
 	}
 	
@@ -132,12 +137,12 @@ public class DarkFieldGrid3DTensor extends MultiChannelGrid3D {
 		float[] myVec = new float[getNumberOfChannels()];
 		
 		for (int channel = 0; channel < getNumberOfChannels(); channel++){
-					myVec[channel] = getPixelValue(x, y, z, channel);
+					myVec[channel] = getAtIndex(x, y, z, channel);
 	}
 		return myVec;
 	}
 	
-	@Override
+	
 	// Careful overrides ALL channels
 	public void setAtIndex(int i, int j, int k, float val) {
 		for(int channel = 0; channel < this.getNumberOfChannels(); channel++){
@@ -156,7 +161,7 @@ public class DarkFieldGrid3DTensor extends MultiChannelGrid3D {
 			
 		// Loop through all channels and add value
 		for (int channel = 0; channel < values.length; channel++){
-			putPixelValue(x,y,z,channel,getPixelValue(x, y,z, channel) - values[channel]);
+			setAtIndex(x,y,z,channel,getAtIndex(x, y,z, channel) - values[channel]);
 		}
 	}
 	
@@ -170,14 +175,24 @@ public class DarkFieldGrid3DTensor extends MultiChannelGrid3D {
 		}
 			
 		// Loop through all channels and add value
-		for (int channel = 0; channel < values.length; channel++){
-			putPixelValue(x,y,z,channel,getPixelValue(x, y,z, channel) + values[channel]);
+		for (int channel = 0; channel < this.getNumberOfChannels(); channel++){
+			float val = getAtIndex(x, y, z, channel) + values[channel];
+			setAtIndex(x,y,z,channel,val);
 		}
 	}
 
 
-
-
+	
+	
+	public void showComponents(){
+		
+		for(int channel = 0; channel < getNumberOfChannels(); channel++){
+			String myTitle = "Volume at channel " + channel; 
+			getSubGrid(channel).show(myTitle);
+			
+			
+		}
+	}
 	
 	
 }

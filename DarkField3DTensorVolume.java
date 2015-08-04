@@ -34,13 +34,15 @@ public class DarkField3DTensorVolume extends DarkFieldGrid3DTensor{
 	}
 
 	
-	@Override
-	public Grid3D getChannel(int c){
-		Grid3D myGrid =  getMultichannelData().getSubGrid(c);
-		myGrid.setSpacing(getSpacing());
-		myGrid.setOrigin(getOrigin());
-		return myGrid;
-	}
+	
+//	@Override
+//	public Grid3D getChannel(int c){
+//		Grid3D myGrid =  this.getSubGrid(c);
+//		myGrid.setSpacing(getSpacing());
+//		myGrid.setOrigin(getOrigin());
+//		return myGrid;
+//	}
+//	
 	
 	public void setTitle(String t) {
 		this.title = t;
@@ -52,14 +54,12 @@ public class DarkField3DTensorVolume extends DarkFieldGrid3DTensor{
 		// If there's no mask just return and do nothing
 		if(mask == null)
 			return;
-	
-		int[] mySize = getSize();
 		
-		for(int x = 0; x < mySize[0]; x++){
-			for(int y = 0; y < mySize[1]; y++){
-				for(int z = 0; z < mySize[2]; z++){
+		for(int x = 0; x < imgSizeX; x++){
+			for(int y = 0; y < imgSizeY; y++){
+				for(int z = 0; z < imgSizeZ; z++){
 					// The mask may only have ! one ! channel as it is as a mask
-					if(mask.getPixelValue(x, y, z, 0) == 0f){
+					if(mask.getAtIndex(x, y, z, 0) == 0f){
 					this.setAtIndex(x, y, z, 0f);
 					}
 			}
@@ -82,9 +82,9 @@ public class DarkField3DTensorVolume extends DarkFieldGrid3DTensor{
 		
 		}
 		
-		for(int x = 0; x <this.getSize()[0]; x++){
-			for(int y = 0; y <this.getSize()[1]; y++){
-				for(int z = 0; z <this.getSize()[0]; z++){
+		for(int x = 0; x <imgSizeX; x++){
+			for(int y = 0; y <imgSizeY; y++){
+				for(int z = 0; z <imgSizeZ; z++){
 					
 				this.subAtDarkFieldScatterTensor(x, y, z, B.getVectorAtIndex(x, y, z));
 				
@@ -93,6 +93,7 @@ public class DarkField3DTensorVolume extends DarkFieldGrid3DTensor{
 		} // End loop z
 		
 	}
+	
 	
 	
 	

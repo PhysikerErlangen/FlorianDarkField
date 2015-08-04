@@ -101,11 +101,11 @@ public class TensorReconstructionWoodLowResolution{
 		 */
 		
 		// Number of scatter vectors
-		int numScatterVectors = 3;
+		int numScatterVectors = 7;
 		//Stepsize for Gradient decent
 		float stepSize = 0.01f;
 		// Number of maximal iterations in gradient decent
-		int maxIt = 20;
+		int maxIt = 1;
 		
 		// Initialize the GradientSolver3D
 		GradientSolverTensor3D gradientSolver = new GradientSolverTensor3D(Configuration1, Configuration2, sinoDCI1, sinoDCI2, stepSize, maxIt, numScatterVectors);
@@ -113,11 +113,11 @@ public class TensorReconstructionWoodLowResolution{
 		DarkField3DTensorVolume reconImage = gradientSolver.Gradient3D();
 
 		
-		ImagePlus test = edu.stanford.rsl.conrad.utils.ImageUtil.wrapGrid4D(reconImage.getMultichannelData(), "test");
+		ImagePlus test = edu.stanford.rsl.conrad.utils.ImageUtil.wrapGrid4D(reconImage, "test");
 		
 		IJ.save(test,"C:\\Users\\schiffers\\workspace\\MeasuredData\\testObjectRecon.tif");
 		
-       reconImage.show();
+       //reconImage.show();
 		
 		
 		/*

@@ -73,7 +73,7 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry{
 	 * Gradient 3D implements the gradient decent algorithm described in book of "zeng"  
 	 */
 	
-	public DarkField3DTensorVolume Gradient3D() throws Exception{
+	public DarkField3DTensorVolume Gradient3D(){
 		
 		boolean debug = true;
 		

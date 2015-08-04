@@ -4,6 +4,8 @@
 //
 package edu.stanford.rsl.science.darkfield.FlorianDarkField;
 
+import ij.IJ;
+import ij.ImagePlus;
 import weka.core.pmml.jaxbbindings.SetPredicate;
 import edu.stanford.rsl.conrad.data.numeric.Grid3D;
 import edu.stanford.rsl.conrad.data.numeric.Grid4D;
@@ -11,7 +13,12 @@ import edu.stanford.rsl.conrad.data.numeric.MultiChannelGrid3D;
 import edu.stanford.rsl.conrad.numerics.SimpleVector;
 
 
-
+/**
+ * 
+ * 
+ * @author Florian Schiffers
+ *
+ */
 public class DarkFieldGrid3DTensor extends Grid4D {
 	
 	// Defines dimension of volume box
@@ -19,32 +26,49 @@ public class DarkFieldGrid3DTensor extends Grid4D {
 	public int imgSizeY;
 	public int imgSizeZ;
 	
-
 	
-	// CONSTRUCTOR for DarkFieldGrid3DTensor
-	// width, height, depth gives the size of the volume
-	// numChannels takes the number of vector elements to be saved in one voxel element
-	
+	/**
+	 * @param imgSizeX
+	 * @param imgSizeY
+	 * @param imgSizeZ
+	 * @param numChannels
+	 */
 	public DarkFieldGrid3DTensor(int imgSizeX, int imgSizeY, int imgSizeZ, int numChannels){
 		// Call constructor of MultiChannelGrid3D
 		super(imgSizeX, imgSizeY, imgSizeZ, numChannels);
 		this.imgSizeX=imgSizeX;
 		this.imgSizeY=imgSizeY;
 		this.imgSizeZ=imgSizeZ;
-	
-		
-		
 	}
 	
-	public void write3DTensorToImage(){
+	
+	/**
+	 * write3DTensor writes the volume to a given file specified by filePath
+	 * The name of the Image is not further defined, so default ""
+	 * @param filePath - Path where Volume should be saved
+	 */
+	public void write3DTensorToImage(String filePath){
+		write3DTensorToImage(filePath, "");
+	}
+	
+
+	/**
+	 * @param filePath - Path where Volume should be saved
+	 * @param volumeName - Name of the image
+	 */
+	public void write3DTensorToImage(String filePath, String volumeName){
 		
+		ImagePlus myImage = edu.stanford.rsl.conrad.utils.ImageUtil.wrapGrid4D(this, volumeName);
 		
+		IJ.save(myImage,filePath);
 		
 	}
 
-			
-	
-	// Multiplies the whole grid with a given factor
+
+	/**
+	 * Multiplies the whole grid with a given factor
+	 * @param factor
+	 */
 	public void multiply(float factor){
 		
 		for(int x = 0; x <this.getSize()[0]; x++){
@@ -58,6 +82,13 @@ public class DarkFieldGrid3DTensor extends Grid4D {
 	}
 	
 	
+	/**
+	 * indexToPhysical calculates the world coordinate of a voxel element at (x,y,z)
+	 * @param x
+	 * @param y
+	 * @param z
+	 * @return Array of physical world coordinates of one voxel element
+	 */
 	public double[] indexToPhysical(double x, double y, double z) {
 		return new double[] { x * this.spacing[0] + this.origin[0],
 				y * this.spacing[1] + this.origin[1],
@@ -65,14 +96,23 @@ public class DarkFieldGrid3DTensor extends Grid4D {
 		};
 	}
 	
+	/**
+	 * @return Number of channels (e.g. scatterDirections)
+	 */
 	public int getNumberOfChannels(){
 		// Return size of the last element of getSize()
 		// This is the number of channels
 		return this.getSize()[3];
 	}
 	
-	
-	// Multiplies the given grid tensor vector with a scalar value factor
+ 
+	/**
+	 * Multiplies the complete given grid tensor vector with a scalar value factor
+	 * @param x
+	 * @param y
+	 * @param z
+	 * @param factor
+	 */
 	public void multiplyAtIndexDarkfield(int x, int y, int z, float factor){
 		// Loop through all channels and multiply with factor
 		for (int channel = 0; channel < this.getNumberOfChannels() ; channel++){
@@ -84,26 +124,54 @@ public class DarkFieldGrid3DTensor extends Grid4D {
 		}		
 	}
 
-	
-	// Multiplies the entry at a given channel with a scalar value
+
+	/**
+	 * Multiplies the entry of a given channel with a scalar value
+	 * @param x
+	 * @param y
+	 * @param z
+	 * @param channel
+	 * @param val
+	 */
 	public void multiplyAtIndexDarkfield(int x, int y, int z, int channel, float val){
 		setAtIndex(x, y,z, channel,getAtIndex(x, y, z, channel) *val);
 	}
 	
-	
-	
-	// Store a channel value to given channel 
+ 
+	/**
+	 * Stores a channel value to given channel
+	 * @param x
+	 * @param y
+	 * @param z
+	 * @param channel
+	 * @param value
+	 */
 	public void setValueAtChannelN(int x, int y, int z, int channel, float value){
 		setAtIndex(x,y,z,channel,value);
 	}
 
-	// Adds a given value to point at channel n 
+	 
+	/**
+	 * Adds a given value to point at channel n
+	 * @param x
+	 * @param y
+	 * @param z
+	 * @param channel
+	 * @param val
+	 */
 	public void addAtIndexDarkfield(int x, int y, int z, int channel, float val){
 		setAtIndex(x, y,z, channel,getAtIndex(x, y,z, channel) + val);
 	}  
 
 	
-	// Store a whole tensor vector into grid point
+	
+	/**
+	 * Stores a whole tensor vector into grid point
+	 * @param x
+	 * @param y
+	 * @param z
+	 * @param values
+	 */
 	public void setDarkFieldScatterTensor(int x, int y, int z, float[] values) {
 		
 		// Check if dimension of input and to be saved values are the same
@@ -117,7 +185,14 @@ public class DarkFieldGrid3DTensor extends Grid4D {
 		}
 	}
 	
-	// Store a whole tensor vector into grid point
+
+	/**
+	 * stores a tensor vector into the given grid point at (x,y,z)
+	 * @param x
+	 * @param y
+	 * @param z
+	 * @param values
+	 */
 	public void setDarkFieldScatterTensor(int x, int y, int z, SimpleVector values) {
 		
 		// Check if dimension of input and to be saved values are the same
@@ -132,6 +207,13 @@ public class DarkFieldGrid3DTensor extends Grid4D {
 	}
 	
 	
+	/**
+	 * returns the tensor vector at a given voxel point
+	 * @param x
+	 * @param y
+	 * @param z
+	 * @return - vector
+	 */
 	public float[] getVectorAtIndex(int x, int y, int z) {
 		
 		float[] myVec = new float[getNumberOfChannels()];
@@ -142,16 +224,29 @@ public class DarkFieldGrid3DTensor extends Grid4D {
 		return myVec;
 	}
 	
-	
-	// Careful overrides ALL channels
-	public void setAtIndex(int i, int j, int k, float val) {
+
+	/**
+	 * Set's the all values of the tensor vector to a specific value
+	 * @param x
+	 * @param y
+	 * @param z
+	 * @param val
+	 */
+	public void setAtIndex(int x, int y, int z, float val) {
 		for(int channel = 0; channel < this.getNumberOfChannels(); channel++){
-			setValueAtChannelN(i, j, k, channel, val);
+			setValueAtChannelN(x, y, z, channel, val);
 		}
 	}
 	
 	
-	// Add a given tensor vector ontop of a grid point
+	
+	/**
+	 * Add a given tensor vector ontop of a grid point
+	 * @param x
+	 * @param y
+	 * @param z
+	 * @param values
+	 */
 	public void subAtDarkFieldScatterTensor(int x, int y, int z, float[] values) {
 		
 		// Check if dimension of input and to be saved values are the same
@@ -166,7 +261,14 @@ public class DarkFieldGrid3DTensor extends Grid4D {
 	}
 	
 	
-	// Add a given tensor vector ontop of a grid point
+	
+	/**
+	 * Adds a given tensor vector on top of a grid point
+	 * @param x 
+	 * @param y
+	 * @param z
+	 * @param values
+	 */
 	public void addAtDarkFieldScatterTensor(int x, int y, int z, float[] values) {
 		
 		// Check if dimension of input and to be saved values are the same
@@ -181,17 +283,27 @@ public class DarkFieldGrid3DTensor extends Grid4D {
 		}
 	}
 
-
-	
-	
+	/**
+	 * Displays each scatter direction component of the Grid4D as an own image
+	 * All of them are Grid3D, which then can be displayed as a volume
+	 * by the volume viewer.
+	 * CAUTION: Auto contrast might be necessary
+	 */
 	public void showComponents(){
 		
 		for(int channel = 0; channel < getNumberOfChannels(); channel++){
 			String myTitle = "Volume at channel " + channel; 
 			getSubGrid(channel).show(myTitle);
-			
-			
 		}
+	}
+	
+/**
+ * Displays a specific scatter direction component (this is a Grid3D)
+ * @param channel
+ */
+public void showComponents(int channel){
+			String myTitle = "Volume at channel " + channel; 
+			getSubGrid(channel).show(myTitle);
 	}
 	
 	

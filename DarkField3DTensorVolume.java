@@ -69,18 +69,13 @@ public class DarkField3DTensorVolume extends DarkFieldGrid3DTensor{
 	
 	
 	
-	public void sub( DarkField3DTensorVolume B) throws Exception{
+	public void sub( DarkField3DTensorVolume B){
 
-		// Check for inconstiency (different dimensions)
-		if(getSize()[0]!=B.getSize()[0]&&getSize()[1]!=B.getSize()[1]&&getSize()[2]!=B.getSize()[2]){
-		System.out.println("Dimensions do not match2");
-
-		System.out.println(getSize());
-		System.out.println(B.getSize());
-		
-		throw new Exception("Dimension do not match in substraction of 2 tensor volumes!");
-		
-		}
+		// Check for inconsistency (different dimensions)
+		assert(getSize()[0]==B.getSize()[0]
+				&&getSize()[1]==B.getSize()[1]
+				&&getSize()[2]==B.getSize()[2])
+				: new Exception("Dimension of data is wrong.");
 		
 		for(int x = 0; x <imgSizeX; x++){
 			for(int y = 0; y <imgSizeY; y++){

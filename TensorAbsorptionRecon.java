@@ -67,7 +67,7 @@ public class TensorAbsorptionRecon {
 		float th_lower = 0.0005f;
 		float th_higher = 0.004f;
 		
-		DarkField3DTensorVolume myMask = reconAMP.createMask(th_lower, th_higher);
+		DarkField3DTensorVolume myMask = reconAMP.createMaskByBinaryThresholding(th_lower, th_higher);
 		
 		myMask.show();
 		

@@ -13,9 +13,30 @@ import edu.stanford.rsl.tutorial.filters.RamLakKernel;
 
 public class DarkFieldAbsorptionRecon3D  extends  DarkFieldTensorGeometry  {
 
-	DarkField3DTensorVolume reconAMP;
-	DarkField3DTensorVolume myMask;
+	private DarkField3DTensorVolume reconAMP;
 	
+	public DarkField3DTensorVolume getReconAMP() {
+		return reconAMP;
+	}
+
+
+	public void setReconAMP(DarkField3DTensorVolume reconAMP) {
+		this.reconAMP = reconAMP;
+	}
+
+
+	private DarkField3DTensorVolume myMask;
+	
+	public DarkField3DTensorVolume getMyMask() {
+		return myMask;
+	}
+
+
+	public void setMyMask(DarkField3DTensorVolume myMask) {
+		this.myMask = myMask;
+	}
+
+
 	public DarkFieldAbsorptionRecon3D(Configuration config){
 		// Call super constructor of TensorGeometry
 		super(config,1);
@@ -23,19 +44,18 @@ public class DarkFieldAbsorptionRecon3D  extends  DarkFieldTensorGeometry  {
 	}
 	
 	
+	/**
+	 * Reconstructs the 3D Absorption Volume by a given Sinogram
+	 * @param sinogram - DarkField3DSinogram class is used for convenience
+	 * even though the sinogram is a standard absorption sinogram. But can be used for both
+	 * @return - Reconstructed Absorption volume
+	 */
 	public DarkField3DTensorVolume reconstructAbsorptionVolume(DarkField3DSinogram sinogram){
-		
-		
-//
-//		sinogram.show("Projection Images before Filtering.");
-//		sinogram.showSinogram("Sinogram before Filtering.");
-		
+		// Create RamLak Kernel
 		RamLakKernel ramLak = new RamLakKernel(maxU_index,deltaU);
-
-		
-		
+		// Loop through all projections
 		for(int curTheta = 0; curTheta < maxTheta_index; curTheta++){
-		
+			
 			Grid2D projImage = sinogram.getSubGrid(curTheta);
 			
 			for(int curV = 0; curV < maxV_index; curV++){
@@ -47,17 +67,9 @@ public class DarkFieldAbsorptionRecon3D  extends  DarkFieldTensorGeometry  {
 			}
 
 			sinogram.setSubGrid(curTheta, projImage);
-			
 		}
 		
-
-
-//		
-//		sinogram.show("Projection Images after Filtering");
-//		sinogram.showSinogram("Sinogram after Filtering");
-
-		
-
+		// Backprojected filtered sinogram
 		 reconAMP = backProjectAbsorption(sinogram);
 		
 		return reconAMP;
@@ -65,14 +77,25 @@ public class DarkFieldAbsorptionRecon3D  extends  DarkFieldTensorGeometry  {
 	}
 
 	
-	public DarkField3DTensorVolume createMask(float th_lower, float th_higher){
+	/**
+	 * Creates a mask by binary thresholding of the reconstructed absorption volume
+	 * @param th_lower - lower threshold
+	 * @param th_higher - higher thresholds
+	 * @return - Volume Mask with 1's and 0'2.
+	 * Even though it's an Mask and could be represented as an Grid3D we use 
+	 * DarkField3DTensorVolume out of convenience
+	 */
+	public DarkField3DTensorVolume createMaskByBinaryThresholding(float th_lower, float th_higher){
 		
 		if (reconAMP == null){
 			return null;
 		}
 		
+		// Allocate an Absorption volume
+		// Caution: NumScatterVectors set to 1, as we reconstruct an Absorption Volume
 		myMask = new DarkField3DTensorVolume(imgSizeX, imgSizeY, imgSizeZ, 1, getSpacing(), getOrigin());
 		
+		// Loop through all voxel elements
 		for(int x = 0; x < imgSizeX; x++){
 			for(int y = 0; y < imgSizeY; y++){
 				for(int z = 0; z < imgSizeZ; z++){
@@ -91,6 +114,12 @@ public class DarkFieldAbsorptionRecon3D  extends  DarkFieldTensorGeometry  {
 	}
 
 	
+	/**
+	 * Backprojects a sinogram into volume space
+	 * A Parallel Beam is assumed. Also an easy trajectory without any deviations is assumed
+	 * @param sino3D
+	 * @return
+	 */
 	public	DarkField3DTensorVolume backProjectAbsorption(DarkField3DSinogram sino3D) {
 		
 		boolean debug = false;

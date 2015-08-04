@@ -8,7 +8,6 @@ package edu.stanford.rsl.science.darkfield.FlorianDarkField;
 
 import ij.IJ;
 import ij.ImagePlus;
-
 import edu.stanford.rsl.conrad.data.numeric.Grid3D;
 import edu.stanford.rsl.conrad.utils.ImageUtil;
 
@@ -161,13 +160,14 @@ public class DarkField3DSinogram extends Grid3D {
 	
 
 	
-	public static DarkField3DSinogram sub(DarkField3DSinogram A, DarkField3DSinogram B) throws Exception{
+	public static DarkField3DSinogram sub(DarkField3DSinogram A, DarkField3DSinogram B){
 
 		// Check for inconsistency (different dimensions)
-		if(A.getSize()[0]!=B.getSize()[0]&&A.getSize()[1]!=B.getSize()[1]){
-		System.out.println("Dimensions do not match in substraction of 2 sinograms");
-		throw new Exception("Dimension do not match in substraction of 2 sinograms!");
-		}
+		assert( (A.getSize()[0]==B.getSize()[0])
+				&&
+				A.getSize()[1]==B.getSize()[1]
+						)
+				: new Exception("Dimension of data is wrong.");
 		
 		// Create new instance of a DarkField3DSinogram with same dimensions
 		DarkField3DSinogram C= new DarkField3DSinogram(A.getSize()[0],A.getSize()[1],A.getSize()[2]);

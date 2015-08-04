@@ -44,20 +44,28 @@ public class DarkFieldTensorPhantom  extends  DarkFieldTensorGeometry  {
 		
 		DarkFieldTensorPhantom myPhantom = new DarkFieldTensorPhantom(config);
 
+		ImagePlus myImage = DarkField3DTensorVolume.wrapDarkFieldGrid3DTensorToImagePlus(myPhantom.phantom, "test");
+		
+		// Load ImageJ
 		new ImageJ();
 		
-		myPhantom.phantom.show();
-		
-		myPhantom.calculateDarkFieldProjection(config,Configuration2);
-		
-		myPhantom.getDarkFieldSinogram(0).show();
-		myPhantom.getDarkFieldSinogram(1).show();
-		
-		myPhantom.getDarkFieldSinogram(0).showSinogram();
-		myPhantom.getDarkFieldSinogram(1).showSinogram();
+		myImage.show();
 		
 		
-		System.out.println("Phaton created");
+//		new ImageJ();
+//		
+//		myPhantom.phantom.show();
+//		
+//		myPhantom.calculateDarkFieldProjection(config,Configuration2);
+//		
+//		myPhantom.getDarkFieldSinogram(0).show();
+//		myPhantom.getDarkFieldSinogram(1).show();
+//		
+//		myPhantom.getDarkFieldSinogram(0).showSinogram();
+//		myPhantom.getDarkFieldSinogram(1).showSinogram();
+//		
+//		
+//		System.out.println("Phaton created");
 	}
 
 

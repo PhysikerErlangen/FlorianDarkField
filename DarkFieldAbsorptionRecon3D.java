@@ -102,9 +102,9 @@ public class DarkFieldAbsorptionRecon3D  extends  DarkFieldTensorGeometry  {
 					float val = reconAMP.getAtIndex(x, y, z, 0);
 					// If value is in bounds set Mask to 1
 					if(val > th_lower && val < th_higher){
-						myMask.setValueAtChannelN(x, y, z, 0, 1);
+						myMask.setAtIndex(x, y, z, 0, 1);
 					} else{ // if value is out of bounds set Mask to 0
-						myMask.setValueAtChannelN(x, y, z, 0, 0);
+						myMask.setAtIndex(x, y, z, 0, 0);
 					}
 				} // END z
 				} // END y

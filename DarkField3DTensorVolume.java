@@ -3,10 +3,16 @@
 //author@ Florian Schiffers July 1st, 2015
 //
 package edu.stanford.rsl.science.darkfield.FlorianDarkField;
+import java.util.ArrayList;
+
 import ij.IJ;
+import ij.ImageJ;
 import ij.ImagePlus;
+import ij.ImageStack;
+import ij.measure.Calibration;
 import edu.stanford.rsl.conrad.data.numeric.Grid3D;
 import edu.stanford.rsl.conrad.data.numeric.Grid4D;
+import edu.stanford.rsl.conrad.geometry.General;
 import edu.stanford.rsl.conrad.utils.ImageUtil;
 
 
@@ -15,25 +21,114 @@ public class DarkField3DTensorVolume extends DarkFieldGrid3DTensor{
 	@SuppressWarnings("unused")
 	private String title;
 	
-
-	public DarkField3DTensorVolume(int imageSizeX,int imageSizeY, int imageSizeZ, int numChannels,double[] spacing, double[] origin){
-		this(imageSizeX, imageSizeY, imageSizeZ, numChannels, spacing, origin, "");
+	
+	/**
+	 * @param imgSizeX - [px]
+	 * @param imgSizeY - [px]
+	 * @param imgSizeZ - [px]
+	 * @param numChannels 
+	 * @param spacing_world - [mm or other real world units]
+	 * @param origin_world - [mm or other real world units]
+	 */
+	public DarkField3DTensorVolume(int imgSizeX,int imgSizeY, int imgSizeZ, int numChannels,double[] spacing_world, double[] origin_world){
+		this(imgSizeX, imgSizeY, imgSizeZ, numChannels, spacing_world, origin_world, "");
 	}
-
-	public DarkField3DTensorVolume(int imageSizeX,int imageSizeY, int imageSizeZ, int numChannels,double[] spacing, double[] origin, String title) {
+	
+	/**
+	 * @param imgSizeX - [px]
+	 * @param imgSizeY - [px]
+	 * @param imgSizeZ - [px]
+	 * @param numChannels 
+	 * @param spacing_world - [mm or other world units]
+	 * @param origin_world - [mm or other world units]
+	 * @param title
+	 */
+	public DarkField3DTensorVolume(int imgSizeX,int imgSizeY, int imgSizeZ, int numChannels,double[] spacing_world, double[] origin_world, String title) {
 		
 		// Call superconstructor of DarkFieldGrid3DTensor
-		super(imageSizeX, imageSizeY, imageSizeZ,numChannels);
+		super(imgSizeX, imgSizeY, imgSizeZ,numChannels);
 		
 		// Set spacing of box
-		setSpacing(spacing);
+		setSpacing(spacing_world);
 		// Set origin of 3D Image Box
-		setOrigin(origin);
+		setOrigin(origin_world);
 		// set Title
 		setTitle(title);
 	}
 
 	
+		
+	public static void main(String[] args){
+		
+		String imagePath = "C:\\Users\\schiffers\\workspace\\MeasuredData\\DCI_volume.tif"; 
+		 
+		DarkField3DTensorVolume myVolume = readFromImagePlus(imagePath);
+		new ImageJ();
+		myVolume.show("Test Volume");
+		myVolume.showComponent(0);
+		
+	}
+	
+	
+	/**
+	 * Reads the DarkField3DTensorVolume out of an ImagePlus
+	 * @param imagePath
+	 * @return
+	 */
+	public static DarkField3DTensorVolume readFromImagePlus(String imagePath){
+		
+		// Open and read the image
+		ImagePlus imgVolume = IJ.openImage(imagePath); 
+		// Make sure image is not null
+		assert(imgVolume != null) : new Exception("Image could not be loaded.");
+		
+		int imgSizeX = imgVolume.getWidth();
+		int imgSizeY = imgVolume.getHeight();
+		int imgSizeZ = imgVolume.getNSlices();
+		
+		int numChannels = imgVolume.getNFrames();
+		
+		Calibration myCalib = imgVolume.getCalibration();
+		
+		double spacingX =  myCalib.pixelWidth;
+		double spacingY =  myCalib.pixelHeight;
+		double spacingZ =  myCalib.pixelDepth;
+		
+		double[] spacing = {spacingX,spacingY, spacingZ};
+		
+		double originX_pixel = myCalib.xOrigin;
+		double originY_pixel = myCalib.yOrigin;
+		double originZ_pixel = myCalib.zOrigin;
+		
+		double[] origin_world = {-originX_pixel*spacingX,-originY_pixel*spacingY,-originZ_pixel*spacingZ};
+				
+		DarkField3DTensorVolume myVolume = new DarkField3DTensorVolume(imgSizeX, imgSizeY, imgSizeZ, numChannels, spacing, origin_world);
+
+		
+		ImageStack myStack = imgVolume.getStack();
+		
+		
+				for(int z = 0; z < imgSizeZ; z++){
+					// Extracts the z Slice
+					for(int channel = 0; channel < numChannels; channel++){
+						// Calculates Stack Index
+						int stackIndex = imgVolume.getStackIndex(0, z, channel);
+						float[] sliceValues = ( float[]) myStack.getPixels(stackIndex);			
+		
+						for(int x = 0; x < imgSizeX; x++){
+							for(int y = 0; y < imgSizeY; y++){
+								int indexOnSlice = y*imgSizeX+x;
+								float val = sliceValues[indexOnSlice];
+								myVolume.setAtIndex(x, y, z, channel, val);
+					} // END Y
+				} // END X
+			} // END CHANNEL
+		} // END Z
+		
+		return myVolume;
+	}
+	
+		
 	
 //	@Override
 //	public Grid3D getChannel(int c){
@@ -90,7 +185,7 @@ public class DarkField3DTensorVolume extends DarkFieldGrid3DTensor{
 	}
 	
 	
-	
+
 	
 	
 //	

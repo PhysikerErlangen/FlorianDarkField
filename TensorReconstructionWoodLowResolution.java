@@ -113,7 +113,9 @@ public class TensorReconstructionWoodLowResolution{
 		DarkField3DTensorVolume reconImage = gradientSolver.Gradient3D();
 
 		
-		ImagePlus test = edu.stanford.rsl.conrad.utils.ImageUtil.wrapGrid4D(reconImage, "test");
+		ImagePlus test = DarkField3DTensorVolume.wrapDarkFieldGrid3DTensorToImagePlus(reconImage, "test");
+		
+		test.show();
 		
 		IJ.save(test,"C:\\Users\\schiffers\\workspace\\MeasuredData\\testObjectRecon.tif");
 		

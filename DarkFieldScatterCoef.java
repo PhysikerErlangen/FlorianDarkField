@@ -284,24 +284,7 @@ public class DarkFieldScatterCoef extends  DarkFieldTensorGeometry{
 		
 	}
 	
-	public static void calcScatterDirections(DarkField3DTensorVolume myVolume, SimpleMatrix scatterMatrix, SimpleVector scatterWeights){
-		
-		for(int x = 0; x <myVolume.imgSizeX; x++){
-			for(int y = 0; y <myVolume.imgSizeY; y++){
-				for(int z = 0; z <myVolume.imgSizeZ; z++){
-					// Initializes the PCA objects
-					DarkFieldPCA myPCA = new DarkFieldPCA(scatterMatrix,scatterWeights);
-					// Performs PCA
-					myPCA.run();
-					// Extract Scatter Direction as smallest component of the ellipsoid.
-					
-				} // End loop z
-			} // End loop y
-		} // End loop z
-		
-		
-		
-	}
+
 	
 	
 	

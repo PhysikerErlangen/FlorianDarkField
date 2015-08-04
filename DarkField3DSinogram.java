@@ -41,10 +41,18 @@ public class DarkField3DSinogram extends Grid3D {
 		return maxThetaIndex;
 	}
 
+	/**
+	 * @param maxThetaIndex
+	 */
 	public void setMaxThetaIndex(int maxThetaIndex) {
 		this.maxThetaIndex = maxThetaIndex;
 	}
 
+	/**
+	 * @param maxU
+	 * @param maxV
+	 * @param maxThetaIndex
+	 */
 	public DarkField3DSinogram(int maxU, int maxV,int maxThetaIndex){
 		super(maxU, maxV, maxThetaIndex,true);
 		
@@ -54,8 +62,10 @@ public class DarkField3DSinogram extends Grid3D {
 		
 	}
 	
-
-	// Multiplies the whole grid with a given factor
+	/**
+	 * Multiplies the whole grid with a given factor
+	 * @param factor
+	 */
 	public void multiply(float factor){
 		
 		for(int u = 0; u <this.getSize()[0]; u++){
@@ -68,6 +78,7 @@ public class DarkField3DSinogram extends Grid3D {
 	}
 	
 	
+	@Override
 	public void show(String title){
 		ImagePlus img = ImageUtil.wrapGrid3D(this, title);
 				
@@ -77,14 +88,23 @@ public class DarkField3DSinogram extends Grid3D {
 
 	}
 	
+	@Override
 	public void show(){
 		show("");
 	}
 	
+	/**
+	 * Displays sinogam with void title ""
+	 */
 	public void showSinogram(){
 	showSinogram("");
 	}
 	
+	/**
+	 * Displays the sinogram.
+	 * Has to create a new Grid which is why this might take some time.
+	 * @param title is the title of the sinogram
+	 */
 	public void showSinogram(String title){
 		
 		Grid3D mySinoGrid = new Grid3D(maxThetaIndex,maxU,maxV);
@@ -107,11 +127,12 @@ public class DarkField3DSinogram extends Grid3D {
 		ImagePlus img = ImageUtil.wrapGrid3D(mySinoGrid, title);
 		
 		img.show();
-		
-		
-	
 	}
 	
+	/**
+	 * Checks if one of all Elements in the sinogram is NaN
+	 * @return
+	 */
 	public boolean checkForNan(){
 		
 		for(int curTheta = 0; curTheta < maxThetaIndex; curTheta++){ // Start with Stack 1 so Matlab convention
@@ -131,6 +152,13 @@ public class DarkField3DSinogram extends Grid3D {
 		
 	}
 	
+	/**
+	 * Checks if value of sinogram is naN
+	 * @param curU
+	 * @param curV
+	 * @param curTheta
+	 * @return true if is NaN, false if it is not a NaN
+	 */
 	public boolean checkForNaN(int curU, int curV, int curTheta){
 		float myVal = getAtIndex(curU,curV,curTheta);
 		if (Float.isNaN(myVal)){
@@ -140,13 +168,17 @@ public class DarkField3DSinogram extends Grid3D {
 	}
 	
 	
-	public void sub( DarkField3DSinogram B) throws Exception {
+	/**
+	 * Subtracts B from current Sinogram
+	 * @param B
+	 */
+	public void sub( DarkField3DSinogram B) {
 
-		// Check for inconstiency (different dimensions)
-		if(getSize()[0]!=B.getSize()[0]&&getSize()[1]!=B.getSize()[1]&&getSize()[2]!=B.getSize()[2]){
-		System.out.println("Dimensions do not match2");
-		throw new Exception("Dimension do not match!");
-		}
+		// Check for inconsistency (different dimensions)
+				assert( getSize()[0]==B.getSize()[0]
+						&&getSize()[1]==B.getSize()[1]
+						&&getSize()[2]!=B.getSize()[2])
+						: new Exception("Dimension of data is wrong.");
 		
 		for(int u = 0; u <getMaxU(); u++){
 			for(int v = 0; v <getMaxV(); v++){
@@ -160,6 +192,11 @@ public class DarkField3DSinogram extends Grid3D {
 	
 
 	
+	/**
+	 * @param A - Sinogram 1
+	 * @param B - Sinogram 2
+	 * @return Sinogram subtracted A - B
+	 */
 	public static DarkField3DSinogram sub(DarkField3DSinogram A, DarkField3DSinogram B){
 
 		// Check for inconsistency (different dimensions)

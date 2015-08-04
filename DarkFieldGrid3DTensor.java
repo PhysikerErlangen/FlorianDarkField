@@ -6,11 +6,16 @@ package edu.stanford.rsl.science.darkfield.FlorianDarkField;
 
 import ij.IJ;
 import ij.ImagePlus;
+import ij.ImageStack;
+import ij.measure.Calibration;
 import weka.core.pmml.jaxbbindings.SetPredicate;
+import edu.stanford.rsl.conrad.data.Grid;
 import edu.stanford.rsl.conrad.data.numeric.Grid3D;
 import edu.stanford.rsl.conrad.data.numeric.Grid4D;
 import edu.stanford.rsl.conrad.data.numeric.MultiChannelGrid3D;
+import edu.stanford.rsl.conrad.geometry.General;
 import edu.stanford.rsl.conrad.numerics.SimpleVector;
+import edu.stanford.rsl.conrad.utils.ImageUtil;
 
 
 /**
@@ -28,9 +33,9 @@ public class DarkFieldGrid3DTensor extends Grid4D {
 	
 	
 	/**
-	 * @param imgSizeX
-	 * @param imgSizeY
-	 * @param imgSizeZ
+	 * @param imgSizeX - [px]
+	 * @param imgSizeY - [px]
+	 * @param imgSizeZ - [px]
 	 * @param numChannels
 	 */
 	public DarkFieldGrid3DTensor(int imgSizeX, int imgSizeY, int imgSizeZ, int numChannels){
@@ -58,7 +63,8 @@ public class DarkFieldGrid3DTensor extends Grid4D {
 	 */
 	public void write3DTensorToImage(String filePath, String volumeName){
 		
-		ImagePlus myImage = edu.stanford.rsl.conrad.utils.ImageUtil.wrapGrid4D(this, volumeName);
+		
+		ImagePlus myImage = wrapDarkFieldGrid3DTensorToImagePlus(this, volumeName);
 		
 		IJ.save(myImage,filePath);
 		
@@ -137,7 +143,7 @@ public class DarkFieldGrid3DTensor extends Grid4D {
 		setAtIndex(x, y,z, channel,getAtIndex(x, y, z, channel) *val);
 	}
 	
- 
+	@Override
 	/**
 	 * Stores a channel value to given channel
 	 * @param x
@@ -146,8 +152,8 @@ public class DarkFieldGrid3DTensor extends Grid4D {
 	 * @param channel
 	 * @param value
 	 */
-	public void setValueAtChannelN(int x, int y, int z, int channel, float value){
-		setAtIndex(x,y,z,channel,value);
+	public void setAtIndex(int x, int y, int z, int channel, float value){
+		super.setAtIndex(x,y,z,channel,value);
 	}
 
 	 
@@ -224,6 +230,25 @@ public class DarkFieldGrid3DTensor extends Grid4D {
 		return myVec;
 	}
 	
+	
+	/**
+	 * returns the tensor vector at a given voxel point
+	 * @param x
+	 * @param y
+	 * @param z
+	 * @return - vector
+	 */
+	public SimpleVector getSimpleVectorAtIndex(int x, int y, int z) {
+		
+		SimpleVector myVec = new SimpleVector(getNumberOfChannels()); 
+
+		for (int channel = 0; channel < getNumberOfChannels(); channel++){
+					myVec.setElementValue(channel, getAtIndex(x, y, z, channel));
+	}
+		return myVec;
+	}
+	
+	
 
 	/**
 	 * Set's the all values of the tensor vector to a specific value
@@ -234,14 +259,14 @@ public class DarkFieldGrid3DTensor extends Grid4D {
 	 */
 	public void setAtIndex(int x, int y, int z, float val) {
 		for(int channel = 0; channel < this.getNumberOfChannels(); channel++){
-			setValueAtChannelN(x, y, z, channel, val);
+			setAtIndex(x, y, z, channel, val);
 		}
 	}
 	
 	
 	
 	/**
-	 * Add a given tensor vector ontop of a grid point
+	 * Add a given tensor vector on top of a grid point
 	 * @param x
 	 * @param y
 	 * @param z
@@ -283,11 +308,31 @@ public class DarkFieldGrid3DTensor extends Grid4D {
 		}
 	}
 
+	/** (non-Javadoc)
+	 * overrides the show() method of Grid4D to deal with DarkFieldGrid3DTensor Data
+	 */
+	@Override
+	public void show(){
+		show("");
+	}
+	
+	/** (non-Javadoc)
+	 * overrides the show() method of Grid4D to deal with DarkFieldGrid3DTensor Data
+	 * @param title is the title of the image to be shown
+	 */
+	
+	@Override
+	public void show(String title){
+		wrapDarkFieldGrid3DTensorToImagePlus(this, title).show();
+	}
+	
+	
+	
 	/**
 	 * Displays each scatter direction component of the Grid4D as an own image
 	 * All of them are Grid3D, which then can be displayed as a volume
 	 * by the volume viewer.
-	 * CAUTION: Auto contrast might be necessary
+	 * 
 	 */
 	public void showComponents(){
 		
@@ -301,12 +346,62 @@ public class DarkFieldGrid3DTensor extends Grid4D {
  * Displays a specific scatter direction component (this is a Grid3D)
  * @param channel
  */
-public void showComponents(int channel){
+public void showComponent(int channel){
 			String myTitle = "Volume at channel " + channel; 
 			getSubGrid(channel).show(myTitle);
 	}
 	
+
+/**
+ * Writes calibration for the imagePlus of a given DarkFieldGrid3DTensor
+ * @param imagePlus
+ * @param grid
+ */
+private static void setCalibrationToImagePlus(ImagePlus imagePlus, DarkFieldGrid3DTensor grid){
+	Calibration calibration = imagePlus.getCalibration();
+	calibration.xOrigin = General.worldToVoxel(0, grid.getSpacing()[0], grid.getOrigin()[0]);
+	calibration.yOrigin = General.worldToVoxel(0, grid.getSpacing()[1], grid.getOrigin()[1]);
+	calibration.zOrigin = General.worldToVoxel(0, grid.getSpacing()[2], grid.getOrigin()[2]);
 	
+	calibration.pixelWidth = grid.getSpacing()[0];
+	calibration.pixelHeight = grid.getSpacing()[1];
+	calibration.pixelDepth = grid.getSpacing()[2];
+}
+
+
+/**
+ * @param grid
+ * @param title
+ * @return
+ */
+public static ImagePlus wrapDarkFieldGrid3DTensorToImagePlus(DarkFieldGrid3DTensor grid, String title){
+	if (grid != null) {
+			//ImageStack stack = new ImageStack(grid.getSize()[0], grid.getSize()[1], grid.getSize()[2]);
+		
+			// Create a new ImagePlus
+			ImagePlus hyper = new ImagePlus();
+			
+			// Create an hyperStack
+			ImageStack hyperStack = new ImageStack(grid.imgSizeX, grid.imgSizeY);
+			
+			// Go through all elements of 4th component
+			for (int channel = 0; channel < grid.getNumberOfChannels(); channel++) {
+				for (int z = 0; z < grid.imgSizeZ; z++) {
+					hyperStack.addSlice("", ImageUtil.wrapGrid2D(grid.getSubGrid(channel).getSubGrid(z)));
+					}
+			}
+			
+			setCalibrationToImagePlus(hyper, grid);
+			
+			hyper.setStack(title, hyperStack);
+			hyper.setDimensions(1, grid.imgSizeZ, grid.getNumberOfChannels());
+			hyper.setOpenAsHyperStack(true);
+			return hyper;
+	} else 
+		return null;
+}	
+
+
 }
 
 

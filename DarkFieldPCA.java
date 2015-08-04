@@ -77,6 +77,13 @@ public class DarkFieldPCA{
 			
 	
 	/**
+	 * @return the eigenVectors
+	 */
+	public SimpleMatrix getEigenVectors() {
+		return eigenVectors;
+	}
+
+	/**
 	 * contains the calculated scatter coefficient by tensor reconstruction
 	 */
 	private SimpleVector myScatterWeights;
@@ -94,6 +101,13 @@ public class DarkFieldPCA{
 	private double[] eigenValues;
 	
 	
+	/**
+	 * @return the eigenValues
+	 */
+	public double[] getEigenValues() {
+		return eigenValues;
+	}
+
 	/**
 	 * Constructor for DarkFieldPCA.
 	 * CAUTION: DarkFieldPCA needs special data, as no mean shift is performed, as the
@@ -209,7 +223,6 @@ public class DarkFieldPCA{
 		
 		eigenValues  =  svd.getSingularValues();
 		eigenVectors = svd.getU();
-		
 	
 	}
 	

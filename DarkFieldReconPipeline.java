@@ -3,6 +3,7 @@ package edu.stanford.rsl.science.darkfield.FlorianDarkField;
 import ij.IJ;
 import ij.ImageJ;
 import ij.ImagePlus;
+import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
 import edu.stanford.rsl.conrad.numerics.SimpleVector;
 import edu.stanford.rsl.conrad.utils.Configuration;
 
@@ -36,6 +37,10 @@ public class DarkFieldReconPipeline {
 	
 	boolean debug = true;
 
+	
+	/**
+	 *  Reconstructed dark field volume
+	 */
 	private DarkField3DTensorVolume reconDarkField;
 	
 	/**
@@ -46,6 +51,11 @@ public class DarkFieldReconPipeline {
 	}
 
 
+	/**
+	 * Mask used for zero constrained enforcement during
+	 * dark field reconstruction.
+	 * Can be set to null if no mask is desired
+	 */
 	private DarkField3DTensorVolume reconMask;
 	
 	/**
@@ -61,6 +71,13 @@ public class DarkFieldReconPipeline {
 	public void setReconMask(DarkField3DTensorVolume reconMask) {
 		this.reconMask = reconMask;
 	}
+	
+	/**
+	 * contains the different scatter directions used for reconstruction
+	 */
+	private SimpleMatrix scatterDirMatrix;
+	
+	
 
 	/**
 	 * CONSTRUCTOR
@@ -118,8 +135,16 @@ public class DarkFieldReconPipeline {
 		this.config1 = config1;
 		this.config2 = config2;
 		
-		this.fileAMP1 = new File(fileNameAMP1);
+		if((fileNameAMP1==null)||(fileNameAMP2==null)){
+		fileAMP1 = null;			
+		fileAMP2 = null;
+			
+		} else{
+			this.fileAMP1 = new File(fileNameAMP1);
 		this.fileAMP2 = new File(fileNameAMP2);
+		}
+		
+		
 		this.fileDCI1 = new File(fileNameDCI1);
 		this.fileDCI2 = new File(fileNameDCI2);
 		
@@ -242,6 +267,10 @@ public void reconstructMaskForZeroConstraint(float th_lower, float th_higher, bo
 		// If mask should be used, it should be created prior to execution of this method
 		GradientSolverTensor3D gradientSolver = new GradientSolverTensor3D(config1, config2, sinoDCI1, sinoDCI2, stepSize, maxIt, numScatterVectors,reconMask,reconMask);
 		
+		// Save the scatter directions into a matrix
+		scatterDirMatrix =  gradientSolver.getScatterDirectionsAsMatrix();
+		
+		// Execute the gradient decent
 		reconDarkField = gradientSolver.Gradient3D();
 
 		if(saveDarkField){
@@ -250,5 +279,45 @@ public void reconstructMaskForZeroConstraint(float th_lower, float th_higher, bo
 			reconDarkField.write3DTensorToImage(filePath, volumeName);
 		}
 	}
+	
+
+	/**
+	 * @param saveVTK - if true saves the fiber Direcitons into a vtk file.
+	 */
+	public void calculateFiberOrientations(boolean saveVTK){
+	
+		calculateFiberOrientations(saveVTK, reconDarkField, scatterDirMatrix, fileDCI1);
+	
+	}
+	
+	
+
+	/**
+	 * @param saveVTK
+	 * @param reconDarkField
+	 * @param scatterDirMatrix
+	 * @param fiberDirectionClass
+	 * @param fileDCI1
+	 */
+	public static void calculateFiberOrientations(boolean saveVTK, DarkField3DTensorVolume reconDarkField, SimpleMatrix scatterDirMatrix, File fileDCI1){
+		
+		assert(reconDarkField != null) : new Exception("Reconstructed is NULL and needs to be calculated first.");
+		assert(scatterDirMatrix != null) : new Exception("Scatter Dir Matrix needs to be calculated first.");
+		
+		DarkFieldScatterExtractor scatterDirExtractor = new DarkFieldScatterExtractor(reconDarkField, scatterDirMatrix);
+		
+		DarkFieldFiberDirectionClass fiberDirectionClass = new DarkFieldFiberDirectionClass
+				(reconDarkField.imgSizeX, reconDarkField.imgSizeY, reconDarkField.imgSizeZ,
+						reconDarkField.getSpacing(), reconDarkField.getOrigin());
+		
+		fiberDirectionClass = scatterDirExtractor.calcScatterDirections();
+		
+		
+		if(saveVTK){
+			String pathFiberVTK = fileDCI1.getParent() + "\\fiberDirections.vtk";
+			fiberDirectionClass.writeToVectorField(pathFiberVTK);
+		}
+	}
+	
 	
 }

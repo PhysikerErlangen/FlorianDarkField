@@ -31,7 +31,7 @@ public class TensorReconstructionPhantom{
 
 	public static void main (String [] args) throws Exception{
  
-		String fileNameConfig1 = "C:\\Users\\schiffers\\workspace\\Configurations\\PhantomHalfLarge_unsymetric.xml";
+		String fileNameConfig1 = "E:\\fschiffers\\Configurations\\PhantomHalfLarge_unsymetric.xml";
 		
 		// Load configuration wooden case
 

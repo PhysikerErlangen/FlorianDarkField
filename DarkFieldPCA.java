@@ -146,7 +146,7 @@ public class DarkFieldPCA{
 			
 			double myWeight = myScatterWeights.getElement(direction);
 			SimpleVector vec1 = scatterDirections.getCol(direction);
-			vec1.multipliedBy(myWeight);
+			vec1.multiplyBy(myWeight);
 			SimpleVector vec2 = vec1.multipliedBy(-1f);
 			
 			scatterPoints.setColValue(2*direction, vec1);

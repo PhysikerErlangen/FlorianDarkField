@@ -36,15 +36,16 @@ public class TensorReconstructionFullResolution{
 		 */
 
 		// Path to the configuration file (default no second configuration is used)
-		String fileNameConfig1 = "C:\\Users\\schiffers\\workspace\\Configurations\\Config_Full_Resolution_100_cubic.xml";
+		String fileNameConfig1 = "E:\\fschiffers\\Configurations\\Config_Full_Resolution_100_cubic.xml";
 
 		// Path to the 2 darkfield images
-		String fileNameDCI1 = "C:\\Users\\schiffers\\workspace\\MeasuredData\\WoodDCI1.tif";
-		String fileNameDCI2 = "C:\\Users\\schiffers\\workspace\\MeasuredData\\WoodDCI2.tif";
+		
+		String fileNameDCI1 = "E:\\fschiffers\\MeasuredData\\WoodDCI1.tif";
+		String fileNameDCI2 = "E:\\fschiffers\\MeasuredData\\WoodDCI2.tif";
 		
 		// Path to the 2 absorption images
-		String fileNameAMP1 = "C:\\Users\\schiffers\\workspace\\MeasuredData\\WoodAMP1.tif";
-		String fileNameAMP2 = "C:\\Users\\schiffers\\workspace\\MeasuredData\\WoodAMP2.tif";
+		String fileNameAMP1 = "E:\\fschiffers\\MeasuredData\\WoodAMP1.tif";
+		String fileNameAMP2 = "E:\\fschiffers\\MeasuredData\\WoodAMP2.tif";
 		
 		/*
 		 * INITILIAZATION OF SOME DATA
@@ -76,6 +77,9 @@ public class TensorReconstructionFullResolution{
 		
 		System.out.println(" DarkField Reconstruction was successfully created and saved.");
 		
+		myDarkFieldPipeLine.calculateFiberOrientations(true);
+		
+		System.out.println("Fiber Orientations sucessfully saved.");
 		
 		
 	}

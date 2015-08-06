@@ -74,6 +74,10 @@ public class DarkFieldTensorGeometry {
 	// Permutation matrix, used to calculate ray direction for different trajectories
 	String trajectoryFlag; // TODO initialize
 	
+	/**
+	 * @param conf
+	 * @param numScatterVectors
+	 */
 	public DarkFieldTensorGeometry(Configuration conf, int numScatterVectors){
 		
 		this.conf = conf;
@@ -127,7 +131,13 @@ public class DarkFieldTensorGeometry {
 		
 	}
 
-	// Checks if to SimpleVector are the same
+	
+	/**
+	 * Easy method that checks if two SimpleVector are the same
+	 * @param v1
+	 * @param v2
+	 * @return
+	 */
 	public boolean checkEquality(SimpleVector v1, SimpleVector v2){
 		for (int k = 0; k < v1.getLen(); k++){
 			if( ( v1.getElement(k) - v2.getElement(k) ) != 0){
@@ -138,6 +148,11 @@ public class DarkFieldTensorGeometry {
 	}
 	
 	
+	/**
+	 *  Initializes the rotation matrix for both trajectories
+	 *  This method can only work as long work 2 specific
+	 *  trajectories!!!
+	 */
 	public void initRotMatrix(){
 		
 		SimpleVector axis001 = new SimpleVector(0,0,1);
@@ -156,18 +171,30 @@ public class DarkFieldTensorGeometry {
 		
 	}
 	
-	// Calculates the detector column in pixel coordinates  
+	/**
+	 * Calculates the detector column in pixel coordinates
+	 * @param uWorld
+	 * @return
+	 */
 	public double calcU_index(double uWorld){
 		double curU_index = uWorld/deltaU - offSetU_index + maxU_index/2.0; 
 		return curU_index;
 	}
 	
+	/**
+	 * @param vWorld
+	 * @return
+	 */
 	public double calcV_index(double vWorld){
 		double curV_index = vWorld/deltaV - offSetV_index + maxV_index/2.0; 
 		return curV_index;
 		
 	}
 	
+	/**
+	 * @param curU_index
+	 * @return
+	 */
 	public double calculateDetectorCoordinate(int curU_index){
 		// Calculate distance from camera center and include possible offset
 		double s = deltaU * curU_index + this.offSetU_world - maxU_world/2.0;
@@ -175,15 +202,22 @@ public class DarkFieldTensorGeometry {
 	}
 	
 	
-	
-	// Calculates the parallel projection of a "voxel" coordinate
-	// onto the detector column in world coordinates
+	/**
+	 * Calculates the parallel projection of a "voxel" coordinate
+	 * onto the detector column in world coordinates
+	 * @param z_index
+	 * @return
+	 */
 	public double calculateDetectorRow(int z_index){
 		double curHeight = z_index*spacingZ + originZ;
 		double curV = curHeight/deltaV - offSetV_index + maxV_index/2.0;
 		return curV;
 	}
 
+	/**
+	 * @param curV
+	 * @return
+	 */
 	public double calculateHeight(double curV){
 		// Calculate distance from camera center and include a possible offset
 		// double curHeight = deltaV  * curV + offSetV_world - maxV/2.0;
@@ -193,19 +227,32 @@ public class DarkFieldTensorGeometry {
 		
 	}
 	
+	/** 
+	 * @return origin in world coordinates [mm]
+	 */
 	public double[] getOrigin(){
 		double[] origin = {geo.getOriginX(),geo.getOriginY(),geo.getOriginZ() }; 
 		return origin;
 		
 	}
 	
+	/**
+	 * @return spacing in real world coordinates [mm]
+	 */
 	public double[] getSpacing(){
 		double[] origin = {geo.getVoxelSpacingX(),geo.getVoxelSpacingY(),geo.getVoxelSpacingZ()}; 
 		return origin;
 	}
 	
-	// checks if the point that should be interpolated lies inside of the bounding box.
-	// if its to far from it, don't consider it and do not interpolate therefore!
+	
+	/**
+	 *  checks if the point that should be interpolated lies inside of the bounding box.
+	 *   if its to far from it, don't consider it and do not interpolate therefore!
+	 * @param x_ind
+	 * @param y_ind
+	 * @param z_ind
+	 * @return true if point is in box
+	 */
 	public boolean checkIfPointIsInBox(double x_ind, double y_ind, double z_ind){
 		
 		if (x_ind + 1 > imgSizeX || y_ind + 1 >= imgSizeY || z_ind + 1 >= imgSizeZ
@@ -226,9 +273,14 @@ public class DarkFieldTensorGeometry {
 	}
 	
 	
-	
-	// THIS is a really ugly method, but seems to be the fastest (but dirty) implementation
-	// With this we implement two trajectories!
+	/**
+	 * THIS is a really ugly method, but seems to be the fastest (but dirty) implementation
+	 * With this we implement two trajectories!
+	 * @param u_worldX - [real world coordinates eg. mm]
+	 * @param u_worldY - [real world coordinates eg. mm]
+ 	 * @param v_worldZ - [real world coordinates eg. mm]
+	 * @return
+	 */
 	public PointND calculateRotatedVector(double u_worldX, double u_worldY, double v_worldZ){
 
 		if(trajectoryFlag.equals("001")){
@@ -242,10 +294,15 @@ public class DarkFieldTensorGeometry {
 }
 	
 	
-	
-	// Calculate orthogonal projection onto arbitrary plane by formula given by
-	// https://de.wikipedia.org/wiki/Orthogonalprojektion
-	// Returns: image coordinates in world coordinates (need to be transformed to image coordinates later)
+	/**
+	 * Calculate orthogonal projection onto arbitrary plane by formula given by
+	 * https://de.wikipedia.org/wiki/Orthogonalprojektion
+	 * Returns: image coordinates in world coordinates (need to be transformed to image coordinates later)
+	 * @param x
+	 * @param uVec
+	 * @param vVec
+	 * @return
+	 */
 	public static SimpleVector calcDetectorCoordinates(SimpleVector x, SimpleVector uVec, SimpleVector vVec){
 		// under the assumption that u and v is orthogonal
 		double u = SimpleOperators.multiplyInnerProd(x,uVec);
@@ -258,8 +315,15 @@ public class DarkFieldTensorGeometry {
 
 	
 	
-	// Calculate orthogonal projection onto arbitrary plane by formula given by
-	// https://de.wikipedia.org/wiki/Orthogonalprojektion
+
+	/**
+	 * Calculates orthogonal projection onto arbitrary plane by formula given by
+	 * https://de.wikipedia.org/wiki/Orthogonalprojektion
+	 * @param x
+	 * @param uVec
+	 * @param vVec
+	 * @return
+	 */
 	public static SimpleVector calcOrthogonalProjection(SimpleVector x, SimpleVector uVec, SimpleVector vVec){
 		
 		double inner1 = SimpleOperators.multiplyInnerProd(x,uVec);

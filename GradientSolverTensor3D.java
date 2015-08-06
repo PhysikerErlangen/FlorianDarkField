@@ -12,6 +12,7 @@ import edu.stanford.rsl.science.darkfield.FlorianDarkField.DarkField3DTensorVolu
 import edu.stanford.rsl.science.darkfield.iterative.OpMath;
 import edu.stanford.rsl.conrad.data.numeric.NumericPointwiseOperators;
 import edu.stanford.rsl.conrad.data.numeric.iterators.NumericPointwiseIteratorND;
+import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
 import edu.stanford.rsl.conrad.utils.Configuration;
 
 
@@ -218,6 +219,12 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry{
 	}	
 	
 	
+	/**
+	 * @return Scatter Directions as Matrix
+	 */
+	public SimpleMatrix getScatterDirectionsAsMatrix(){
+		return scatterCoef1.getScatterVectorsAsMatrix();
+	}
 	
 	
 }

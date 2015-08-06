@@ -71,12 +71,19 @@ public class DarkFieldTensorPhantom  extends  DarkFieldTensorGeometry  {
 
 
 	
+	/**
+	 * @param config
+	 */
 	public DarkFieldTensorPhantom(Configuration config){
 		this(config,3);
 	}
 	
 
 	
+	/**
+	 * @param config
+	 * @param numChannels
+	 */
 	public DarkFieldTensorPhantom(Configuration config, int numChannels){
 
 		// Call super constructor of TensorGeometry
@@ -90,6 +97,9 @@ public class DarkFieldTensorPhantom  extends  DarkFieldTensorGeometry  {
 	}
 	
 	
+	/**
+	 * 
+	 */
 	public void calcPhantom(){
 		
 		SimpleVector scatterDir1 = null;
@@ -143,10 +153,18 @@ public class DarkFieldTensorPhantom  extends  DarkFieldTensorGeometry  {
 	
 	
 	
+	/**
+	 * @param index
+	 * @return
+	 */
 	public DarkField3DSinogram getDarkFieldSinogram(int index){
 		return sinogramList.get(index);
 	}
 	
+	/**
+	 * @param config1
+	 * @param config2
+	 */
 	public void calculateDarkFieldProjection(Configuration config1, Configuration config2){
 		
 		DarkFieldScatterCoef scatterCoef1 = new DarkFieldScatterCoef(config1,phantom.getNumberOfChannels());

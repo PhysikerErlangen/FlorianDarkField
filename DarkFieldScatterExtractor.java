@@ -29,31 +29,63 @@ public class DarkFieldScatterExtractor {
 		this.imgSizeY = darkFieldVolume.imgSizeY;
 		this.imgSizeZ = darkFieldVolume.imgSizeZ;
 		
-		fiberDirections = new DarkFieldFiberDirectionClass(imgSizeX, imgSizeY, imgSizeZ);
+		
 		
 	}
 	
-	public void calcScatterDirections( ){
+	/**
+	 * Calculates the scatter direction of every voxel in the volume
+	 * We use the ClassDarkFieldPCA to calculate the directions
+	 * @return
+	 */
+	public DarkFieldFiberDirectionClass calcScatterDirections( ){
+		
+		fiberDirections = new DarkFieldFiberDirectionClass(imgSizeX, imgSizeY, imgSizeZ, darkFieldVolume.getSpacing(),darkFieldVolume.getOrigin());
 		
 		for(int x = 0; x < imgSizeX; x++){
 			for(int y = 0; y <imgSizeY; y++){
 				for(int z = 0; z <imgSizeZ; z++){
-					// Initializes the PCA objects
-					SimpleVector scatterWeights = darkFieldVolume.getSimpleVectorAtIndex(x, y, z);
-					DarkFieldPCA myPCA = new DarkFieldPCA(scatterMatrix,scatterWeights);
-					// Performs PCA
-					myPCA.run();
-					// Extract Scatter Direction as smallest component of the ellipsoid.
-					SimpleVector fiberDir = myPCA.getEigenVectors().getCol(2);
-					
+					// Calculate the scatter direction at given voxel
+					SimpleVector fiberDir = calcScatterDirection(x, y, z);
+					// Add fiber direction to the ScatterDirectionObject
 					fiberDirections.setFiberDirection(x, y, z, fiberDir);
 				} // End loop z
 			} // End loop y
 		} // End loop z
 		
-		
+		return fiberDirections;
 		
 	}
 	
+	/**
+	 * Calculates the scatter direction at voxel element (x,y,z)
+	 * @param x
+	 * @param y
+	 * @param z
+	 * @return Scatter Direction
+	 */
+	public SimpleVector calcScatterDirection(int x, int y, int z){
+		
+		// Initializes the PCA objects
+		SimpleVector scatterWeights = darkFieldVolume.getSimpleVectorAtIndex(x, y, z);
+		DarkFieldPCA myPCA = new DarkFieldPCA(scatterMatrix,scatterWeights);
+		// Performs PCA
+		myPCA.run();
+		// Extract Scatter Direction as smallest component of the ellipsoid.
+		
+		double th = 1E-10;
+		
+		SimpleVector fiberDir;
+		if(myPCA.getEigenValues()[2]<th){
+			fiberDir = new SimpleVector(3);
+		}else{
+			fiberDir = myPCA.getEigenVectors().getCol(2).normalizedL2();
+			fiberDir.multiplyBy(myPCA.getEigenValues()[2]);
+		}
+		
+		
+		return fiberDir;
+	}
+
 	
 }

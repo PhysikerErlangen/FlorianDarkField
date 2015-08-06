@@ -39,8 +39,8 @@ public class TensorAbsorptionRecon {
 
 		//Choose dark-field projections. Sinogram is calculated from projections.
 		
-		String fileNameAMP1 = "C:\\Users\\schiffers\\workspace\\MeasuredData\\WoodAMP1.tif";
-		String fileNameAMP2 = "C:\\Users\\schiffers\\workspace\\MeasuredData\\WoodAMP2.tif";
+		String fileNameAMP1 = "E:\\fschiffers\\MeasuredData\\WoodAMP1.tif";
+		String fileNameAMP2 = "E:\\fschiffers\\MeasuredData\\WoodAMP2.tif";
 		
 		/* 
 		 * Load dark field images

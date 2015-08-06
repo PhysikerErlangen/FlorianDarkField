@@ -13,11 +13,15 @@ import ij.measure.Calibration;
 import edu.stanford.rsl.conrad.data.numeric.Grid3D;
 import edu.stanford.rsl.conrad.data.numeric.Grid4D;
 import edu.stanford.rsl.conrad.geometry.General;
+import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
 import edu.stanford.rsl.conrad.utils.ImageUtil;
 
 
 public class DarkField3DTensorVolume extends DarkFieldGrid3DTensor{
 
+	
+	
+	
 	@SuppressWarnings("unused")
 	private String title;
 	
@@ -69,16 +73,25 @@ public class DarkField3DTensorVolume extends DarkFieldGrid3DTensor{
 		
 	}
 	
-	
 	/**
 	 * Reads the DarkField3DTensorVolume out of an ImagePlus
 	 * @param imagePath
 	 * @return
 	 */
 	public static DarkField3DTensorVolume readFromImagePlus(String imagePath){
+		 ImagePlus imgVolume = IJ.openImage(imagePath);
+		 return  readFromImagePlus(imgVolume);
+	}
+	
+	
+	/**
+	 * @param imgVolume
+	 * @return
+	 */
+	public static DarkField3DTensorVolume readFromImagePlus(ImagePlus imgVolume){
 		
 		// Open and read the image
-		ImagePlus imgVolume = IJ.openImage(imagePath); 
+		 
 		// Make sure image is not null
 		assert(imgVolume != null) : new Exception("Image could not be loaded.");
 		

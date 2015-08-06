@@ -72,6 +72,10 @@ public class DarkFieldScatterCoef extends  DarkFieldTensorGeometry{
 	// Number of Scattering vectors
 	SimpleVector[] scatteringVectors;
 	
+	/**
+	 * @param conf
+	 * @param numScatterVectors
+	 */
 	public DarkFieldScatterCoef( Configuration conf, int numScatterVectors) {
 
 		// Call super constructor which contains whole geometry etc.
@@ -128,43 +132,43 @@ public class DarkFieldScatterCoef extends  DarkFieldTensorGeometry{
 			this.scatteringVectors[4] = new SimpleVector(1f,1f,-1f).normalizedL2();
 			this.scatteringVectors[5] = new SimpleVector(1f,-1f,1f).normalizedL2();
 			this.scatteringVectors[6] = new SimpleVector(-1f,1f,1f).normalizedL2();
-			
 		}
-		
-		
 		
 		else if(this.numScatterVectors == 1){
-			
 			this.scatteringVectors = new SimpleVector[1];
-			
 			this.scatteringVectors[0] = new SimpleVector(1,0,1);
-			
-			 
 		}
-		
 	}
 
 	
 	
-//	public int getIndex(int uPixel, int vPixel, int proj, int scatterVec){
-//		
-//		return 0;
-//		
-//	}
-	
-	public double getWeight(int projIndex, int scatterVector){
+	/**
+	 * @param curTheta
+	 * @param scatterVector
+	 * @return
+	 */
+	public double getWeight(int curTheta, int scatterVector){
 		// TODO DO SOME CALCULATIONS
-		return weights[projIndex][scatterVector];
+		return weights[curTheta][scatterVector];
 	}
 
-		
-	// u,v pixel coordinate, projIndex is projection index, scatterVector current scatter direction
-	public void setWeight(int projIndex, int scatterIndex,double val){
-		weights[projIndex][scatterIndex] = val;
+
+	/**
+	 * @param curTheta
+	 * @param scatterIndex
+	 * @param val
+	 */
+	public void setWeight(int curTheta, int scatterIndex,double val){
+		weights[curTheta][scatterIndex] = val;
 	}
 	
-
-	// Calculate scalar product of two vectors
+ 
+	/**
+	 * Calculate scalar product of two vectors
+	 * @param vec1
+	 * @param vec2
+	 * @return
+	 */
 	public static double scalarProduct(SimpleVector vec1, SimpleVector vec2) {
 		assert vec1.getLen() != vec2.getLen() : new IllegalArgumentException(
 				"Both vectors have to have same size!");
@@ -175,7 +179,13 @@ public class DarkFieldScatterCoef extends  DarkFieldTensorGeometry{
 		return sum;
 	}
 
-	// Calculates the cross product between to vectors
+ 
+	/**
+	 * Calculates the cross product between to vectors
+	 * @param vec1
+	 * @param vec2
+	 * @return
+	 */
 	public static SimpleVector crossProduct(SimpleVector vec1, SimpleVector vec2) {
 		// Assert if vector length is not the same
 		assert (vec1.getLen() != 3) || (vec2.getLen() != 3) : new IllegalArgumentException(
@@ -194,10 +204,17 @@ public class DarkFieldScatterCoef extends  DarkFieldTensorGeometry{
 
 	// calculateWeightFactor calculates the weight factor which are defined in
 	// maleckis paper
-	// rayDir: Direction of the ray
-	// scatterDirection: Direction of the particular Scattering Vector
-	// Sensitivity: sensitivity direction of grating interferometer
+	// rayDir: 
+	// scatterDirection: 
+	// Sensitivity: 
 
+	/**
+	 * 
+	 * @param rayDir - Direction of the ray
+	 * @param scatterDirection - Direction of the particular Scattering Vector
+	 * @param sensitivity - sensitivity direction of grating interferometer
+	 * @return
+	 */
 	public double calculateWeightFactor(SimpleVector rayDir,
 			SimpleVector scatterDirection, SimpleVector sensitivity) {
 		SimpleVector help = crossProduct(rayDir, scatterDirection);
@@ -207,6 +224,12 @@ public class DarkFieldScatterCoef extends  DarkFieldTensorGeometry{
 		return weight * weight;
 	}
 	
+	/**
+	 * Calculates the whole weight matrix according to Eq. (2)
+	 * of Paper: Vogel - Constrained X-Ray tensor tomography reconstruction
+	 * Here parallel Beam structure is assumed, which is why the actual
+	 * dimension of 
+	 */
 	public void calculateWeightMatrix() {
 
 		/* Assume that object is static and Detector is moved around object
@@ -240,10 +263,20 @@ public class DarkFieldScatterCoef extends  DarkFieldTensorGeometry{
 	}
 
 	
+	/**
+	 * returns scatter sample direction of the particular channel
+	 * @param scatterIndex
+	 * @return
+	 */
 	private SimpleVector getScatterVector(int scatterIndex){
 		return scatteringVectors[scatterIndex];
 	}
 	
+	/**
+	 * Return the x-Ray direction at a projection angle theta
+	 * @param curTheta
+	 * @return
+	 */
 	private SimpleVector getRayVector(int curTheta){
 	
 		double theta = deltaTheta * curTheta;
@@ -258,6 +291,11 @@ public class DarkFieldScatterCoef extends  DarkFieldTensorGeometry{
 	}
 	
 	
+	/**
+	 * Returns the sensitivity vector at a projection angle theta
+	 * @param curTheta
+	 * @return
+	 */
 	private SimpleVector getSensitivityVector(int curTheta){
 		
 		double theta = deltaTheta * curTheta;
@@ -272,6 +310,9 @@ public class DarkFieldScatterCoef extends  DarkFieldTensorGeometry{
 	
 }
 
+	/**
+	 * @return Matrix of scatter directions (Dim 3 X Number Scatter Directions)
+	 */
 	public SimpleMatrix getScatterVectorsAsMatrix(){
 		
 		SimpleMatrix scatterMatrix = new SimpleMatrix(3,scatteringVectors.length );

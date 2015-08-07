@@ -117,6 +117,21 @@ public class DarkFieldReconPipeline {
 	}
 
 	
+	
+	/**
+	 * @param fileNameConfig1
+	 * @param fileNameConfig2
+	 * @param fileNameDCI1
+	 * @param fileNameDCI2
+	 * @param fileNameAMP1
+	 * @param fileNameAMP2
+	 */
+	public DarkFieldReconPipeline(Configuration config1, Configuration config2){
+		
+		initData(config1, config2, null, null, null, null);
+	}
+	
+	
 	/**
 	 * INITILIAZATION OF DATA NEEDED FOR THE RECONSTRUCTION OF THE DARKFIELD
 	 * @param config1
@@ -130,7 +145,7 @@ public class DarkFieldReconPipeline {
 			String fileNameDCI1, String fileNameDCI2, 
 			String fileNameAMP1, String fileNameAMP2){
 		
-		new ImageJ();
+		
 		
 		this.config1 = config1;
 		this.config2 = config2;
@@ -144,9 +159,20 @@ public class DarkFieldReconPipeline {
 		this.fileAMP2 = new File(fileNameAMP2);
 		}
 		
+		if(fileNameDCI1==null){
+			fileDCI1 = null;			
+			} else{
+				fileDCI1 = new File(fileNameDCI1);
+			}
 		
-		this.fileDCI1 = new File(fileNameDCI1);
-		this.fileDCI2 = new File(fileNameDCI2);
+		if(fileNameDCI2==null){
+			fileDCI2 = null;
+				
+			} else{
+				fileDCI2 = new File(fileNameDCI2);
+			}
+		
+	
 		
 		// Initialize the reconstruction mask to be null
 		reconMask = null;
@@ -159,6 +185,31 @@ public class DarkFieldReconPipeline {
 	 ****************************************************************************** 
 	 */
 	
+	
+	   /**
+	    * Calculates the 3D-Binary Mask which is used for zero Constraint 
+		* in Dark-Field Tensor Reconstruction.
+		* 
+		*  The thresholds th_lower and th_higher define the threshold for 
+		*  creating the mask out of the absorption volume. 
+	    * @param th_lower - lower threshold for binary mask
+	    * @param th_higher - upper threshold for binary mask
+	    * @param saveAMP - Boolean if AMP Image should be saved
+	    * @param saveMask - Boolean if Mask should be saved
+	    */
+	public void reconstructMaskForZeroConstraint(float th_lower, float th_higher, boolean saveAMP, boolean saveMask){
+		   /**
+			 * INITILIAZATION OF ABSORPTION DATA
+			 */
+		   
+			// Load absorption image of orientation 1
+			ImagePlus imgAMP1 = IJ.openImage(fileAMP1.getAbsolutePath());
+			DarkField3DSinogram sinoAMP1   = ImageToSinogram3D.imagePlusToImagePlus3D_for_Absorption(imgAMP1);
+
+			reconstructMaskForZeroConstraint(th_lower, th_higher, saveAMP, saveMask,sinoAMP1);
+	}
+	
+	
 
 	/**
 	 * OVERLOADED FUNCTION THAT NEVERS SAVES THE DATA
@@ -169,26 +220,21 @@ public class DarkFieldReconPipeline {
 		reconstructMaskForZeroConstraint(th_lower, th_higher, false, false);
 	}
 
-   /**
-    * Calculates the 3D-Binary Mask which is used for zero Constraint 
-	* in Dark-Field Tensor Reconstruction.
-	* 
-	*  The thresholds th_lower and th_higher define the threshold for 
-	*  creating the mask out of the absorption volume. 
-    * @param th_lower - lower threshold for binary mask
-    * @param th_higher - upper threshold for binary mask
-    * @param saveAMP - Boolean if AMP Image should be saved
-    * @param saveMask - Boolean if Mask should be saved
-    */
-public void reconstructMaskForZeroConstraint(float th_lower, float th_higher, boolean saveAMP, boolean saveMask){
-	   
+
 	   /**
-		 * INITILIAZATION OF ABSORPTION DATA
-		 */
-	   
-		// Load absorption image of orientation 1
-		ImagePlus imgAMP1 = IJ.openImage(fileAMP1.getAbsolutePath());
-		DarkField3DSinogram sinoAMP1   = ImageToSinogram3D.imagePlusToImagePlus3D_for_Absorption(imgAMP1);
+	    * Calculates the 3D-Binary Mask which is used for zero Constraint 
+		* in Dark-Field Tensor Reconstruction.
+		* 
+		*  The thresholds th_lower and th_higher define the threshold for 
+		*  creating the mask out of the absorption volume. 
+	    * @param th_lower - lower threshold for binary mask
+	    * @param th_higher - upper threshold for binary mask
+	    * @param saveAMP - Boolean if AMP Image should be saved
+	    * @param saveMask - Boolean if Mask should be saved
+	    */
+	
+public void reconstructMaskForZeroConstraint(float th_lower, float th_higher, boolean saveAMP, boolean saveMask, DarkField3DSinogram sinoAMP1){
+
 
 		/*
 		 * JUST USE ONE ABSORPTION VOLUME FOR THE MOMENT
@@ -207,6 +253,7 @@ public void reconstructMaskForZeroConstraint(float th_lower, float th_higher, bo
 		
 		if(debug){
 			System.out.println("Absorption Volume was reconstructed.");
+			parallellBeamRecon.getReconAMP().show("Reconstruction of Absorption CT");
 		}
 		
 		// Save absorption reconstruction into a tif file
@@ -230,51 +277,57 @@ public void reconstructMaskForZeroConstraint(float th_lower, float th_higher, bo
 			System.out.println("Absorption mask was created and saved.");
 		}
 		
-		// Dereference non used Data manually
-		parallellBeamRecon = null;
-		imgAMP1 = null;
-		// imgAMP2 = null;
    }
    
+
+public void reconstructDarkFieldVolume(int numScatterVectors, int maxIt, float stepSize, File pathDarkField){
+	
+	
+	/*
+	 * INITILIAZATION OF ABSORPTION DATA
+	 */
    
+	// Load dark field image of orientation 1
+	ImagePlus imgDCI1 = IJ.openImage(fileDCI1.getPath());
+	// Readout DarkFieldSinogram out of ImagePlus Image
+	DarkField3DSinogram sinoDCI1   = ImageToSinogram3D.imagePlusToImagePlus3D(imgDCI1);
+	
+	// Load dark field image of orientation 2
+	ImagePlus imgDCI2 = IJ.openImage(fileDCI2.getPath());
+	// Readout DarkFieldSinogram out of ImagePlus Image
+	DarkField3DSinogram sinoDCI2   = ImageToSinogram3D.imagePlusToImagePlus3D(imgDCI2);		
+	
+	// Dereference unused data automatically
+	imgDCI1 = null;
+	imgDCI2 = null;
+
+	reconstructDarkFieldVolume(numScatterVectors, maxIt, stepSize, pathDarkField, sinoDCI1, sinoDCI2);
+	
+	
+}
+
+
 	/**
 	 * @param numScatterVectors
 	 * @param maxIt
 	 * @param stepSize
 	 */
-	public void reconstructDarkFieldVolume(int numScatterVectors, int maxIt, float stepSize, boolean saveDarkField){
+	public void reconstructDarkFieldVolume(int numScatterVectors, int maxIt, float stepSize, File pathDarkField,DarkField3DSinogram sinoDCI1,DarkField3DSinogram sinoDCI2){
 		
-		/*
-		 * INITILIAZATION OF ABSORPTION DATA
-		 */
-	   
-		// Load dark field image of orientation 1
-		ImagePlus imgDCI1 = IJ.openImage(fileDCI1.getPath());
-		// Readout DarkFieldSinogram out of ImagePlus Image
-		DarkField3DSinogram sinoDCI1   = ImageToSinogram3D.imagePlusToImagePlus3D(imgDCI1);
-		
-		// Load dark field image of orientation 2
-		ImagePlus imgDCI2 = IJ.openImage(fileDCI2.getPath());
-		// Readout DarkFieldSinogram out of ImagePlus Image
-		DarkField3DSinogram sinoDCI2   = ImageToSinogram3D.imagePlusToImagePlus3D(imgDCI2);		
-		
-		// Dereference unused data automatically
-		imgDCI1 = null;
-		imgDCI2 = null;
-		
+				
 		// Initialize the GradientSolver3D
 		// Can even deal with reconMask == null, as GradientSolver knows how to deal with this.
 		// If mask should be used, it should be created prior to execution of this method
 		GradientSolverTensor3D gradientSolver = new GradientSolverTensor3D(config1, config2, sinoDCI1, sinoDCI2, stepSize, maxIt, numScatterVectors,reconMask,reconMask);
 		
 		// Save the scatter directions into a matrix
-		scatterDirMatrix =  gradientSolver.getScatterDirectionsAsMatrix();
+		scatterDirMatrix =  DarkFieldScatterDirection.getScatterDirectionMatrix(numScatterVectors);
 		
 		// Execute the gradient decent
 		reconDarkField = gradientSolver.Gradient3D();
 
-		if(saveDarkField){
-			String filePath = fileDCI1.getParent() + "\\DCI_volume.tif";
+		if(pathDarkField!=null){
+			String filePath = pathDarkField.getParent() + "\\DCI_volume.tif";
 			String volumeName = "Reconstructed DarkField Volume";
 			reconDarkField.write3DTensorToImage(filePath, volumeName);
 		}
@@ -290,6 +343,14 @@ public void reconstructMaskForZeroConstraint(float th_lower, float th_higher, bo
 	
 	}
 	
+	/**
+	 * @param saveVTK - if true saves the fiber Direcitons into a vtk file.
+	 */
+	public void calculateFiberOrientations(File pathFile){
+	
+		calculateFiberOrientations(true, reconDarkField, scatterDirMatrix, pathFile);
+	
+	}
 	
 
 	/**
@@ -297,9 +358,9 @@ public void reconstructMaskForZeroConstraint(float th_lower, float th_higher, bo
 	 * @param reconDarkField
 	 * @param scatterDirMatrix
 	 * @param fiberDirectionClass
-	 * @param fileDCI1
+	 * @param pathFile
 	 */
-	public static void calculateFiberOrientations(boolean saveVTK, DarkField3DTensorVolume reconDarkField, SimpleMatrix scatterDirMatrix, File fileDCI1){
+	public static void calculateFiberOrientations(boolean saveVTK, DarkField3DTensorVolume reconDarkField, SimpleMatrix scatterDirMatrix, File pathFile){
 		
 		assert(reconDarkField != null) : new Exception("Reconstructed is NULL and needs to be calculated first.");
 		assert(scatterDirMatrix != null) : new Exception("Scatter Dir Matrix needs to be calculated first.");
@@ -314,7 +375,7 @@ public void reconstructMaskForZeroConstraint(float th_lower, float th_higher, bo
 		
 		
 		if(saveVTK){
-			String pathFiberVTK = fileDCI1.getParent() + "\\fiberDirections.vtk";
+			String pathFiberVTK = pathFile.getParent() + "\\fiberDirections.vtk";
 			fiberDirectionClass.writeToVectorField(pathFiberVTK);
 		}
 	}

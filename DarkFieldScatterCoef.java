@@ -70,7 +70,7 @@ public class DarkFieldScatterCoef extends  DarkFieldTensorGeometry{
 	int numScatterVectors;
 	
 	// Number of Scattering vectors
-	SimpleVector[] scatteringVectors;
+	SimpleMatrix scatteringVectors;
 	
 	/**
 	 * @param conf
@@ -99,47 +99,13 @@ public class DarkFieldScatterCoef extends  DarkFieldTensorGeometry{
 
 
 		 // initialize the scattering vectors of the grid
-		 initializeScatteringVectors();	
+		 scatteringVectors = DarkFieldScatterDirection.getScatterDirectionMatrix(numScatterVectors);	
 		 
 		 // Calculate Weight Matrix
 		 calculateWeightMatrix();
 		 
 	}
 	
-	
-	
-	
-	// Initialize the scattering vectors
-	public void initializeScatteringVectors(){
-		// For the first test implementations
-		if(this.numScatterVectors == 3){
-			
-			this.scatteringVectors = new SimpleVector[3];
-			
-			this.scatteringVectors[0] = new SimpleVector(1f,0f,0f); 
-			this.scatteringVectors[1] = new SimpleVector(0f,1f,0f);
-			this.scatteringVectors[2] = new SimpleVector(0f,0f,1f);
-		}	
-		
-		if(this.numScatterVectors == 7){
-			
-			this.scatteringVectors = new SimpleVector[7];
-			
-			this.scatteringVectors[0] = new SimpleVector(1f,0f,0f).normalizedL2(); 
-			this.scatteringVectors[1] = new SimpleVector(0f,1f,0f).normalizedL2();
-			this.scatteringVectors[2] = new SimpleVector(0f,0f,1f).normalizedL2();
-			this.scatteringVectors[3] = new SimpleVector(1f,1f,1f).normalizedL2(); 
-			this.scatteringVectors[4] = new SimpleVector(1f,1f,-1f).normalizedL2();
-			this.scatteringVectors[5] = new SimpleVector(1f,-1f,1f).normalizedL2();
-			this.scatteringVectors[6] = new SimpleVector(-1f,1f,1f).normalizedL2();
-		}
-		
-		else if(this.numScatterVectors == 1){
-			this.scatteringVectors = new SimpleVector[1];
-			this.scatteringVectors[0] = new SimpleVector(1,0,1);
-		}
-	}
-
 	
 	
 	/**
@@ -269,7 +235,7 @@ public class DarkFieldScatterCoef extends  DarkFieldTensorGeometry{
 	 * @return
 	 */
 	private SimpleVector getScatterVector(int scatterIndex){
-		return scatteringVectors[scatterIndex];
+		return scatteringVectors.getCol(scatterIndex);
 	}
 	
 	/**
@@ -310,21 +276,6 @@ public class DarkFieldScatterCoef extends  DarkFieldTensorGeometry{
 	
 }
 
-	/**
-	 * @return Matrix of scatter directions (Dim 3 X Number Scatter Directions)
-	 */
-	public SimpleMatrix getScatterVectorsAsMatrix(){
-		
-		SimpleMatrix scatterMatrix = new SimpleMatrix(3,scatteringVectors.length );
-		
-		for(int channel = 0; channel < numScatterVectors; channel++){
-			scatterMatrix.setColValue(channel, scatteringVectors[channel]);
-		}
-
-		return scatterMatrix;
-		
-	}
-	
 
 	
 	

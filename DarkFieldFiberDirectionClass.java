@@ -92,24 +92,15 @@ public class DarkFieldFiberDirectionClass extends Grid4D{
 		for (int x = 0; x < imgSizeX; x++){
 			for (int y = 0; y < imgSizeY; y++){
 				for (int z = 0; z < imgSizeZ; z++){
-
-				
 				SimpleVector direction = getSimpleVectorAtIndex(x,y,z);
 				double length = direction.normL2();
-				
 				if(length > max){
 					max = length;
 				}
-
 				if(length != 0){
-
 				SimpleVector myVec = new SimpleVector(x,y,z,direction.getElement(0),direction.getElement(1),direction.getElement(2),length);
-					
 				usedPoints.add(myVec);
-				
 				}
-					
-				
 				}
 			}
 		}

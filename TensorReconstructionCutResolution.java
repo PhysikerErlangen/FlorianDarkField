@@ -9,12 +9,8 @@ package edu.stanford.rsl.science.darkfield.FlorianDarkField;
 
 import java.io.File;
 
-import weka.gui.beans.ConfigurationEvent;
-
 import com.jogamp.opengl.util.awt.ImageUtil;
 
-import edu.stanford.rsl.conrad.data.numeric.Grid2D;
-import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
 import edu.stanford.rsl.conrad.numerics.SimpleVector;
 import edu.stanford.rsl.conrad.utils.Configuration;
 
@@ -25,8 +21,6 @@ import edu.stanford.rsl.science.darkfield.FlorianDarkField.GradientSolverTensor3
 // Contains the reconstructed sample
 import edu.stanford.rsl.science.darkfield.FlorianDarkField.DarkField3DTensorVolume;
 import edu.stanford.rsl.science.darkfield.FlorianDarkField.ImageToSinogram3D;
-import edu.stanford.rsl.science.darkfield.parallel.ParallelBackprojectorAMP2D;
-import edu.stanford.rsl.tutorial.filters.RamLakKernel;
 import ij.IJ;
 import ij.ImageJ;
 import ij.ImagePlus;
@@ -35,7 +29,7 @@ import ij.ImagePlus;
 
 
 
-public class TensorReconstructionWoodLowResolution{
+public class TensorReconstructionCutResolution{
 
 	public static void main (String [] args) throws Exception{
 
@@ -44,16 +38,18 @@ public class TensorReconstructionWoodLowResolution{
 		 */
 
 		// Path to the configuration file (default no second configuration is used)
-		String fileNameConfig1 = "E:\\fschiffers\\Configurations\\HalfAngleCropped_Cut_60_38_100_Date_07-27-15.xml";
+		String fileNameConfig1 = "E:\\fschiffers\\MeasuredData\\HalfAngleAndCut\\config_CUT.xml";
 
 		// Path to the 2 darkfield images
 		
-		String fileNameDCI1 = "E:\\fschiffers\\MeasuredData\\Reduced_Data_Cut\\HalfAngleCropped_WoodDCI1.tif";
-		String fileNameDCI2 = "E:\\fschiffers\\MeasuredData\\Reduced_Data_Cut\\HalfAngleCropped_WoodDCI2.tif";
+		String fileNameDCI1 = "E:\\fschiffers\\MeasuredData\\HalfAngleAndCut\\WoodDCI1.tif";
+		String fileNameDCI2 = "E:\\fschiffers\\MeasuredData\\HalfAngleAndCut\\WoodDCI2.tif";
 		
 		// Path to the 2 absorption images
-		//String fileNameAMP1 = "E:\\fschiffers\\MeasuredData\\WoodAMP1.tif";
-		// String fileNameAMP2 = "E:\\fschiffers\\MeasuredData\\WoodAMP2.tif";
+		String fileNameAMP1 = "E:\\fschiffers\\MeasuredData\\HalfAngleAndCut\\WoodAMP1.tif";
+		String fileNameAMP2 = "E:\\fschiffers\\MeasuredData\\HalfAngleAndCut\\WoodAMP2.tif";
+		
+		File folder = new File(fileNameDCI1);
 		
 		/*
 		 * INITILIAZATION OF SOME DATA
@@ -69,33 +65,32 @@ public class TensorReconstructionWoodLowResolution{
 		// Number of maximal iterations in gradient decent
 		int maxIt = 5;
 		
-		// Initialize the pipeline
-		DarkFieldReconPipeline myDarkFieldPipeLine = new DarkFieldReconPipeline(fileNameConfig1, fileNameDCI1, fileNameDCI2,null,null);
+		new ImageJ();
 		
-		boolean reconWithMask = false;
+		// Initialize the pipeline
+		DarkFieldReconPipeline myDarkFieldPipeLine = new DarkFieldReconPipeline(fileNameConfig1, fileNameDCI1, fileNameDCI2, fileNameAMP1, fileNameAMP2);
+		
 		// Create the Absorption Mask
 		boolean saveAMP = true;
 		boolean saveMask = true;
-		if(reconWithMask){
 		myDarkFieldPipeLine.reconstructMaskForZeroConstraint(th_lower, th_higher,saveAMP, saveMask);
-		}
+		
+		myDarkFieldPipeLine.getReconMask().show("Mask Image");
+		
 		
 		System.out.println("Reconstruction mask was successfully created and saved.");
 		
 		// Reconstruct DarkField Volume
-		
-		File folder = new File(fileNameDCI1);
+		boolean saveDarkField = true;
 		myDarkFieldPipeLine.reconstructDarkFieldVolume(numScatterVectors, maxIt, stepSize, folder);
 		
 		System.out.println(" DarkField Reconstruction was successfully created and saved.");
 		
 		myDarkFieldPipeLine.calculateFiberOrientations(true);
 		
-		System.out.println(" DarkField Reconstruction was successfully created and saved.");
+		System.out.println("Fiber Orientations sucessfully saved.");
+		
 		
 	}
 
-	
-
-	
 }

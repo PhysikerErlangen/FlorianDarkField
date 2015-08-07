@@ -25,12 +25,8 @@ public class ReadFiberDirectionsOutOfTif {
 		DarkField3DTensorVolume darkFieldVolume = DarkField3DTensorVolume.readFromImagePlus(imgDCI1);
 		
 		darkFieldVolume.show();
-		
-		String fileNameConfig1 = "E:\\fschiffers\\Configurations\\Config_Full_Resolution_100_cubic.xml";
-		Configuration config1 = Configuration.loadConfiguration(fileNameConfig1);
-		DarkFieldScatterCoef scatterCoef = new DarkFieldScatterCoef(config1, 7);
-		
-		SimpleMatrix scatterMatrix = scatterCoef.getScatterVectorsAsMatrix();
+
+		SimpleMatrix scatterMatrix = DarkFieldScatterDirection.getScatterDirectionMatrix(darkFieldVolume.getNumberOfChannels());
 		
 		
 		DarkFieldReconPipeline.calculateFiberOrientations(true, darkFieldVolume, scatterMatrix, fileDCI);

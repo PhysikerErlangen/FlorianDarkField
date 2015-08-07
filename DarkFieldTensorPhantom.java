@@ -10,6 +10,8 @@ import edu.stanford.rsl.apps.gui.opengl.PointCloudViewer;
 import edu.stanford.rsl.conrad.data.numeric.Grid2D;
 import edu.stanford.rsl.conrad.data.numeric.Grid3D;
 import edu.stanford.rsl.conrad.geometry.shapes.simple.PointND;
+import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
+import edu.stanford.rsl.conrad.numerics.SimpleOperators;
 import edu.stanford.rsl.conrad.numerics.SimpleVector;
 import edu.stanford.rsl.conrad.utils.Configuration;
 import edu.stanford.rsl.conrad.utils.FileUtil;
@@ -31,9 +33,14 @@ public class DarkFieldTensorPhantom  extends  DarkFieldTensorGeometry  {
 	
 	DarkField3DTensorVolume phantom;
 	
+	SimpleMatrix scatterDirections;
+	
+	final SimpleVector fiberDirX = new SimpleVector(1f,0f,0f);
+	final SimpleVector fiberDirY = new SimpleVector(0f,1f,0f);
+	
 	public static void main (String [] args) throws Exception{
 	
-		String fileNameConfig1 = "C:\\Users\\schiffers\\workspace\\Configurations\\PhantomConfigurationFlorian-001-axis.xml";
+		String fileNameConfig1 = "E:\\fschiffers\\MeasuredData\\Phantom2\\PhantomHalfLarge_unsymetric.xml";
 		// Load configuration wooden case
 		Configuration config = Configuration.loadConfiguration(fileNameConfig1);
 		Configuration Configuration2 = Configuration.loadConfiguration(fileNameConfig1);
@@ -75,25 +82,57 @@ public class DarkFieldTensorPhantom  extends  DarkFieldTensorGeometry  {
 	 * @param config
 	 */
 	public DarkFieldTensorPhantom(Configuration config){
-		this(config,3);
+		this(config,7);
 	}
 	
 
 	
 	/**
 	 * @param config
-	 * @param numChannels
+	 * @param numScatterVectors
 	 */
-	public DarkFieldTensorPhantom(Configuration config, int numChannels){
+	public DarkFieldTensorPhantom(Configuration config, int numScatterVectors){
 
 		// Call super constructor of TensorGeometry
-		super(config,numChannels);
+		super(config,numScatterVectors);
 		
-		phantom = new DarkField3DTensorVolume(this.imgSizeX,this.imgSizeY, this.imgSizeZ, numChannels,this.getSpacing(),this.getOrigin());
+		phantom = new DarkField3DTensorVolume(this.imgSizeX,this.imgSizeY, this.imgSizeZ, numScatterVectors,this.getSpacing(),this.getOrigin());
 		
 		sinogramList = new ArrayList<DarkField3DSinogram>();
 		
+		scatterDirections = DarkFieldScatterDirection.getScatterDirectionMatrix(numScatterVectors);
+		
 		calcPhantom();
+	}
+	
+	public SimpleVector calculateEllipsoidFromFiberOrientation(SimpleVector fiberDir){
+	
+		SimpleVector eigenValues = new SimpleVector(1,1,0.01);
+		SimpleMatrix eigenVectors = null;
+		
+				
+		if(SimpleOperators.equalElementWise(fiberDir, fiberDirX,0.01)){
+			//double[][] myEigenVectors ={ {0,1,0},{0,0,1},{1,0,0}};
+			double[][] myEigenVectors ={ {0,0,1},{1,0,0},{0,1,0}};
+			eigenVectors = new SimpleMatrix(myEigenVectors);
+			
+//			SimpleVector test = eigenVectors.getCol(0);
+//			SimpleVector test2 = eigenVectors.getCol(1);
+//			SimpleVector test3 = eigenVectors.getCol(2);
+//			System.out.println("TEST");
+			
+		} else if(SimpleOperators.equalElementWise(fiberDir, fiberDirY,0.01)){
+			double[][] myEigenVectors ={ {1,0,0},{0,0,1},{0,1,0}};
+			eigenVectors = new SimpleMatrix(myEigenVectors);
+		}
+		
+		SimpleVector scatterCoef = new SimpleVector(1f,1f,1f,1f,1f,1f,1f); 
+		
+		DarkFieldEllipsoid myEllipsoid = new DarkFieldEllipsoid(scatterDirections, scatterCoef, eigenValues, eigenVectors);
+		
+		SimpleVector projScatterCoef = myEllipsoid.calculateSquaredProjectedCoefficients();
+		
+		return projScatterCoef;
 	}
 	
 	
@@ -102,38 +141,47 @@ public class DarkFieldTensorPhantom  extends  DarkFieldTensorGeometry  {
 	 */
 	public void calcPhantom(){
 		
-		SimpleVector scatterDir1 = null;
+		SimpleVector fiberDir1 = new SimpleVector(1f,0f,0f);
+		SimpleVector fiberDir2 = new SimpleVector(0f,1f,0f);
 		
-		// USE THREE DIFFERENT SCATTER DIRECTION
-		if(this.numScatterVectors == 3){
-		scatterDir1 = new SimpleVector(1,0,0);
-		SimpleVector scatterDir2 = new SimpleVector(0,1,0);
-		SimpleVector scatterDir3 = new SimpleVector(0,0,1);
-		} else if(this.numScatterVectors == 1){
-			
-		scatterDir1 = new SimpleVector(1f);	
+		SimpleVector scatterCoefDir1 = calculateEllipsoidFromFiberOrientation(fiberDir1);
+		SimpleVector scatterCoefDir2 = calculateEllipsoidFromFiberOrientation(fiberDir2);
 		
-		}
+		int aX = (int)( 0.3*imgSizeX);
+		int bX = (int) (0.7*imgSizeX);
+		
+		int aY = (int)( 0.4*imgSizeY);
+		int bY = (int) (0.6*imgSizeY);
+		
+		int l1 = (int)( 0.1*imgSizeZ);
+		int l2 = (int) (0.3*imgSizeZ);
+		int l3 = (int) (0.5*imgSizeZ);
+		int l4 = (int) (0.7*imgSizeZ);
+		int l5 = (int) (0.9*imgSizeZ);
 		
 		
-		int a = (int)( 0.2*imgSizeX);
-		int b = (int) (0.8*imgSizeY);
 		
-		int a2 = (int)( 0.4*imgSizeX);
-		int b2 = (int) (0.6*imgSizeY);
+		System.out.println("a:" + aX + "b: " + bX);
 		
-		int a3 = (int)( 0.3*imgSizeX);
-		int b3 = (int) (0.7*imgSizeY);
-		
-		System.out.println("a:" + a + "b: " + b);
-		
-		for(int x = a; x < b; x ++){
-			for(int y = a2; y < b2; y ++){
-				for(int z = a3; z < b3; z ++){
+		for(int x = aX; x < bX; x ++){
+			for(int y = aY; y < bY; y ++){
+				for(int z = l1; z <= l5; z ++){
 
 					// Creates a phantom of 3 Layers, each Layer contains voxel with a constant scatter direction!
+				
+					if(z<l2){
+						phantom.setDarkFieldScatterTensor(x, y, z, scatterCoefDir1);	
+					} else if(z<l3){
+						phantom.setDarkFieldScatterTensor(x, y, z, scatterCoefDir2);
+					} else if(z<l4){
+						phantom.setDarkFieldScatterTensor(x, y, z, scatterCoefDir1);
+					} else if(z<l5){
+						phantom.setDarkFieldScatterTensor(x, y, z, scatterCoefDir2);
+					}  
 					
-					phantom.setDarkFieldScatterTensor(x, y, z, scatterDir1);
+					
+					
+					
 					
 //					if((double)z <= a ){
 //							phantom.setDarkFieldScatterTensor(x, y, z, scatterDir1);

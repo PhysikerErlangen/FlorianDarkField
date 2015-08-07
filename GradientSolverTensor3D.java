@@ -219,12 +219,5 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry{
 	}	
 	
 	
-	/**
-	 * @return Scatter Directions as Matrix
-	 */
-	public SimpleMatrix getScatterDirectionsAsMatrix(){
-		return scatterCoef1.getScatterVectorsAsMatrix();
-	}
-	
 	
 }

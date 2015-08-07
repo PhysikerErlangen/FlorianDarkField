@@ -7,6 +7,8 @@ package edu.stanford.rsl.science.darkfield.FlorianDarkField;
 
 
 
+import java.io.File;
+
 import com.jogamp.opengl.util.awt.ImageUtil;
 
 import edu.stanford.rsl.conrad.numerics.SimpleVector;
@@ -51,6 +53,8 @@ public class TensorReconstructionFullResolution{
 		 * INITILIAZATION OF SOME DATA
 		 */
 		
+		new ImageJ();
+		
 		float th_lower = 0.0005f;
 		float th_higher = 0.004f;
 		
@@ -72,8 +76,8 @@ public class TensorReconstructionFullResolution{
 		System.out.println("Reconstruction mask was successfully created and saved.");
 		
 		// Reconstruct DarkField Volume
-		boolean saveDarkField = true;
-		myDarkFieldPipeLine.reconstructDarkFieldVolume(numScatterVectors, maxIt, stepSize, saveDarkField);
+		File folder = new File(fileNameConfig1);
+		myDarkFieldPipeLine.reconstructDarkFieldVolume(numScatterVectors, maxIt, stepSize, folder);
 		
 		System.out.println(" DarkField Reconstruction was successfully created and saved.");
 		

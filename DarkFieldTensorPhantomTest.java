@@ -1,39 +1,50 @@
-// This code was developed in a collaboration with ECAP, Erlangen, Germany.
-// This part of the code is not to be published under GPL before Oct 31st 2017.
-// author@ Florian Schiffers July 1st, 2015
-//
-
+/**
+ * 
+ */
 package edu.stanford.rsl.science.darkfield.FlorianDarkField;
 
-
+import static org.junit.Assert.*;
+import ij.ImageJ;
 
 import java.io.File;
 
-import com.jogamp.opengl.util.awt.ImageUtil;
+import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.Test;
 
+import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
 import edu.stanford.rsl.conrad.numerics.SimpleVector;
 import edu.stanford.rsl.conrad.utils.Configuration;
 
+/**
+ * @author schiffers
+ *
+ */
+public class DarkFieldTensorPhantomTest {
 
-// Used for solving the 3D Gradientsolver in the tensor framework
-import edu.stanford.rsl.science.darkfield.FlorianDarkField.GradientSolverTensor3D;
+	DarkFieldTensorPhantom phantom;
 
-// Contains the reconstructed sample
-import edu.stanford.rsl.science.darkfield.FlorianDarkField.DarkField3DTensorVolume;
-import edu.stanford.rsl.science.darkfield.FlorianDarkField.ImageToSinogram3D;
-import ij.IJ;
-import ij.ImageJ;
-import ij.ImagePlus;
+	DarkFieldReconPipeline myDarkFieldPipeLine;
+	
+	int numScatterVectors;
+	
+	File folder;
+	
+	/**
+	 * @throws java.lang.Exception
+	 */
+	@AfterClass
+	public static void tearDownAfterClass() throws Exception {
+	}
 
-
-
-
-
-public class TensorReconstructionPhantom{
-
-	public static void main (String [] args) throws Exception{
- 
-		String fileNameConfig1 = "E:\\fschiffers\\MeasuredData\\Phantom2\\PhantomHalfLarge_unsymetric.xml";
+	/**
+	 * @throws java.lang.Exception
+	 */
+	@Before
+	public void setUp() throws Exception {
+		
+	String fileNameConfig1 = "E:\\fschiffers\\MeasuredData\\Phantom2\\PhantomHalfLarge_unsymetric.xml";
 		
 		// Load configuration wooden case
 
@@ -50,10 +61,10 @@ public class TensorReconstructionPhantom{
 		new ImageJ();
 		
 		// Number of scatter vectors
-		int numScatterVectors = 7;
+		numScatterVectors = 7;
 		
 		// Create Dark Field Phantom
-		DarkFieldTensorPhantom phantom = new DarkFieldTensorPhantom(Configuration1,numScatterVectors);
+		phantom = new DarkFieldTensorPhantom(Configuration1,numScatterVectors);
 
 		// display the phantom
 		phantom.phantom.show("Phantom Volume");
@@ -90,11 +101,11 @@ public class TensorReconstructionPhantom{
 		int maxIt = 1;
 		
 		// Initialize the pipeline
-		DarkFieldReconPipeline myDarkFieldPipeLine = new DarkFieldReconPipeline(Configuration1,Configuration2);
+		myDarkFieldPipeLine = new DarkFieldReconPipeline(Configuration1,Configuration2);
 		
 		// Reconstruct DarkField Volume
 		
-		File folder = new File(fileNameConfig1);
+		folder = new File(fileNameConfig1);
 		
 		myDarkFieldPipeLine.reconstructDarkFieldVolume(numScatterVectors,maxIt,stepSize,folder,sinoDCI1,null);
 		
@@ -105,7 +116,20 @@ public class TensorReconstructionPhantom{
 		myDarkFieldPipeLine.calculateFiberOrientations(myParentFile);
 		
 		System.out.println("Fiber Orientations sucessfully saved.");
+		
+	}
 
+
+	// This methods tests, if the creation of the Phantom works correctly
+	@Test
+	public void testPhantomFiberExtraction() {
+		
+		SimpleMatrix myScatterMatrix = DarkFieldScatterDirection.getScatterDirectionMatrix(numScatterVectors);
+		
+		DarkFieldReconPipeline.calculateFiberOrientations(phantom.phantom, myScatterMatrix, folder,"fiberDirectionsPhantom");
+		
+		
+		fail("Not yet implemented");
 	}
 
 }

@@ -339,7 +339,13 @@ public void reconstructDarkFieldVolume(int numScatterVectors, int maxIt, float s
 	 */
 	public void calculateFiberOrientations(boolean saveVTK){
 	
-		calculateFiberOrientations(saveVTK, reconDarkField, scatterDirMatrix, fileDCI1);
+		if(saveVTK == false)
+			calculateFiberOrientations(reconDarkField, scatterDirMatrix, null);
+		else{
+			calculateFiberOrientations(reconDarkField, scatterDirMatrix, fileDCI1);	
+		}
+			
+		
 	
 	}
 	
@@ -348,7 +354,7 @@ public void reconstructDarkFieldVolume(int numScatterVectors, int maxIt, float s
 	 */
 	public void calculateFiberOrientations(File pathFile){
 	
-		calculateFiberOrientations(true, reconDarkField, scatterDirMatrix, pathFile);
+		calculateFiberOrientations(reconDarkField, scatterDirMatrix, pathFile);
 	
 	}
 	
@@ -360,7 +366,21 @@ public void reconstructDarkFieldVolume(int numScatterVectors, int maxIt, float s
 	 * @param fiberDirectionClass
 	 * @param pathFile
 	 */
-	public static void calculateFiberOrientations(boolean saveVTK, DarkField3DTensorVolume reconDarkField, SimpleMatrix scatterDirMatrix, File pathFile){
+	public static void calculateFiberOrientations(DarkField3DTensorVolume reconDarkField, SimpleMatrix scatterDirMatrix, File pathFile){
+		
+		calculateFiberOrientations(reconDarkField, scatterDirMatrix, pathFile,"fiberDirections");
+		
+		
+	}
+	
+
+	/**
+	 * @param reconDarkField
+	 * @param scatterDirMatrix
+	 * @param pathFile
+	 * @param fileName - without file type, as .vtk is added automatically
+	 */
+	public static void calculateFiberOrientations(DarkField3DTensorVolume reconDarkField, SimpleMatrix scatterDirMatrix, File pathFile, String fileName){
 		
 		assert(reconDarkField != null) : new Exception("Reconstructed is NULL and needs to be calculated first.");
 		assert(scatterDirMatrix != null) : new Exception("Scatter Dir Matrix needs to be calculated first.");
@@ -374,8 +394,8 @@ public void reconstructDarkFieldVolume(int numScatterVectors, int maxIt, float s
 		fiberDirectionClass = scatterDirExtractor.calcScatterDirections();
 		
 		
-		if(saveVTK){
-			String pathFiberVTK = pathFile.getParent() + "\\fiberDirections.vtk";
+		if(pathFile!=null){
+			String pathFiberVTK = pathFile.getParent() + "\\ " + fileName + ".vtk";
 			fiberDirectionClass.writeToVectorField(pathFiberVTK);
 		}
 	}

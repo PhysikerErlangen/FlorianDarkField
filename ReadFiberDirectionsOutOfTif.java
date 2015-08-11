@@ -29,7 +29,7 @@ public class ReadFiberDirectionsOutOfTif {
 		SimpleMatrix scatterMatrix = DarkFieldScatterDirection.getScatterDirectionMatrix(darkFieldVolume.getNumberOfChannels());
 		
 		
-		DarkFieldReconPipeline.calculateFiberOrientations(true, darkFieldVolume, scatterMatrix, fileDCI);
+		DarkFieldReconPipeline.calculateFiberOrientations(darkFieldVolume, scatterMatrix, fileDCI);
 		
 		System.out.println("Everthing was written");
 		

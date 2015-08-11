@@ -98,13 +98,13 @@ public class DarkFieldPCA{
 	/**
 	 * Array containing the eigenvalues of the covariance matrix after singular value decomposition.
 	 */
-	private double[] eigenValues;
+	private SimpleVector eigenValues;
 	
 	
 	/**
 	 * @return the eigenValues
 	 */
-	public double[] getEigenValues() {
+	public SimpleVector getEigenValues() {
 		return eigenValues;
 	}
 
@@ -221,8 +221,8 @@ public class DarkFieldPCA{
 		//
 		// plot(svd.getSingularValues());
 		
-		eigenValues  =  svd.getSingularValues();
-		eigenVectors = svd.getU();
+		eigenValues  =  new SimpleVector( svd.getSingularValues());
+		eigenVectors =  svd.getU();
 	
 	}
 	

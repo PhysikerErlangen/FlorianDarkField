@@ -76,11 +76,11 @@ public class DarkFieldScatterExtractor {
 		double th = 1E-10;
 		
 		SimpleVector fiberDir;
-		if(myPCA.getEigenValues()[2]<th){
+		if(myPCA.getEigenValues().getElement(2)<th){
 			fiberDir = new SimpleVector(3);
 		}else{
 			fiberDir = myPCA.getEigenVectors().getCol(2).normalizedL2();
-			fiberDir.multiplyBy(myPCA.getEigenValues()[2]);
+			fiberDir.multiplyBy(myPCA.getEigenValues().getElement(2));
 		}
 		
 		

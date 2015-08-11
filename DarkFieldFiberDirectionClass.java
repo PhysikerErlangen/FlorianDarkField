@@ -167,6 +167,30 @@ public class DarkFieldFiberDirectionClass extends Grid4D{
 					bufWriter.write(System.getProperty( "line.separator" ));
 				}
 				
+				bufWriter.write("SCALARS scalarDirection float 1");
+				bufWriter.write(System.getProperty( "line.separator" ));
+				bufWriter.write("LOOKUP_TABLE default");
+				bufWriter.write(System.getProperty( "line.separator" ));
+				
+				// Write scalars
+				for(int i = 0; i < usedPoints.size(); i++){
+					SimpleVector normalizedVec = usedPoints.get(i).getSubVec(3, 3);
+					
+					normalizedVec = normalizedVec.absoluted();
+					
+					if(normalizedVec.max() == normalizedVec.getElement(0)){
+					bufWriter.write("0");
+					}
+					else if(normalizedVec.max() == normalizedVec.getElement(1)){
+					bufWriter.write("0.5");
+					}	
+					else{
+							bufWriter.write("1");
+						}
+					
+					bufWriter.write(System.getProperty( "line.separator" ));
+				}
+				
 	
 				bufWriter.write("VECTORS firstDirection float");
 			

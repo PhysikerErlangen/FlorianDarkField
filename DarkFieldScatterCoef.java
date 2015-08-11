@@ -1,7 +1,9 @@
 package edu.stanford.rsl.science.darkfield.FlorianDarkField;
 
 
+import edu.stanford.rsl.conrad.geometry.General;
 import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
+import edu.stanford.rsl.conrad.numerics.SimpleOperators;
 import edu.stanford.rsl.conrad.numerics.SimpleVector;
 import edu.stanford.rsl.conrad.utils.Configuration;
 import edu.stanford.rsl.science.overexposure.CrossCalibration;
@@ -10,57 +12,7 @@ import edu.stanford.rsl.science.overexposure.CrossCalibration;
 
 public class DarkFieldScatterCoef extends  DarkFieldTensorGeometry{
 
-	public static void main(String[] args){
-		
-		SimpleVector vec1 = new SimpleVector(1,0,0);
-		SimpleVector vec1_2 = new SimpleVector(2,0,0);
-		SimpleVector vec2 = new SimpleVector(0,1,0);
-		SimpleVector vec3 = new SimpleVector(0,0,1);
-		
-		SimpleVector vec4 = new SimpleVector(0,1,1);
-		SimpleVector vec5 = new SimpleVector(1,1,1);
-		
-		SimpleVector vec6 = new SimpleVector(-2.3,1.3,7.3); 
-		SimpleVector vec7 = new SimpleVector(1.1,8.3,-11);
-		
-		SimpleVector res;
-		
-		// Check if cross product is working correctly
-		res = crossProduct(vec1, vec2);
-		System.out.println(vec1 + "x" +vec2 +" =  " +res);
-		
-		res = crossProduct(vec1, vec3);
-		System.out.println(res);
-		
-		res = crossProduct(vec1_2, vec1);
-		System.out.println(res);
-		
-		res = crossProduct(vec4, vec5);
-		System.out.println(res);
-		
-		res = crossProduct(vec6, vec7);
-		System.out.println(res);
-		 
-		double resD;
-		// Check if scalar product is working nice
-		// Check if cross product is working correctly
-		resD = scalarProduct(vec1, vec2);
-		System.out.println(vec1 + "*" +vec2 +" =  " +resD);
-		
-		resD = scalarProduct(vec1, vec3);
-		System.out.println(resD);
-		
-		resD = scalarProduct(vec1_2, vec1);
-		System.out.println(resD);
-		
-		resD = scalarProduct(vec4, vec5);
-		System.out.println(resD);
-		
-		resD = scalarProduct(vec6, vec7);
-		System.out.println(resD);
-		
-		
-	}
+
 	
 	// Declares array of weighting factors
 	private double[][] weights;
@@ -129,44 +81,44 @@ public class DarkFieldScatterCoef extends  DarkFieldTensorGeometry{
 	}
 	
  
-	/**
-	 * Calculate scalar product of two vectors
-	 * @param vec1
-	 * @param vec2
-	 * @return
-	 */
-	public static double scalarProduct(SimpleVector vec1, SimpleVector vec2) {
-		assert vec1.getLen() != vec2.getLen() : new IllegalArgumentException(
-				"Both vectors have to have same size!");
-		double sum = 0;
-		for (int k = 0; k < vec1.getLen(); k++) {
-			sum += vec1.getElement(k) * vec2.getElement(k);
-		}
-		return sum;
-	}
+//	/**
+//	 * Calculate scalar product of two vectors
+//	 * @param vec1
+//	 * @param vec2
+//	 * @return
+//	 */
+//	public static double scalarProduct(SimpleVector vec1, SimpleVector vec2) {
+//		assert vec1.getLen() != vec2.getLen() : new IllegalArgumentException(
+//				"Both vectors have to have same size!");
+//		double sum = 0;
+//		for (int k = 0; k < vec1.getLen(); k++) {
+//			sum += vec1.getElement(k) * vec2.getElement(k);
+//		}
+//		return sum;
+//	}
 
  
-	/**
-	 * Calculates the cross product between to vectors
-	 * @param vec1
-	 * @param vec2
-	 * @return
-	 */
-	public static SimpleVector crossProduct(SimpleVector vec1, SimpleVector vec2) {
-		// Assert if vector length is not the same
-		assert (vec1.getLen() != 3) || (vec2.getLen() != 3) : new IllegalArgumentException(
-				"Length of both vectors has to be 3");
-
-		double newA = vec1.getElement(1) * vec2.getElement(2)
-				- vec1.getElement(2) * vec2.getElement(1);
-		double newB = vec1.getElement(2) * vec2.getElement(0)
-				- vec1.getElement(0) * vec2.getElement(2);
-		double newC = vec1.getElement(0) * vec2.getElement(1)
-				- vec1.getElement(1) * vec2.getElement(0);
-
-		return new SimpleVector(newA, newB, newC);
-
-	}
+//	/**
+//	 * Calculates the cross product between to vectors
+//	 * @param vec1
+//	 * @param vec2
+//	 * @return
+//	 */
+//	public static SimpleVector crossProduct(SimpleVector vec1, SimpleVector vec2) {
+//		// Assert if vector length is not the same
+//		assert (vec1.getLen() != 3) || (vec2.getLen() != 3) : new IllegalArgumentException(
+//				"Length of both vectors has to be 3");
+//
+//		double newA = vec1.getElement(1) * vec2.getElement(2)
+//				- vec1.getElement(2) * vec2.getElement(1);
+//		double newB = vec1.getElement(2) * vec2.getElement(0)
+//				- vec1.getElement(0) * vec2.getElement(2);
+//		double newC = vec1.getElement(0) * vec2.getElement(1)
+//				- vec1.getElement(1) * vec2.getElement(0);
+//
+//		return new SimpleVector(newA, newB, newC);
+//
+//	}
 
 	// calculateWeightFactor calculates the weight factor which are defined in
 	// maleckis paper
@@ -183,9 +135,15 @@ public class DarkFieldScatterCoef extends  DarkFieldTensorGeometry{
 	 */
 	public double calculateWeightFactor(SimpleVector rayDir,
 			SimpleVector scatterDirection, SimpleVector sensitivity) {
-		SimpleVector help = crossProduct(rayDir, scatterDirection);
+		
+		
+		
+		SimpleVector help = General.crossProduct(rayDir, scatterDirection);
 		double cross = help.normL2();
-		double scalar = scalarProduct(scatterDirection, sensitivity);
+		
+		double scalar = SimpleOperators.multiplyInnerProd(scatterDirection, sensitivity);
+		//double scalar = scalarProduct(scatterDirection, sensitivity);
+
 		double weight = cross * scalar;
 		return weight * weight;
 	}

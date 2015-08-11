@@ -3,6 +3,7 @@
 //author@ Florian Schiffers July 1st, 2015
 //
 package edu.stanford.rsl.science.darkfield.FlorianDarkField;
+import java.io.File;
 import java.util.ArrayList;
 
 import ij.IJ;
@@ -14,6 +15,8 @@ import edu.stanford.rsl.conrad.data.numeric.Grid3D;
 import edu.stanford.rsl.conrad.data.numeric.Grid4D;
 import edu.stanford.rsl.conrad.geometry.General;
 import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
+import edu.stanford.rsl.conrad.numerics.SimpleOperators;
+import edu.stanford.rsl.conrad.numerics.SimpleVector;
 import edu.stanford.rsl.conrad.utils.ImageUtil;
 
 
@@ -156,7 +159,11 @@ public class DarkField3DTensorVolume extends DarkFieldGrid3DTensor{
 		this.title = t;
 	}
 	
- // masks a volume with a given mask. Careful, has to have same dimension
+ 
+	/**
+	 * masks a volume with a given mask. Careful, has to have same dimension
+	 * @param mask
+	 */
 	public void maskWithVolume(DarkField3DTensorVolume mask){
 		
 		// If there's no mask just return and do nothing
@@ -177,6 +184,9 @@ public class DarkField3DTensorVolume extends DarkFieldGrid3DTensor{
 	
 	
 	
+	/**
+	 * @param B
+	 */
 	public void sub( DarkField3DTensorVolume B){
 
 		// Check for inconsistency (different dimensions)
@@ -197,8 +207,50 @@ public class DarkField3DTensorVolume extends DarkFieldGrid3DTensor{
 		
 	}
 	
+
+	/**
+	 * Return 
+	 * @param A
+	 * @param B
+	 * @return result = A - B;
+	 */
+	public static DarkField3DTensorVolume sub(  DarkField3DTensorVolume A, DarkField3DTensorVolume B){
+
+		// Check for inconsistency (different dimensions)
+		assert(A.imgSizeX == B.imgSizeX
+				&&A.imgSizeY == B.imgSizeY
+				&&A.imgSizeZ == B.imgSizeZ
+				): new Exception("Dimension of data is wrong.");
+		
+		DarkField3DTensorVolume sub = new DarkField3DTensorVolume(A.imgSizeX,A.imgSizeY, A.imgSizeX,
+				A.getNumberOfChannels(), A.spacing, A.origin);
+		
+		for(int x = 0; x <A.imgSizeX; x++){
+			for(int y = 0; y <A.imgSizeY; y++){
+				for(int z = 0; z <A.imgSizeZ; z++){
+					
+					SimpleVector vecA = A.getSimpleVectorAtIndex(x, y, z);
+					SimpleVector vecB = B.getSimpleVectorAtIndex(x, y, z);
+					SimpleVector values = SimpleOperators.subtract(vecA, vecB);
+					sub.setDarkFieldScatterTensor(x, y, z, values);
+				} // End loop z
+			} // End loop y
+		} // End loop z
+	
+		return sub;
+	}
+	
 	
 
+	/**
+	 * Class that calls the fiberDirectionWriterClass 
+	 * @param pathFile
+	 * @param fileName
+	 */
+	public void saveFiberOrientations(File pathFile, String fileName){
+		DarkFieldReconPipeline.calculateFiberOrientations(this, DarkFieldScatterDirection.getScatterDirectionMatrix(this.getNumberOfChannels()), pathFile, fileName);
+	}
+	
 	
 	
 //	

@@ -138,14 +138,14 @@ boolean showFlag = false;
 		
 		// Initialize the GradientSolver3D
 
-		GradientSolverTensor3D gradientSolver = new GradientSolverTensor3D(Configuration1, Configuration2, sinoDCI1, sinoDCI2, stepSize, maxIt, numScatterVectors,reconMask,reconMask);
+		//GradientSolverTensor3D gradientSolver = new GradientSolverTensor3D(Configuration1, Configuration2, sinoDCI1, sinoDCI2, stepSize, maxIt, numScatterVectors,reconMask,reconMask);
 		
-		DarkField3DTensorVolume reconImage = gradientSolver.Gradient3D();
+		//DarkField3DTensorVolume reconImage = gradientSolver.Gradient3D();
 
 		
 
 		
-       reconImage.show();
+      // reconImage.show();
 		
 		
 		/*

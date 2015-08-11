@@ -31,49 +31,56 @@ public class DarkFieldTensorPhantom  extends  DarkFieldTensorGeometry  {
 	ArrayList<DarkField3DSinogram> sinogramList;
 	ArrayList<ImagePlus> projectionList;
 	
-	DarkField3DTensorVolume phantom;
+	private DarkField3DTensorVolume phantom;
 	
+	/**
+	 * @return the phantom
+	 */
+	public DarkField3DTensorVolume getPhantom() {
+		return phantom;
+	}
+
 	SimpleMatrix scatterDirections;
 	
 	final SimpleVector fiberDirX = new SimpleVector(1f,0f,0f);
 	final SimpleVector fiberDirY = new SimpleVector(0f,1f,0f);
 	
-	public static void main (String [] args) throws Exception{
-	
-		String fileNameConfig1 = "E:\\fschiffers\\MeasuredData\\Phantom2\\PhantomHalfLarge_unsymetric.xml";
-		// Load configuration wooden case
-		Configuration config = Configuration.loadConfiguration(fileNameConfig1);
-		Configuration Configuration2 = Configuration.loadConfiguration(fileNameConfig1);
-		// Reset rotation axis for Config2
-		SimpleVector rotationAxis2 = new SimpleVector(0.0d,1.0d,0.0);
-		Configuration2.getGeometry().setRotationAxis(rotationAxis2);
-		
-		
-		DarkFieldTensorPhantom myPhantom = new DarkFieldTensorPhantom(config);
-
-		ImagePlus myImage = DarkField3DTensorVolume.wrapDarkFieldGrid3DTensorToImagePlus(myPhantom.phantom, "test");
-		
-		// Load ImageJ
-		new ImageJ();
-		
-		myImage.show();
-		
-		
+//	public static void main (String [] args) throws Exception{
+//	
+//		String fileNameConfig1 = "E:\\fschiffers\\MeasuredData\\Phantom2\\PhantomHalfLarge_unsymetric.xml";
+//		// Load configuration wooden case
+//		Configuration config = Configuration.loadConfiguration(fileNameConfig1);
+//		Configuration Configuration2 = Configuration.loadConfiguration(fileNameConfig1);
+//		// Reset rotation axis for Config2
+//		SimpleVector rotationAxis2 = new SimpleVector(0.0d,1.0d,0.0);
+//		Configuration2.getGeometry().setRotationAxis(rotationAxis2);
+//		
+//		
+//		DarkFieldTensorPhantom myPhantom = new DarkFieldTensorPhantom(config);
+//
+//		ImagePlus myImage = DarkField3DTensorVolume.wrapDarkFieldGrid3DTensorToImagePlus(myPhantom.phantom, "test");
+//		
+//		// Load ImageJ
 //		new ImageJ();
 //		
-//		myPhantom.phantom.show();
-//		
-//		myPhantom.calculateDarkFieldProjection(config,Configuration2);
-//		
-//		myPhantom.getDarkFieldSinogram(0).show();
-//		myPhantom.getDarkFieldSinogram(1).show();
-//		
-//		myPhantom.getDarkFieldSinogram(0).showSinogram();
-//		myPhantom.getDarkFieldSinogram(1).showSinogram();
+//		myImage.show();
 //		
 //		
-//		System.out.println("Phaton created");
-	}
+////		new ImageJ();
+////		
+////		myPhantom.phantom.show();
+////		
+////		myPhantom.calculateDarkFieldProjection(config,Configuration2);
+////		
+////		myPhantom.getDarkFieldSinogram(0).show();
+////		myPhantom.getDarkFieldSinogram(1).show();
+////		
+////		myPhantom.getDarkFieldSinogram(0).showSinogram();
+////		myPhantom.getDarkFieldSinogram(1).showSinogram();
+////		
+////		
+////		System.out.println("Phaton created");
+//	}
 
 
 
@@ -107,7 +114,7 @@ public class DarkFieldTensorPhantom  extends  DarkFieldTensorGeometry  {
 	
 	public SimpleVector calculateEllipsoidFromFiberOrientation(SimpleVector fiberDir){
 	
-		SimpleVector eigenValues = new SimpleVector(1,1,0.01);
+		SimpleVector eigenValues = new SimpleVector(1,1,0.0001);
 		SimpleMatrix eigenVectors = null;
 		
 				

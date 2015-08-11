@@ -13,22 +13,7 @@ public class DarkFieldPointCloudViewer {
 	
 	PointCloudViewer pointCloudViewer;
 	
-	public static void main(String[] args){
-		
-	
-		
-		PointND p1 = new PointND(1,2,3);
-		PointND p2 = new PointND(-1,2,-2);
-		PointND p3 = new PointND(1,-2,3);
-		
-		ArrayList<PointND> points = new ArrayList<PointND>();
-		points.add(p1);
-		points.add(p2);
-		points.add(p3);
-		
-		DarkFieldPointCloudViewer myMaker = new DarkFieldPointCloudViewer(points);
-		
-	}
+
 	
 	
 	public void showPoints(){

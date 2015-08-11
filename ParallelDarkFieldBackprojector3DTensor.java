@@ -213,7 +213,7 @@ public class ParallelDarkFieldBackprojector3DTensor extends  DarkFieldTensorGeom
 	
 	public	DarkField3DTensorVolume backprojectPixelDriven(DarkField3DSinogram sino3D) {
 		
-		boolean debug = true;
+		boolean debug = false;
 		
 		// Create empty 3DDarkField Volume
 		DarkField3DTensorVolume grid = new DarkField3DTensorVolume(imgSizeX,imgSizeY,imgSizeZ,numScatterVectors,getSpacing(),getOrigin());

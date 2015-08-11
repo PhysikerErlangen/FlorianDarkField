@@ -70,7 +70,7 @@ public class TensorReconstructionWoodLowResolution{
 		int maxIt = 5;
 		
 		// Initialize the pipeline
-		DarkFieldReconPipeline myDarkFieldPipeLine = new DarkFieldReconPipeline(fileNameConfig1, fileNameDCI1, fileNameDCI2,null,null);
+		DarkFieldReconPipeline myDarkFieldPipeLine = new DarkFieldReconPipeline(fileNameConfig1, fileNameDCI1, fileNameDCI2,null,null,fileNameConfig1);
 		
 		boolean reconWithMask = false;
 		// Create the Absorption Mask

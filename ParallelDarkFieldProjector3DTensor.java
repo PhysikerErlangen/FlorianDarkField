@@ -197,7 +197,7 @@ public class ParallelDarkFieldProjector3DTensor extends  DarkFieldTensorGeometry
 // Project the Volume onto one projection
 public DarkField3DSinogram projectPixelDriven(DarkField3DTensorVolume darkFieldVolume) {
 	
-	boolean debug = true;
+	boolean debug = false;
 	
 	// Create sinogram to be reconstructed
 	DarkField3DSinogram sino = new DarkField3DSinogram(this.maxU_index,this.maxV_index,this.maxTheta_index);

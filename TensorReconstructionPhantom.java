@@ -56,7 +56,7 @@ public class TensorReconstructionPhantom{
 		DarkFieldTensorPhantom phantom = new DarkFieldTensorPhantom(Configuration1,numScatterVectors);
 
 		// display the phantom
-		phantom.phantom.show("Phantom Volume");
+		phantom.getPhantom().show("Phantom Volume");
 		
 		phantom.calculateDarkFieldProjection(Configuration1, Configuration2);
  		
@@ -90,7 +90,7 @@ public class TensorReconstructionPhantom{
 		int maxIt = 1;
 		
 		// Initialize the pipeline
-		DarkFieldReconPipeline myDarkFieldPipeLine = new DarkFieldReconPipeline(Configuration1,Configuration2);
+		DarkFieldReconPipeline myDarkFieldPipeLine = new DarkFieldReconPipeline(Configuration1,Configuration2,fileNameConfig1);
 		
 		// Reconstruct DarkField Volume
 		

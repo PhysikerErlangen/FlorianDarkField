@@ -7,6 +7,7 @@ import static org.junit.Assert.*;
 import ij.ImageJ;
 
 import java.io.File;
+import java.util.Scanner;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -23,7 +24,7 @@ import edu.stanford.rsl.conrad.utils.Configuration;
  */
 public class DarkFieldTensorPhantomTest {
 
-	DarkFieldTensorPhantom phantom;
+	DarkFieldTensorPhantom phantomObject;
 
 	DarkFieldReconPipeline myDarkFieldPipeLine;
 	
@@ -36,6 +37,11 @@ public class DarkFieldTensorPhantomTest {
 	 */
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
+		  Scanner sc = new Scanner(System.in);
+		    System.out.print("Gib was ein: ");
+		    String eingabe = sc.next();
+		    System.out.println("Du hast " + eingabe + " eingegeben.");
+		    sc.close();
 	}
 
 	/**
@@ -44,7 +50,7 @@ public class DarkFieldTensorPhantomTest {
 	@Before
 	public void setUp() throws Exception {
 		
-	String fileNameConfig1 = "E:\\fschiffers\\MeasuredData\\Phantom2\\PhantomHalfLarge_unsymetric.xml";
+	String fileNameConfig1 = "E:\\fschiffers\\MeasuredData\\Phantom2\\PhantomHalfLarge_unsymetricSmall.xml";
 		
 		// Load configuration wooden case
 
@@ -64,19 +70,20 @@ public class DarkFieldTensorPhantomTest {
 		numScatterVectors = 7;
 		
 		// Create Dark Field Phantom
-		phantom = new DarkFieldTensorPhantom(Configuration1,numScatterVectors);
+		phantomObject = new DarkFieldTensorPhantom(Configuration1,numScatterVectors);
 
 		// display the phantom
-		phantom.phantom.show("Phantom Volume");
+		phantomObject.getPhantom().show("Phantom Volume");
 		
-		phantom.calculateDarkFieldProjection(Configuration1, Configuration2);
+		phantomObject.calculateDarkFieldProjection(Configuration1, Configuration2);
  		
 		/* 
 		 * Load dark field images
 		 */
 		
 		// Load dark field image of orientation 1
-		DarkField3DSinogram sinoDCI1   = phantom.getDarkFieldSinogram(0);		
+		DarkField3DSinogram sinoDCI1   = phantomObject.getDarkFieldSinogram(0);		
+		DarkField3DSinogram sinoDCI2   = phantomObject.getDarkFieldSinogram(1);
 		
 		boolean showFlag = true;
 		
@@ -87,6 +94,8 @@ public class DarkFieldTensorPhantomTest {
 		// Show Stack of DarkField slices
 		sinoDCI1.showSinogram("Sinogram of dark field image 1");
 		// Show DarkField Projection Images
+		
+		
 		}
 
 		
@@ -96,18 +105,18 @@ public class DarkFieldTensorPhantomTest {
 		
 		// Number of scatter vectors
 		//Step size for Gradient decent
-		float stepSize = 0.007f;
+		float stepSize = 0.01f;
 		// Number of maximal iterations in gradient decent
-		int maxIt = 1;
+		int maxIt =20;
 		
 		// Initialize the pipeline
-		myDarkFieldPipeLine = new DarkFieldReconPipeline(Configuration1,Configuration2);
+		myDarkFieldPipeLine = new DarkFieldReconPipeline(Configuration1,Configuration2,fileNameConfig1);
 		
 		// Reconstruct DarkField Volume
 		
 		folder = new File(fileNameConfig1);
 		
-		myDarkFieldPipeLine.reconstructDarkFieldVolume(numScatterVectors,maxIt,stepSize,folder,sinoDCI1,null);
+		myDarkFieldPipeLine.reconstructDarkFieldVolume(numScatterVectors,maxIt,stepSize,folder,sinoDCI1,sinoDCI2);
 		
 		System.out.println(" DarkField Reconstruction was successfully created and saved.");
 		
@@ -119,17 +128,20 @@ public class DarkFieldTensorPhantomTest {
 		
 	}
 
-
 	// This methods tests, if the creation of the Phantom works correctly
 	@Test
-	public void testPhantomFiberExtraction() {
+	public void testPhantomReconDifference() {
+		
+		DarkField3DTensorVolume recon =  myDarkFieldPipeLine.getReconDarkField();
+		
+		DarkField3DTensorVolume  diffVolume  = DarkField3DTensorVolume.sub(recon, phantomObject.getPhantom());
+		
+		diffVolume.show("Difference between diffVolume and Phantom");
 		
 		SimpleMatrix myScatterMatrix = DarkFieldScatterDirection.getScatterDirectionMatrix(numScatterVectors);
 		
-		DarkFieldReconPipeline.calculateFiberOrientations(phantom.phantom, myScatterMatrix, folder,"fiberDirectionsPhantom");
+		DarkFieldReconPipeline.calculateFiberOrientations(phantomObject.getPhantom(), myScatterMatrix, folder,"fiberDirectionsPhantom");
 		
-		
-		fail("Not yet implemented");
 	}
 
 }

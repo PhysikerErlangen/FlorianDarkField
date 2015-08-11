@@ -35,6 +35,8 @@ public class DarkFieldReconPipeline {
 	private File fileAMP1;
 	private File fileAMP2; //TODO Is not used at the current state
 	
+	private File saveFolder;
+	
 	boolean debug = true;
 
 	
@@ -91,13 +93,14 @@ public class DarkFieldReconPipeline {
 	 * @param fileNameAMP2
 	 */
 	public DarkFieldReconPipeline(String fileNameConfig1, String fileNameDCI1, String fileNameDCI2, 
-			String fileNameAMP1, String fileNameAMP2){
+			String fileNameAMP1, String fileNameAMP2,String fileNameSaveFolder){
 		Configuration config1 = Configuration.loadConfiguration(fileNameConfig1);
 		Configuration config2 = Configuration.loadConfiguration(fileNameConfig1);
 		// Reset rotation axis for Config2
+		
 		SimpleVector rotationAxis2 = new SimpleVector(0.0d,1.0d,0.0);
 		config2.getGeometry().setRotationAxis(rotationAxis2);
-		initData(config1, config2, fileNameDCI1, fileNameDCI2, fileNameAMP1, fileNameAMP2);
+		initData(config1, config2, fileNameDCI1, fileNameDCI2, fileNameAMP1, fileNameAMP2,fileNameSaveFolder);
 		
 	}
 	
@@ -110,10 +113,10 @@ public class DarkFieldReconPipeline {
 	 * @param fileNameAMP2
 	 */
 	public DarkFieldReconPipeline(String fileNameConfig1, String fileNameConfig2, String fileNameDCI1, String fileNameDCI2, 
-			String fileNameAMP1, String fileNameAMP2){
+			String fileNameAMP1, String fileNameAMP2,String fileNameSaveFolder){
 		Configuration config1 = Configuration.loadConfiguration(fileNameConfig1);
 		Configuration config2 = Configuration.loadConfiguration(fileNameConfig2);
-		initData(config1, config2, fileNameDCI1, fileNameDCI2, fileNameAMP1, fileNameAMP2);
+		initData(config1, config2, fileNameDCI1, fileNameDCI2, fileNameAMP1, fileNameAMP2,fileNameSaveFolder);
 	}
 
 	
@@ -126,9 +129,9 @@ public class DarkFieldReconPipeline {
 	 * @param fileNameAMP1
 	 * @param fileNameAMP2
 	 */
-	public DarkFieldReconPipeline(Configuration config1, Configuration config2){
+	public DarkFieldReconPipeline(Configuration config1, Configuration config2,String fileNameSaveFolder){
 		
-		initData(config1, config2, null, null, null, null);
+		initData(config1, config2, null, null, null, null,fileNameSaveFolder);
 	}
 	
 	
@@ -143,7 +146,13 @@ public class DarkFieldReconPipeline {
 	 */
 	private void initData(Configuration config1, Configuration config2, 
 			String fileNameDCI1, String fileNameDCI2, 
-			String fileNameAMP1, String fileNameAMP2){
+			String fileNameAMP1, String fileNameAMP2,String fileNameSaveFolder){
+		
+		if(fileNameSaveFolder==null){
+			saveFolder = null;	
+		} else{
+			saveFolder = new File(fileNameSaveFolder);
+		}
 		
 		
 		
@@ -161,7 +170,8 @@ public class DarkFieldReconPipeline {
 		
 		if(fileNameDCI1==null){
 			fileDCI1 = null;			
-			} else{
+			} 
+		else{
 				fileDCI1 = new File(fileNameDCI1);
 			}
 		
@@ -318,7 +328,7 @@ public void reconstructDarkFieldVolume(int numScatterVectors, int maxIt, float s
 		// Initialize the GradientSolver3D
 		// Can even deal with reconMask == null, as GradientSolver knows how to deal with this.
 		// If mask should be used, it should be created prior to execution of this method
-		GradientSolverTensor3D gradientSolver = new GradientSolverTensor3D(config1, config2, sinoDCI1, sinoDCI2, stepSize, maxIt, numScatterVectors,reconMask,reconMask);
+		GradientSolverTensor3D gradientSolver = new GradientSolverTensor3D(config1, config2, sinoDCI1, sinoDCI2, stepSize, maxIt, numScatterVectors,saveFolder, reconMask,reconMask);
 		
 		// Save the scatter directions into a matrix
 		scatterDirMatrix =  DarkFieldScatterDirection.getScatterDirectionMatrix(numScatterVectors);

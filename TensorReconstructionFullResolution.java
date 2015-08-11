@@ -66,7 +66,7 @@ public class TensorReconstructionFullResolution{
 		int maxIt = 5;
 		
 		// Initialize the pipeline
-		DarkFieldReconPipeline myDarkFieldPipeLine = new DarkFieldReconPipeline(fileNameConfig1, fileNameDCI1, fileNameDCI2, fileNameAMP1, fileNameAMP2);
+		DarkFieldReconPipeline myDarkFieldPipeLine = new DarkFieldReconPipeline(fileNameConfig1, fileNameDCI1, fileNameDCI2, fileNameAMP1, fileNameAMP2,fileNameConfig1);
 		
 		// Create the Absorption Mask
 		boolean saveAMP = true;

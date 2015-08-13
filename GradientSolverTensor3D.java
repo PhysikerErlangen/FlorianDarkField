@@ -96,6 +96,14 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry {
 		this.tensorConstraint = tensorConstraint;
 	}
 
+	public static enum TrajectoryType {
+		/** HORIZONTAL TRAJECTORY */
+		VERTICAL,
+		/** VERTICAL TRAJECTORY */
+		HORIZONTAL,
+	}
+	
+	
 	/**
 	 * @param configuration1
 	 * @param configuration2
@@ -125,15 +133,15 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry {
 	 * @param maxIt
 	 * @param numScatterVectors
 	 * @param pathToSaveVtk
-	 * @param reconAMP1
-	 * @param reconAMP2
+	 * @param maskAMP1
+	 * @param maskAMP2
 	 */
 	public GradientSolverTensor3D(Configuration configuration1,
 			Configuration configuration2,
 			DarkField3DSinogram darkFieldSinogram1,
 			DarkField3DSinogram darkFieldSinogram2, float stepSize, int maxIt,
-			int numScatterVectors,  File pathToSaveVtk, DarkField3DTensorVolume reconAMP1,
-			DarkField3DTensorVolume reconAMP2) {
+			int numScatterVectors,  File pathToSaveVtk, DarkField3DTensorVolume maskAMP1,
+			DarkField3DTensorVolume maskAMP2) {
 
 		// Open super operator of geometry class
 		super(configuration1, numScatterVectors);
@@ -149,42 +157,15 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry {
 		// this.configuration1 = configuration1;
 		// this.configuration2 = configuration2;
 
-		this.maskAMP1 = reconAMP1;
-		this.maskAMP2 = reconAMP2;
+		this.maskAMP1 = maskAMP1;
+		this.maskAMP2 = maskAMP2;
 		
 		this.pathToSaveVtk = pathToSaveVtk;
-
-		// Create instances of both scatter coef classes
-		// One for each direction
-		scatterCoef1 = new DarkFieldScatterCoef(configuration1,
-				numScatterVectors);
-		scatterCoef2 = new DarkFieldScatterCoef(configuration2,
-				numScatterVectors);
-
-		// Create instance of the backprojector
-		backProjector1 = new ParallelDarkFieldBackprojector3DTensor(
-				configuration1, scatterCoef1);
-		backProjector2 = new ParallelDarkFieldBackprojector3DTensor(
-				configuration2, scatterCoef2);
-
-		// Create instance of the projector
-		projector1 = new ParallelDarkFieldProjector3DTensor(configuration1,
-				scatterCoef1);
-		projector2 = new ParallelDarkFieldProjector3DTensor(configuration2,
-				scatterCoef2);
-
-	}
-
-	/**
-	 * Gradient 3D implements the gradient decent algorithm described in book of
-	 * "zeng"
-	 * 
-	 * @return reconstructed DarkField Tensor volume
-	 */
-	public DarkField3DTensorVolume Gradient3D() {
-
-		debug = true;
 		
+		/*
+		 * If the darkFieldSinograms are null (i.e. they don't exist)
+		 * do not reconstruct 
+		 */
 		if(darkFieldSinogram1==null){
 		reconVertical = false;
 		}else{
@@ -197,8 +178,45 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry {
 			reconHorizontal = true;
 		}
 		
-		writeVtkInEveryStep = true;
+		
 
+		/*
+		 * Create instances of both scatter coef classes
+		 * One for each direction
+		 */
+		scatterCoef1 = new DarkFieldScatterCoef(configuration1,
+				numScatterVectors);
+		scatterCoef2 = new DarkFieldScatterCoef(configuration2,
+				numScatterVectors);
+
+		/*
+		 * Create instances of the BackProjector
+		 */
+		backProjector1 = new ParallelDarkFieldBackprojector3DTensor(
+				configuration1, scatterCoef1);
+		backProjector2 = new ParallelDarkFieldBackprojector3DTensor(
+				configuration2, scatterCoef2);
+
+		/*
+		 * Create instances of the projectors
+		 */
+		projector1 = new ParallelDarkFieldProjector3DTensor(configuration1,
+				scatterCoef1);
+		projector2 = new ParallelDarkFieldProjector3DTensor(configuration2,
+				scatterCoef2);
+		
+	}
+
+	/**
+	 * Gradient 3D implements the gradient decent algorithm described in book of
+	 * "zeng"
+	 * 
+	 * @return reconstructed DarkField Tensor volume
+	 */
+	public DarkField3DTensorVolume Gradient3D() {
+
+		debug = true;
+		writeVtkInEveryStep = true;
 
 		// Initialize to be constructed volume
 		reconImage = new DarkField3DTensorVolume(imgSizeX, imgSizeY, imgSizeZ,
@@ -211,7 +229,7 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry {
 				.println("--------------------------------------------------------"
 						+ maxIt);
 		System.out
-				.println("Start Gradient Decent Algorithm. Number of iteration is: "
+				.println("Start Gradient Decent Algorithm. Number of maximum iteration is: "
 						+ maxIt);
 		System.out
 				.println("--------------------------------------------------------"
@@ -237,7 +255,7 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry {
 			
 			System.out.println("Enforce Hard Constraint on reconstructed scatter coefs: " + it);
 			
-			// reconImage.enforceConstraint(tensorConstraint);
+			reconImage.enforceConstraint(tensorConstraint);
 			
 			
 			
@@ -259,143 +277,154 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry {
 		return reconImage;
 
 	}
-
-	
-
-	
 		
 	/**
-	 * Perform one step of the gradient
+	 * Perform one step of the gradient.
+	 * Deals with both trajectories. 
+	 * Reconstructed of each trajectory is handled in a submethod.
 	 */
 	private void doGradientStep(int it) {
-
-		long startTime = System.currentTimeMillis();
 
 		System.out
 				.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 		System.out.println("Current Iteration: " + it);
 
-		long endTime = System.currentTimeMillis();
-		long deltaT = endTime - startTime;
-		System.out.println("Gradient step completed in " + deltaT + "ms, It: "
-				+ it);
-
 		/*
-		 * Gradient Decent 1. Calculate difference between Measurement and
-		 * Reconstruction by projection 2. Backproject this difference onto the
-		 * reconstruction (volume) 3. Add this backprojected volume ontop of
-		 * your current reconstruction
+		 * Gradient Decent
+		 * 1. Calculate difference between Measurement and reconstruction by projection
+		 * 2. Backproject this difference onto the reconstruction (volume)
+		 * 3. Add this backprojected volume on top of your current reconstruction
 		 */
 
-		DarkField3DSinogram projectionSinogram1 = null;
-		DarkField3DSinogram projectionSinogram2 = null;
-
-		int numElements = maxU_index * maxV_index * maxTheta_index;
-		double error1 = 0, error2 = 0;
-
-		if (debug)
-			System.out.println("Start projection of current Iteration.");
-
-		/*
-		 * First iteration handled differently, as projection signal (sinogram)
-		 * of a 0-Volume is 0 anyway
-		 */
-		if (it == 0) {
-			if (reconVertical) {
-				projectionSinogram1 = new DarkField3DSinogram(maxU_index,
-						maxV_index, maxTheta_index);
-			}if (reconHorizontal) {
-				projectionSinogram2 = new DarkField3DSinogram(maxU_index,
-						maxV_index, maxTheta_index);
-			}		
+		double error = 0;
+		
+		if(reconVertical){
+		error = error + reconstructionTrajectory(TrajectoryType.VERTICAL,it);
 		}
-		 /*
-		  * Calculations of projections (Sinograms) of current Reconstruction state
-		  */
-		else { 
-			if (reconVertical) {
-				projectionSinogram1 = projector1.projectPixelDriven(reconImage);
-			} if (reconHorizontal) {
-				projectionSinogram2 = projector2.projectPixelDriven(reconImage);
-			}
-		}
-
-		if (debug)
-			System.out.println("End projection of current Iteration.");
-
-		DarkField3DSinogram differenceSinogram1 = null, differenceSinogram2 = null;
-
-		 /*
-		  * Reconstruct vertical trajectory
-		  */
-		if (reconVertical) {
-
-			// Calculate difference between observation and current projection
-			differenceSinogram1 = DarkField3DSinogram.sub(projectionSinogram1,
-					darkFieldSinogram1);
-			error1 = (float) OpMath.norm2(differenceSinogram1) / numElements;
-			// Backprojection difference between observation (Sinogram) and
-			// current iteration
-
-			if (debug)
-				System.out
-						.println("Start Backprojection of Differences of Trajector 1.");
-			DarkField3DTensorVolume backProjectionDifference1 = backProjector1
-					.backprojectPixelDriven(differenceSinogram1);
-			if (debug)
-				System.out
-						.println("End Backprojection of Differences of Trajector 1.");
-			// First multiply this with the gradient step size
-			// differenceSinogram1.showSinogram("Difference of Sinograms");
-
-			// backProjectionDifference1.
-
-			backProjectionDifference1.multiply(stepSize);
-			backProjectionDifference1.maskWithVolume(maskAMP1);
-
-			reconImage.sub(backProjectionDifference1);
-
-			if (debug)
-				System.out.println("End reconstruction of Trajectory 1.");
-		}
-
-		/*
-		 *  Reconstruct horizontal trajectory
-		 */
-		if (reconHorizontal) {
-
-			if (debug)
-				System.out.println("Start reconstruction of Trajectory 2.");
-
-			differenceSinogram2 = DarkField3DSinogram.sub(projectionSinogram2,
-					darkFieldSinogram2);
-			error2 = (float) OpMath.norm2(differenceSinogram2) / numElements;
-			// differenceSinogram2.showSinogram("Sinogram2 of differences at iteration: "
-			// +it);
-			if (debug)
-				System.out
-						.println("Start Backprojection of Differences of Trajector 2.");
-			// Backprojection difference between observation (Sinogram) and
-			// current iteration
-			DarkField3DTensorVolume backProjectionDifference2 = backProjector2
-					.backprojectPixelDriven(differenceSinogram2);
-			// Apply gradient step by adding difference on top of current
-			// reconstruction
-			backProjectionDifference2.multiply(stepSize);
-			backProjectionDifference2.maskWithVolume(maskAMP2);
-			reconImage.sub(backProjectionDifference2);
-
-			if (debug)
-				System.out.println("End reconstruction of Trajectory 2.");
-		}
-
-		double totalError = error1 + error2;
-		System.out.println("Error (Difference of Sinograms): " + totalError);
+		
+		if(reconHorizontal){
+		error = error + reconstructionTrajectory(TrajectoryType.HORIZONTAL,it);
+		}	
+	
+		System.out.println("Error (Difference of Sinograms): " + error);
 
 	}
 	
-	private void reconstructionTrajectory(){
+	/**
+	 * @param type
+	 * @return
+	 */
+	private ParallelDarkFieldBackprojector3DTensor getBackProjector(TrajectoryType type){
+		if(type == TrajectoryType.VERTICAL ){
+			return backProjector1;
+		} else if(type == TrajectoryType.HORIZONTAL ){
+			return backProjector2;
+		} else{
+			return null;
+		}
+	}
+	
+
+	/**
+	 * @param type
+	 * @return
+	 */
+	private ParallelDarkFieldProjector3DTensor getProjector(TrajectoryType type){
+		if(type == TrajectoryType.VERTICAL ){
+			return projector1;
+		} else if(type == TrajectoryType.HORIZONTAL ){
+			return projector2;
+		} else{
+			return null;
+		}
+	}
+	
+	/**
+	 * @param type
+	 * @return
+	 */
+	private DarkField3DTensorVolume getMask(TrajectoryType type){
+		if(type == TrajectoryType.VERTICAL ){
+			return maskAMP1;
+		} else if(type == TrajectoryType.HORIZONTAL ){
+			return maskAMP2;
+		} else{
+			return null;
+		}
+	}
+	
+	/**
+	 * @param type
+	 * @return
+	 */
+	private DarkField3DSinogram getSinogram(TrajectoryType type){
+		if(type == TrajectoryType.VERTICAL ){
+			return darkFieldSinogram1;
+		} else if(type == TrajectoryType.HORIZONTAL ){
+			return darkFieldSinogram2;
+		} else{
+			return null;
+		}
+	}
+	
+	
+	/**
+	 * Reconstruction of one trajectory in Gradient Step
+	 * @param darkFieldSinogram
+	 * @param projector
+	 * @param backprojector
+	 * @param iteration
+	 */
+	private double reconstructionTrajectory(TrajectoryType type,
+			int iteration){
 		
+		ParallelDarkFieldBackprojector3DTensor backProjector = getBackProjector(type);
+		ParallelDarkFieldProjector3DTensor projector = getProjector(type);
+		DarkField3DSinogram darkFieldSinogram = getSinogram(type);
+		
+		/*
+		 * Calculate DarkFieldProjection of current reconstruction state
+		 * First iteration handled differently, as projection signal (sinogram)
+		 * of a 0-Volume is 0 anyway
+		 */
+		DarkField3DSinogram projectionSinogram;
+		if(iteration == 0){
+			projectionSinogram = new DarkField3DSinogram(maxU_index,
+				maxV_index, maxTheta_index);
+		} else{
+			projectionSinogram = projector.projectPixelDriven(reconImage);	
+		}
+		
+		/*
+		 * Calculate difference between observed darkFieldSignal and reconstruction 
+		 */
+		DarkField3DSinogram differenceSinogram = 
+				DarkField3DSinogram.sub(projectionSinogram,darkFieldSinogram);
+
+		/*
+		 * Backprojection of the projection difference between observation and reconstruction 
+		 */
+		DarkField3DTensorVolume diffVolume = backProjector
+				.backprojectPixelDriven(differenceSinogram);
+
+		/*
+		 * Multiply diffVolume with stepSize of Gradient
+		 */
+		diffVolume.multiply(stepSize);
+		
+		/*
+		 * Mask the Image with the volume.
+		 * MaskWithVolume handles null data
+		 */
+		diffVolume.maskWithVolume(getMask(type));
+		
+		reconImage.sub(diffVolume);
+		
+		/*
+		 * Calculate error between observed and reconstruction sinograms
+		 */
+		double error= OpMath.norm2(differenceSinogram);
+		return error;
 	}
 
 }

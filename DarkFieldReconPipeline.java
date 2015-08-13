@@ -32,8 +32,6 @@ public class DarkFieldReconPipeline {
 	
 	private File fileDCI1;
 	private File fileDCI2;
-	private File fileAMP1;
-	private File fileAMP2; //TODO Is not used at the current state
 	
 	private File saveFolder;
 	
@@ -45,6 +43,13 @@ public class DarkFieldReconPipeline {
 	 */
 	private DarkField3DTensorVolume reconDarkField;
 	
+	/**
+	 * @param reconDarkField the reconDarkField to set
+	 */
+	public void setReconDarkField(DarkField3DTensorVolume reconDarkField) {
+		this.reconDarkField = reconDarkField;
+	}
+
 	/**
 	 * @return the reconDarkField
 	 */
@@ -93,14 +98,14 @@ public class DarkFieldReconPipeline {
 	 * @param fileNameAMP2
 	 */
 	public DarkFieldReconPipeline(String fileNameConfig1, String fileNameDCI1, String fileNameDCI2, 
-			String fileNameAMP1, String fileNameAMP2,String fileNameSaveFolder){
+			String fileNameSaveFolder){
 		Configuration config1 = Configuration.loadConfiguration(fileNameConfig1);
 		Configuration config2 = Configuration.loadConfiguration(fileNameConfig1);
 		// Reset rotation axis for Config2
 		
 		SimpleVector rotationAxis2 = new SimpleVector(0.0d,1.0d,0.0);
 		config2.getGeometry().setRotationAxis(rotationAxis2);
-		initData(config1, config2, fileNameDCI1, fileNameDCI2, fileNameAMP1, fileNameAMP2,fileNameSaveFolder);
+		initData(config1, config2, fileNameDCI1, fileNameDCI2,fileNameSaveFolder);
 		
 	}
 	
@@ -113,10 +118,10 @@ public class DarkFieldReconPipeline {
 	 * @param fileNameAMP2
 	 */
 	public DarkFieldReconPipeline(String fileNameConfig1, String fileNameConfig2, String fileNameDCI1, String fileNameDCI2, 
-			String fileNameAMP1, String fileNameAMP2,String fileNameSaveFolder){
+			String fileNameSaveFolder){
 		Configuration config1 = Configuration.loadConfiguration(fileNameConfig1);
 		Configuration config2 = Configuration.loadConfiguration(fileNameConfig2);
-		initData(config1, config2, fileNameDCI1, fileNameDCI2, fileNameAMP1, fileNameAMP2,fileNameSaveFolder);
+		initData(config1, config2, fileNameDCI1, fileNameDCI2,fileNameSaveFolder);
 	}
 
 	
@@ -131,7 +136,7 @@ public class DarkFieldReconPipeline {
 	 */
 	public DarkFieldReconPipeline(Configuration config1, Configuration config2,String fileNameSaveFolder){
 		
-		initData(config1, config2, null, null, null, null,fileNameSaveFolder);
+		initData(config1, config2, null, null,fileNameSaveFolder);
 	}
 	
 	
@@ -146,7 +151,7 @@ public class DarkFieldReconPipeline {
 	 */
 	private void initData(Configuration config1, Configuration config2, 
 			String fileNameDCI1, String fileNameDCI2, 
-			String fileNameAMP1, String fileNameAMP2,String fileNameSaveFolder){
+			String fileNameSaveFolder){
 		
 		if(fileNameSaveFolder==null){
 			saveFolder = null;	
@@ -158,15 +163,7 @@ public class DarkFieldReconPipeline {
 		
 		this.config1 = config1;
 		this.config2 = config2;
-		
-		if((fileNameAMP1==null)||(fileNameAMP2==null)){
-		fileAMP1 = null;			
-		fileAMP2 = null;
-			
-		} else{
-			this.fileAMP1 = new File(fileNameAMP1);
-		this.fileAMP2 = new File(fileNameAMP2);
-		}
+
 		
 		if(fileNameDCI1==null){
 			fileDCI1 = null;			
@@ -207,13 +204,13 @@ public class DarkFieldReconPipeline {
 	    * @param saveAMP - Boolean if AMP Image should be saved
 	    * @param saveMask - Boolean if Mask should be saved
 	    */
-	public void reconstructMaskForZeroConstraint(float th_lower, float th_higher, boolean saveAMP, boolean saveMask){
+	public void reconstructMaskForZeroConstraint(float th_lower, float th_higher, boolean saveAMP, boolean saveMask, String pathToAMP){
 		   /**
 			 * INITILIAZATION OF ABSORPTION DATA
 			 */
 		   
 			// Load absorption image of orientation 1
-			ImagePlus imgAMP1 = IJ.openImage(fileAMP1.getAbsolutePath());
+			ImagePlus imgAMP1 = IJ.openImage(pathToAMP );
 			DarkField3DSinogram sinoAMP1   = ImageToSinogram3D.imagePlusToImagePlus3D_for_Absorption(imgAMP1);
 
 			reconstructMaskForZeroConstraint(th_lower, th_higher, saveAMP, saveMask,sinoAMP1);
@@ -226,8 +223,8 @@ public class DarkFieldReconPipeline {
 	 * @param th_lower
 	 * @param th_higher
 	 */
-	public void reconstructMaskForZeroConstraint(float th_lower, float th_higher){
-		reconstructMaskForZeroConstraint(th_lower, th_higher, false, false);
+	public void reconstructMaskForZeroConstraint(float th_lower, float th_higher,String fileAMP1){
+		reconstructMaskForZeroConstraint(th_lower, th_higher, false, false,fileAMP1);
 	}
 
 
@@ -243,7 +240,7 @@ public class DarkFieldReconPipeline {
 	    * @param saveMask - Boolean if Mask should be saved
 	    */
 	
-public void reconstructMaskForZeroConstraint(float th_lower, float th_higher, boolean saveAMP, boolean saveMask, DarkField3DSinogram sinoAMP1){
+public void reconstructMaskForZeroConstraint(float th_lower, float th_higher, boolean saveAMP, boolean saveMask, DarkField3DSinogram sinoAMP){
 
 
 		/*
@@ -259,7 +256,7 @@ public void reconstructMaskForZeroConstraint(float th_lower, float th_higher, bo
 		DarkFieldAbsorptionRecon3D parallellBeamRecon = new DarkFieldAbsorptionRecon3D(config1);
 		
 		// Reconstruct the Absorption volume later used for zero constraint
-				parallellBeamRecon.reconstructAbsorptionVolume(sinoAMP1);
+				parallellBeamRecon.reconstructAbsorptionVolume(sinoAMP);
 		
 		if(debug){
 			System.out.println("Absorption Volume was reconstructed.");
@@ -268,7 +265,7 @@ public void reconstructMaskForZeroConstraint(float th_lower, float th_higher, bo
 		
 		// Save absorption reconstruction into a tif file
 		if(saveAMP){
-		   String filePath = fileAMP1.getParent() + "\\AMP_recon_volume.tif";
+		   String filePath = fileDCI1.getParent() + "\\AMP_recon_volume.tif";
 		   String volumeName = "Reconstruction of Absorption volume";
 		   parallellBeamRecon.getReconAMP().write3DTensorToImage(filePath, volumeName);
 		}
@@ -278,7 +275,7 @@ public void reconstructMaskForZeroConstraint(float th_lower, float th_higher, bo
 		
 		// Save absoprtion mask into a tif file 
 		if(saveMask){
-			String filePath = fileAMP1.getParent() + "\\AMP_mask_volume.tif";
+			String filePath = fileDCI1.getParent() + "\\AMP_mask_volume.tif";
 			String volumeName = "Masked used for zero constraint";
 			parallellBeamRecon.getMyMask().write3DTensorToImage(filePath, volumeName);
 		}
@@ -290,6 +287,16 @@ public void reconstructMaskForZeroConstraint(float th_lower, float th_higher, bo
    }
    
 
+/**
+ * Sinograms and read directly out of the file paths that are given by the constructor
+ * These sinograms objects are then passed to the overloaded function of reconstructedDarkFieldVolume
+ * This is done, so that you could also work with Phantom data, where only the sinogram is passed
+ * and not the path to the .tif image itself
+ * @param numScatterVectors
+ * @param maxIt
+ * @param stepSize
+ * @param pathDarkField
+ */
 public void reconstructDarkFieldVolume(int numScatterVectors, int maxIt, float stepSize, File pathDarkField){
 	
 	
@@ -297,19 +304,28 @@ public void reconstructDarkFieldVolume(int numScatterVectors, int maxIt, float s
 	 * INITILIAZATION OF ABSORPTION DATA
 	 */
    
-	// Load dark field image of orientation 1
-	ImagePlus imgDCI1 = IJ.openImage(fileDCI1.getPath());
-	// Readout DarkFieldSinogram out of ImagePlus Image
-	DarkField3DSinogram sinoDCI1   = ImageToSinogram3D.imagePlusToImagePlus3D(imgDCI1);
 	
-	// Load dark field image of orientation 2
-	ImagePlus imgDCI2 = IJ.openImage(fileDCI2.getPath());
-	// Readout DarkFieldSinogram out of ImagePlus Image
-	DarkField3DSinogram sinoDCI2   = ImageToSinogram3D.imagePlusToImagePlus3D(imgDCI2);		
+	DarkField3DSinogram sinoDCI1 = null;
 	
-	// Dereference unused data automatically
-	imgDCI1 = null;
-	imgDCI2 = null;
+	if(fileDCI1 != null){
+		// Load dark field image of orientation 1
+		ImagePlus imgDCI1 = IJ.openImage(fileDCI1.getPath());
+		// Readout DarkFieldSinogram out of ImagePlus Image
+		sinoDCI1   = ImageToSinogram3D.imagePlusToImagePlus3D(imgDCI1);
+		// Dereference unused data automatically
+		imgDCI1 = null;
+	}
+	
+	DarkField3DSinogram sinoDCI2 = null;
+	
+	if(fileDCI2 != null){
+		// Load dark field image of orientation 1
+		ImagePlus imgDCI2 = IJ.openImage(fileDCI2.getPath());
+		// Readout DarkFieldSinogram out of ImagePlus Image
+		sinoDCI2   = ImageToSinogram3D.imagePlusToImagePlus3D(imgDCI2);
+		// Dereference unused data automatically
+		imgDCI2 = null;
+	}
 
 	reconstructDarkFieldVolume(numScatterVectors, maxIt, stepSize, pathDarkField, sinoDCI1, sinoDCI2);
 	
@@ -347,12 +363,12 @@ public void reconstructDarkFieldVolume(int numScatterVectors, int maxIt, float s
 	/**
 	 * @param saveVTK - if true saves the fiber Direcitons into a vtk file.
 	 */
-	public void calculateFiberOrientations(boolean saveVTK){
+	public DarkFieldFiberDirectionClass calculateFiberOrientations(boolean saveVTK){
 	
 		if(saveVTK == false)
-			calculateFiberOrientations(reconDarkField, scatterDirMatrix, null);
+			return calculateFiberOrientations(reconDarkField, scatterDirMatrix, null);
 		else{
-			calculateFiberOrientations(reconDarkField, scatterDirMatrix, fileDCI1);	
+			return calculateFiberOrientations(reconDarkField, scatterDirMatrix, fileDCI1);	
 		}
 			
 		
@@ -362,9 +378,9 @@ public void reconstructDarkFieldVolume(int numScatterVectors, int maxIt, float s
 	/**
 	 * @param saveVTK - if true saves the fiber Direcitons into a vtk file.
 	 */
-	public void calculateFiberOrientations(File pathFile){
+	public DarkFieldFiberDirectionClass calculateFiberOrientations(File pathFile){
 	
-		calculateFiberOrientations(reconDarkField, scatterDirMatrix, pathFile);
+		return calculateFiberOrientations(reconDarkField, scatterDirMatrix, pathFile);
 	
 	}
 	
@@ -376,21 +392,34 @@ public void reconstructDarkFieldVolume(int numScatterVectors, int maxIt, float s
 	 * @param fiberDirectionClass
 	 * @param pathFile
 	 */
-	public static void calculateFiberOrientations(DarkField3DTensorVolume reconDarkField, SimpleMatrix scatterDirMatrix, File pathFile){
+	public static DarkFieldFiberDirectionClass calculateFiberOrientations(DarkField3DTensorVolume reconDarkField, SimpleMatrix scatterDirMatrix, File pathFile){
 		
-		calculateFiberOrientations(reconDarkField, scatterDirMatrix, pathFile,"fiberDirections");
+		return calculateFiberOrientations(reconDarkField, scatterDirMatrix, pathFile,"fiberDirections");
 		
 		
 	}
 	
 
+
+	/**
+	 * @param reconDarkField
+	 * @param scatterDirMatrix
+	 * @return
+	 */
+	public static DarkFieldFiberDirectionClass calculateFiberOrientations(DarkField3DTensorVolume reconDarkField, SimpleMatrix scatterDirMatrix){
+		
+		return calculateFiberOrientations(reconDarkField, scatterDirMatrix, null,null);
+		
+		
+	}
+	
 	/**
 	 * @param reconDarkField
 	 * @param scatterDirMatrix
 	 * @param pathFile
 	 * @param fileName - without file type, as .vtk is added automatically
 	 */
-	public static void calculateFiberOrientations(DarkField3DTensorVolume reconDarkField, SimpleMatrix scatterDirMatrix, File pathFile, String fileName){
+	public static DarkFieldFiberDirectionClass calculateFiberOrientations(DarkField3DTensorVolume reconDarkField, SimpleMatrix scatterDirMatrix, File pathFile, String fileName){
 		
 		assert(reconDarkField != null) : new Exception("Reconstructed is NULL and needs to be calculated first.");
 		assert(scatterDirMatrix != null) : new Exception("Scatter Dir Matrix needs to be calculated first.");
@@ -401,13 +430,15 @@ public void reconstructDarkFieldVolume(int numScatterVectors, int maxIt, float s
 				(reconDarkField.imgSizeX, reconDarkField.imgSizeY, reconDarkField.imgSizeZ,
 						reconDarkField.getSpacing(), reconDarkField.getOrigin());
 		
-		fiberDirectionClass = scatterDirExtractor.calcScatterDirections();
+		fiberDirectionClass = scatterDirExtractor.calcFiberOrientations();
 		
 		
 		if(pathFile!=null){
 			String pathFiberVTK = pathFile.getParent() + "\\ " + fileName + ".vtk";
 			fiberDirectionClass.writeToVectorField(pathFiberVTK);
 		}
+		
+		return fiberDirectionClass;
 	}
 	
 	

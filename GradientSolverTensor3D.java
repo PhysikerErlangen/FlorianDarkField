@@ -11,10 +11,12 @@ import java.io.File;
 import edu.stanford.rsl.science.darkfield.FlorianDarkField.ParallelDarkFieldBackprojector3DTensor;
 import edu.stanford.rsl.science.darkfield.FlorianDarkField.ParallelDarkFieldProjector3DTensor;
 import edu.stanford.rsl.science.darkfield.FlorianDarkField.DarkField3DTensorVolume;
+import edu.stanford.rsl.science.darkfield.FlorianDarkField.DarkField3DTensorVolume.TensorConstraintType;
 import edu.stanford.rsl.science.darkfield.iterative.OpMath;
 import edu.stanford.rsl.conrad.data.numeric.NumericPointwiseOperators;
 import edu.stanford.rsl.conrad.data.numeric.iterators.NumericPointwiseIteratorND;
 import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
+import edu.stanford.rsl.conrad.numerics.SimpleOperators;
 import edu.stanford.rsl.conrad.utils.Configuration;
 
 public class GradientSolverTensor3D extends DarkFieldTensorGeometry {
@@ -36,12 +38,15 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry {
 
 	private int maxIt;
 
-	DarkFieldScatterCoef scatterCoef1;
-	DarkFieldScatterCoef scatterCoef2;
+	private DarkFieldScatterCoef scatterCoef1;
+	private DarkFieldScatterCoef scatterCoef2;
 
-	// MASKING Images for zero constraint
-	DarkField3DTensorVolume reconAMP1;
-	DarkField3DTensorVolume reconAMP2;
+
+	/**
+	 * MASKING Images for zero constraint 
+	 */
+	private DarkField3DTensorVolume maskAMP1;
+	private DarkField3DTensorVolume maskAMP2;
 
 	private ParallelDarkFieldBackprojector3DTensor backProjector1;
 	private ParallelDarkFieldBackprojector3DTensor backProjector2;
@@ -49,11 +54,48 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry {
 	private ParallelDarkFieldProjector3DTensor projector1;
 	private ParallelDarkFieldProjector3DTensor projector2;
 
-	DarkField3DTensorVolume reconImage;
+	/**
+	 * Volume to reconstructed by Gradient Method
+	 */
+	private DarkField3DTensorVolume reconImage;
+
+	/**
+	 * @return the reconImage
+	 */
+	public DarkField3DTensorVolume getReconImage() {
+		return reconImage;
+	}
+
+	/**
+	 * @param reconImage the reconImage to set
+	 */
+	public void setReconImage(DarkField3DTensorVolume reconImage) {
+		this.reconImage = reconImage;
+	}
+
+
+
+
 
 	private File pathToSaveVtk;
 	
+	private TensorConstraintType tensorConstraint = TensorConstraintType.HARD_CONSTRAINT;
 	
+	
+	/**
+	 * @return the tensorConstraint
+	 */
+	public TensorConstraintType getTensorConstraint() {
+		return tensorConstraint;
+	}
+
+	/**
+	 * @param tensorConstraint the tensorConstraint to set
+	 */
+	public void setTensorConstraint(TensorConstraintType tensorConstraint) {
+		this.tensorConstraint = tensorConstraint;
+	}
+
 	/**
 	 * @param configuration1
 	 * @param configuration2
@@ -107,8 +149,8 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry {
 		// this.configuration1 = configuration1;
 		// this.configuration2 = configuration2;
 
-		this.reconAMP1 = reconAMP1;
-		this.reconAMP2 = reconAMP2;
+		this.maskAMP1 = reconAMP1;
+		this.maskAMP2 = reconAMP2;
 		
 		this.pathToSaveVtk = pathToSaveVtk;
 
@@ -149,7 +191,7 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry {
 		reconVertical = true;
 		}
 		
-		if(darkFieldSinogram1==null){
+		if(darkFieldSinogram2==null){
 		reconHorizontal = false;
 		}else{
 			reconHorizontal = true;
@@ -192,8 +234,15 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry {
 
 			doGradientStep(it);
 
+			
+			System.out.println("Enforce Hard Constraint on reconstructed scatter coefs: " + it);
+			
+			// reconImage.enforceConstraint(tensorConstraint);
+			
+			
+			
 			if(writeVtkInEveryStep){
-				
+				System.out.println("Write Reconstruction Result at iteration = " +it);
 				String myName = "ReconstructedVolumeIter_"+it;
 				reconImage.saveFiberOrientations(pathToSaveVtk, myName);
 				
@@ -211,6 +260,10 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry {
 
 	}
 
+	
+
+	
+		
 	/**
 	 * Perform one step of the gradient
 	 */
@@ -243,34 +296,28 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry {
 		if (debug)
 			System.out.println("Start projection of current Iteration.");
 
+		/*
+		 * First iteration handled differently, as projection signal (sinogram)
+		 * of a 0-Volume is 0 anyway
+		 */
 		if (it == 0) {
-			
 			if (reconVertical) {
 				projectionSinogram1 = new DarkField3DSinogram(maxU_index,
 						maxV_index, maxTheta_index);
 			}if (reconHorizontal) {
 				projectionSinogram2 = new DarkField3DSinogram(maxU_index,
 						maxV_index, maxTheta_index);
-			}
-		} else {
-			// Calculate projection of first reconstruction
+			}		
+		}
+		 /*
+		  * Calculations of projections (Sinograms) of current Reconstruction state
+		  */
+		else { 
 			if (reconVertical) {
 				projectionSinogram1 = projector1.projectPixelDriven(reconImage);
 			} if (reconHorizontal) {
 				projectionSinogram2 = projector2.projectPixelDriven(reconImage);
 			}
-
-			if (debug) {
-				// projectionSinogram1.showSinogram("Sinogram 1 at it: " +it);
-				// projectionSinogram2.showSinogram("Sinogram 2 at it: " +it);
-				System.out
-						.println("End projection of current reconstruction (It: "
-								+ it + ")");
-				System.out
-						.println("Start calculation of difference between observation and reconstruction (It: "
-								+ it + ")");
-			}
-
 		}
 
 		if (debug)
@@ -278,12 +325,12 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry {
 
 		DarkField3DSinogram differenceSinogram1 = null, differenceSinogram2 = null;
 
-		// Calculate difference between observation and current projection
-		if (reconVertical) { // Reconstruct vertical trajectory
+		 /*
+		  * Reconstruct vertical trajectory
+		  */
+		if (reconVertical) {
 
-			if (debug)
-				System.out.println("Start reconstruction of Trajectory 1.");
-
+			// Calculate difference between observation and current projection
 			differenceSinogram1 = DarkField3DSinogram.sub(projectionSinogram1,
 					darkFieldSinogram1);
 			error1 = (float) OpMath.norm2(differenceSinogram1) / numElements;
@@ -304,7 +351,7 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry {
 			// backProjectionDifference1.
 
 			backProjectionDifference1.multiply(stepSize);
-			backProjectionDifference1.maskWithVolume(reconAMP1);
+			backProjectionDifference1.maskWithVolume(maskAMP1);
 
 			reconImage.sub(backProjectionDifference1);
 
@@ -312,7 +359,10 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry {
 				System.out.println("End reconstruction of Trajectory 1.");
 		}
 
-		if (reconHorizontal) {// Reconstruct horizontal trajectory
+		/*
+		 *  Reconstruct horizontal trajectory
+		 */
+		if (reconHorizontal) {
 
 			if (debug)
 				System.out.println("Start reconstruction of Trajectory 2.");
@@ -332,7 +382,7 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry {
 			// Apply gradient step by adding difference on top of current
 			// reconstruction
 			backProjectionDifference2.multiply(stepSize);
-			backProjectionDifference2.maskWithVolume(reconAMP2);
+			backProjectionDifference2.maskWithVolume(maskAMP2);
 			reconImage.sub(backProjectionDifference2);
 
 			if (debug)
@@ -342,6 +392,10 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry {
 		double totalError = error1 + error2;
 		System.out.println("Error (Difference of Sinograms): " + totalError);
 
+	}
+	
+	private void reconstructionTrajectory(){
+		
 	}
 
 }

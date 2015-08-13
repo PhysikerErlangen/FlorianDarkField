@@ -91,6 +91,8 @@ public class DarkFieldPCA_Test {
 		
 		SimpleMatrix diffMatrix = SimpleOperators.subtract(eigenVectors, eigenVecFromMatlab);
 
+		
+		
 		System.out.println("Difference between real Eigenvectors is: ");
 		System.out.println(eigenVectors.transposed());
 		

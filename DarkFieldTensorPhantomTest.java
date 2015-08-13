@@ -44,11 +44,10 @@ public class DarkFieldTensorPhantomTest {
 		    sc.close();
 	}
 
-	/**
-	 * @throws java.lang.Exception
-	 */
-	@Before
-	public void setUp() throws Exception {
+
+	// This methods tests, if the creation of the Phantom works correctly
+	@Test
+	public void testPhantomReconDifference() {
 		
 	String fileNameConfig1 = "E:\\fschiffers\\MeasuredData\\Phantom2\\PhantomHalfLarge_unsymetricSmall.xml";
 		
@@ -105,9 +104,9 @@ public class DarkFieldTensorPhantomTest {
 		
 		// Number of scatter vectors
 		//Step size for Gradient decent
-		float stepSize = 0.01f;
+		float stepSize = 0.02f;
 		// Number of maximal iterations in gradient decent
-		int maxIt =20;
+		int maxIt =5;
 		
 		// Initialize the pipeline
 		myDarkFieldPipeLine = new DarkFieldReconPipeline(Configuration1,Configuration2,fileNameConfig1);
@@ -116,7 +115,7 @@ public class DarkFieldTensorPhantomTest {
 		
 		folder = new File(fileNameConfig1);
 		
-		myDarkFieldPipeLine.reconstructDarkFieldVolume(numScatterVectors,maxIt,stepSize,folder,sinoDCI1,sinoDCI2);
+		myDarkFieldPipeLine.reconstructDarkFieldVolume(numScatterVectors,maxIt,stepSize,folder,sinoDCI1,null);
 		
 		System.out.println(" DarkField Reconstruction was successfully created and saved.");
 		
@@ -126,11 +125,6 @@ public class DarkFieldTensorPhantomTest {
 		
 		System.out.println("Fiber Orientations sucessfully saved.");
 		
-	}
-
-	// This methods tests, if the creation of the Phantom works correctly
-	@Test
-	public void testPhantomReconDifference() {
 		
 		DarkField3DTensorVolume recon =  myDarkFieldPipeLine.getReconDarkField();
 		

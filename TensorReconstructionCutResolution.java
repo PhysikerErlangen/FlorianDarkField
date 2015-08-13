@@ -68,20 +68,21 @@ public class TensorReconstructionCutResolution{
 		new ImageJ();
 		
 		// Initialize the pipeline
-		DarkFieldReconPipeline myDarkFieldPipeLine = new DarkFieldReconPipeline(fileNameConfig1, fileNameDCI1, fileNameDCI2, fileNameAMP1, fileNameAMP2,fileNameConfig1);
+		DarkFieldReconPipeline myDarkFieldPipeLine = new DarkFieldReconPipeline(fileNameConfig1, fileNameDCI1, null,fileNameConfig1);
 		
 		// Create the Absorption Mask
 		boolean saveAMP = true;
 		boolean saveMask = true;
-		myDarkFieldPipeLine.reconstructMaskForZeroConstraint(th_lower, th_higher,saveAMP, saveMask);
+		myDarkFieldPipeLine.reconstructMaskForZeroConstraint(th_lower, th_higher,saveAMP, saveMask,fileNameAMP1);
 		
 		myDarkFieldPipeLine.getReconMask().show("Mask Image");
+		
+		
 		
 		
 		System.out.println("Reconstruction mask was successfully created and saved.");
 		
 		// Reconstruct DarkField Volume
-		boolean saveDarkField = true;
 		myDarkFieldPipeLine.reconstructDarkFieldVolume(numScatterVectors, maxIt, stepSize, folder);
 		
 		System.out.println(" DarkField Reconstruction was successfully created and saved.");

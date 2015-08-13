@@ -71,7 +71,7 @@ private SimpleVector halfAxisLengths;
 	 * @param myPoint - has to be of dimension 3
 	 * @return
 	 */
-	public SimpleVector transformPointIntoEigenVectorSystem(SimpleVector myPoint){
+	private SimpleVector transformPointIntoEigenVectorSystem(SimpleVector myPoint){
 		SimpleVector transformed = SimpleOperators.multiply(eigenVectors.transposed(), myPoint);
 		return transformed;
 	}
@@ -99,9 +99,14 @@ private SimpleVector halfAxisLengths;
 		// Calculate vector in ellipsoid coordinate frame
 		SimpleVector point = transformPointIntoEigenVectorSystem(curDir);
 		
+		double curCoef;
 		// Scale points by the half axis lengths like eq. 18 in vogel's paper
+		if(halfAxisLengths.min()==0){
+			curCoef = 0;
+		} else {
 		SimpleVector scaledPoint = SimpleOperators.divideElementWise(point,halfAxisLengths);
-		double  curCoef = 1/scaledPoint.normL2();
+		 curCoef = 1/scaledPoint.normL2();
+		}
 		
 		projScatterCoef.setElementValue(channel, curCoef);
 		}

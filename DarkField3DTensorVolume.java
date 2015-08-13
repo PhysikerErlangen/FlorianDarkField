@@ -251,7 +251,48 @@ public class DarkField3DTensorVolume extends DarkFieldGrid3DTensor{
 		DarkFieldReconPipeline.calculateFiberOrientations(this, DarkFieldScatterDirection.getScatterDirectionMatrix(this.getNumberOfChannels()), pathFile, fileName);
 	}
 	
+	/**
+	 * @author schiffers
+	 * Different type of constraint published in paper of J. Vogel in
+	 * Constrained X-Ray tensor tomography
+	 */
+	public static enum TensorConstraintType {
+		/** HARD CONSTRAINT */
+		HARD_CONSTRAINT,
+		/** SOFT CONSTRAINT */ //TODO Implement
+		SOFT_CONSTRAINT,
+		/** NO CONSTRAINT AT ALL */ //TODO Implement
+		NO_CONSTRAINT
+	}
 	
+	
+	public void enforceConstraint(TensorConstraintType type){
+		if(type == TensorConstraintType.HARD_CONSTRAINT ){
+			enforceHardConstraint();
+		} else if (type == TensorConstraintType.SOFT_CONSTRAINT){
+			// TODO NOT YET IMPLEMENTED
+		} else{
+			// TODO NOT YET IMPLEMENTED
+		}
+	} 
+	
+	private void enforceHardConstraint(){
+		
+		DarkFieldScatterExtractor myScatterExtractor = new DarkFieldScatterExtractor(this, DarkFieldScatterDirection.getScatterDirectionMatrix(this.getNumberOfChannels()));
+	
+		for(int x = 0; x <imgSizeX; x++){
+			for(int y = 0; y <imgSizeY; y++){
+			for(int z = 0; z <imgSizeZ; z++){
+				SimpleVector constrainedCoef = myScatterExtractor.calcProjectedScatterCoefficients(x, y, z);
+				this.setDarkFieldScatterTensor(x, y, z, constrainedCoef);
+					
+				}
+			}
+		}
+		
+				
+	}
+
 	
 //	
 //	@Override

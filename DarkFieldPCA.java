@@ -137,14 +137,26 @@ public class DarkFieldPCA{
 		
 	}
 		
-	// Calculates the different scatter directions with their corresponding weights. 
+ 
+	/**
+	 * Calculates set of 2K directions vectors corresponding to scatter coefficients and
+	 * the respective scatter directions
+	 * See eq. 15/16 of Vogel "Constrained X-Ray tensor tomography reconstruction" 2015
+	 */
 	private void calcSetOfScatterPoints(){
 		
+		// NumPoints is 2*Number of scatter directions
 		scatterPoints = new SimpleMatrix(dimension,numPoints);
 		
+		// Loop through all scatter directions
 		for (int direction = 0; direction < myScatterWeights.getLen(); direction++){
 			
-			double myWeight = myScatterWeights.getElement(direction);
+			// Scattering coefficients are extracted after reconstruction of all n_k
+			// by component-wise application of the square root:
+			double myWeight = Math.sqrt(Math.abs(myScatterWeights.getElement(direction)));
+			
+			// Samples are created by multiplying each scatter directions with
+			// its respective scatter coefficients
 			SimpleVector vec1 = scatterDirections.getCol(direction);
 			vec1.multiplyBy(myWeight);
 			SimpleVector vec2 = vec1.multipliedBy(-1f);

@@ -100,7 +100,7 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry {
 		/** HORIZONTAL TRAJECTORY */
 		VERTICAL,
 		/** VERTICAL TRAJECTORY */
-		HORIZONTAL,
+		HORIZONTAL
 	}
 	
 	
@@ -299,11 +299,13 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry {
 		double error = 0;
 		
 		if(reconVertical){
-		error = error + reconstructionTrajectory(TrajectoryType.VERTICAL,it);
+			double val =reconstructionTrajectory(TrajectoryType.VERTICAL,it); 
+		error = error +  val;
 		}
 		
 		if(reconHorizontal){
-		error = error + reconstructionTrajectory(TrajectoryType.HORIZONTAL,it);
+		double val = reconstructionTrajectory(TrajectoryType.HORIZONTAL,it);
+		error = error +  val;
 		}	
 	
 		System.out.println("Error (Difference of Sinograms): " + error);

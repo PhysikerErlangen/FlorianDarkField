@@ -10,7 +10,7 @@ import edu.stanford.rsl.science.overexposure.CrossCalibration;
 
 
 
-public class DarkFieldScatterCoef extends  DarkFieldTensorGeometry{
+public class DarkFieldScatterWeightsCalculator extends  DarkFieldTensorGeometry{
 
 
 	
@@ -28,7 +28,7 @@ public class DarkFieldScatterCoef extends  DarkFieldTensorGeometry{
 	 * @param conf
 	 * @param numScatterVectors
 	 */
-	public DarkFieldScatterCoef( Configuration conf, int numScatterVectors) {
+	public DarkFieldScatterWeightsCalculator( Configuration conf, int numScatterVectors) {
 
 		// Call super constructor which contains whole geometry etc.
 		super(conf,numScatterVectors);

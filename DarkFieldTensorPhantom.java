@@ -28,8 +28,8 @@ import edu.stanford.rsl.tutorial.basics.PointCloudMaker;
 public class DarkFieldTensorPhantom  extends  DarkFieldTensorGeometry  {
 
 	
-	ArrayList<DarkField3DSinogram> sinogramList;
-	ArrayList<ImagePlus> projectionList;
+	private ArrayList<DarkField3DSinogram> sinogramList;
+	private ArrayList<ImagePlus> projectionList;
 	
 	private DarkField3DTensorVolume phantom;
 	
@@ -40,10 +40,20 @@ public class DarkFieldTensorPhantom  extends  DarkFieldTensorGeometry  {
 		return phantom;
 	}
 
-	SimpleMatrix scatterDirections;
+	/**
+	 *  SCATTER DIRECTION MATRIX
+	 */
+	private SimpleMatrix scatterDirections;
 	
-	final SimpleVector fiberDirX = new SimpleVector(1f,0f,0f);
-	final SimpleVector fiberDirY = new SimpleVector(0f,1f,0f);
+	/**
+	 * @return the scatterDirections
+	 */
+	public SimpleMatrix getScatterDirections() {
+		return scatterDirections;
+	}
+
+	final static SimpleVector fiberDirX = new SimpleVector(1f,0f,0f);
+	final static SimpleVector fiberDirY = new SimpleVector(0f,1f,0f);
 	
 //	public static void main (String [] args) throws Exception{
 //	
@@ -112,9 +122,9 @@ public class DarkFieldTensorPhantom  extends  DarkFieldTensorGeometry  {
 		calcPhantom();
 	}
 	
-	public SimpleVector calculateEllipsoidFromFiberOrientation(SimpleVector fiberDir){
+	public static SimpleVector calculateEllipsoidFromFiberOrientation(SimpleVector fiberDir, SimpleMatrix scatterDirections){
 	
-		SimpleVector eigenValues = new SimpleVector(1,1,0.0001);
+		SimpleVector eigenValues = new SimpleVector(5,5,1);
 		SimpleMatrix eigenVectors = null;
 		
 				
@@ -122,11 +132,6 @@ public class DarkFieldTensorPhantom  extends  DarkFieldTensorGeometry  {
 			//double[][] myEigenVectors ={ {0,1,0},{0,0,1},{1,0,0}};
 			double[][] myEigenVectors ={ {0,0,1},{1,0,0},{0,1,0}};
 			eigenVectors = new SimpleMatrix(myEigenVectors);
-			
-//			SimpleVector test = eigenVectors.getCol(0);
-//			SimpleVector test2 = eigenVectors.getCol(1);
-//			SimpleVector test3 = eigenVectors.getCol(2);
-//			System.out.println("TEST");
 			
 		} else if(SimpleOperators.equalElementWise(fiberDir, fiberDirY,0.01)){
 			double[][] myEigenVectors ={ {1,0,0},{0,0,1},{0,1,0}};
@@ -151,8 +156,8 @@ public class DarkFieldTensorPhantom  extends  DarkFieldTensorGeometry  {
 		SimpleVector fiberDir1 = new SimpleVector(1f,0f,0f);
 		SimpleVector fiberDir2 = new SimpleVector(0f,1f,0f);
 		
-		SimpleVector scatterCoefDir1 = calculateEllipsoidFromFiberOrientation(fiberDir1);
-		SimpleVector scatterCoefDir2 = calculateEllipsoidFromFiberOrientation(fiberDir2);
+		SimpleVector scatterCoefDir1 = calculateEllipsoidFromFiberOrientation(fiberDir1, scatterDirections);
+		SimpleVector scatterCoefDir2 = calculateEllipsoidFromFiberOrientation(fiberDir2, scatterDirections);
 		
 		int aX = (int)( 0.3*imgSizeX);
 		int bX = (int) (0.7*imgSizeX);
@@ -185,18 +190,6 @@ public class DarkFieldTensorPhantom  extends  DarkFieldTensorGeometry  {
 					} else if(z<l5){
 						phantom.setDarkFieldScatterTensor(x, y, z, scatterCoefDir2);
 					}  
-					
-					
-					
-					
-					
-//					if((double)z <= a ){
-//							phantom.setDarkFieldScatterTensor(x, y, z, scatterDir1);
-//					}else if( (double)z < b){
-//							phantom.setDarkFieldScatterTensor(x, y, z, scatterDir2);
-//					}else{
-//							phantom.setDarkFieldScatterTensor(x, y, z, scatterDir3);
-//					}
 
 				} // END X 
 		} // END Y
@@ -212,8 +205,15 @@ public class DarkFieldTensorPhantom  extends  DarkFieldTensorGeometry  {
 	 * @param index
 	 * @return
 	 */
-	public DarkField3DSinogram getDarkFieldSinogram(int index){
-		return sinogramList.get(index);
+	public DarkField3DSinogram getDarkFieldSinogram(TrajectoryType type){
+		if(type == TrajectoryType.HORIZONTAL){
+			return sinogramList.get(0);
+		} else if(type == TrajectoryType.VERTICAL){
+			return sinogramList.get(1);
+		} else {
+			return null;
+		}
+
 	}
 	
 	/**
@@ -222,8 +222,8 @@ public class DarkFieldTensorPhantom  extends  DarkFieldTensorGeometry  {
 	 */
 	public void calculateDarkFieldProjection(Configuration config1, Configuration config2){
 		
-		DarkFieldScatterCoef scatterCoef1 = new DarkFieldScatterCoef(config1,phantom.getNumberOfChannels());
-		DarkFieldScatterCoef scatterCoef2 = new DarkFieldScatterCoef(config2,phantom.getNumberOfChannels());
+		DarkFieldScatterWeightsCalculator scatterCoef1 = new DarkFieldScatterWeightsCalculator(config1,phantom.getNumberOfChannels());
+		DarkFieldScatterWeightsCalculator scatterCoef2 = new DarkFieldScatterWeightsCalculator(config2,phantom.getNumberOfChannels());
 		
 		ParallelDarkFieldProjector3DTensor projector1 = new
 				ParallelDarkFieldProjector3DTensor(config1, scatterCoef1);

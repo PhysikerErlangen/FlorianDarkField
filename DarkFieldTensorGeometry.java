@@ -17,6 +17,7 @@ import edu.stanford.rsl.conrad.utils.Configuration;
 
 
 
+
 public class DarkFieldTensorGeometry {
 	
 	// maximum projection angle in index
@@ -71,8 +72,15 @@ public class DarkFieldTensorGeometry {
 	
 	Trajectory geo;
 	
+	public static enum TrajectoryType {
+		/** HORIZONTAL TRAJECTORY */
+		VERTICAL,
+		/** VERTICAL TRAJECTORY */
+		HORIZONTAL
+	}
+	
 	// Permutation matrix, used to calculate ray direction for different trajectories
-	String trajectoryFlag; // TODO initialize
+	TrajectoryType trajectoryFlag; // TODO initialize
 	
 	/**
 	 * @param conf
@@ -129,28 +137,30 @@ public class DarkFieldTensorGeometry {
 	
 		initRotMatrix();
 		
+		
+		
 	}
 
 	
-	/**
-	 * Easy method that checks if two SimpleVector are the same
-	 * @param v1
-	 * @param v2
-	 * @return
-	 */
-	public boolean checkEquality(SimpleVector v1, SimpleVector v2){
-		for (int k = 0; k < v1.getLen(); k++){
-			if( ( v1.getElement(k) - v2.getElement(k) ) != 0){
-				return false;
-			}
-		}
-		return true;
-	}
+//	/**
+//	 * Easy method that checks if two SimpleVector are the same
+//	 * @param v1
+//	 * @param v2
+//	 * @return
+//	 */
+//	public static boolean checkEquality(SimpleVector v1, SimpleVector v2){
+//		for (int k = 0; k < v1.getLen(); k++){
+//			if( ( v1.getElement(k) - v2.getElement(k) ) != 0){
+//				return false;
+//			}
+//		}
+//		return true;
+//	}
 	
 	
 	/**
 	 *  Initializes the rotation matrix for both trajectories
-	 *  This method can only work as long work 2 specific
+	 *  This method can only work as long one works with 2 specific
 	 *  trajectories!!!
 	 */
 	public void initRotMatrix(){
@@ -160,11 +170,11 @@ public class DarkFieldTensorGeometry {
 		
 		SimpleVector rotAxis = geo.getRotationAxis();
 		
-		if (checkEquality(axis001,rotAxis) ){
-			trajectoryFlag = "001";
+		if (SimpleOperators.equalElementWise(axis001, rotAxis,0.001)){
+			trajectoryFlag = TrajectoryType.HORIZONTAL;
 		}
-		else if(checkEquality(axis010, rotAxis)){
-			trajectoryFlag = "010";			
+		else if(SimpleOperators.equalElementWise(axis010, rotAxis,0.001)){
+			trajectoryFlag = TrajectoryType.VERTICAL;			
 		} else{
 			
 		}
@@ -195,10 +205,10 @@ public class DarkFieldTensorGeometry {
 	 * @param curU_index
 	 * @return
 	 */
-	public double calculateDetectorCoordinate(int curU_index){
+	public double calcU_world(int curU_index){
 		// Calculate distance from camera center and include possible offset
-		double s = deltaU * curU_index + this.offSetU_world - maxU_world/2.0;
-		return s;
+		double uWorld = deltaU * curU_index + this.offSetU_world - maxU_world/2.0;
+		return uWorld;
 	}
 	
 	
@@ -215,15 +225,15 @@ public class DarkFieldTensorGeometry {
 	}
 
 	/**
-	 * @param curV
+	 * @param curV_index
 	 * @return
 	 */
-	public double calculateHeight(double curV){
+	public double curV_world(double curV_index){
 		// Calculate distance from camera center and include a possible offset
 		// double curHeight = deltaV  * curV + offSetV_world - maxV/2.0;
-		double curHeight = deltaV  * curV + offSetV_world - maxV_world/2.0;
+		double curV_world = deltaV  * curV_index + offSetV_world - maxV_world/2.0;
 		
-		return curHeight;
+		return curV_world;
 		
 	}
 	
@@ -266,13 +276,6 @@ public class DarkFieldTensorGeometry {
 	}
 	
 	
-	public void calculateRayDirection(double curTheta){
-		
-		
-		
-	}
-	
-	
 	/**
 	 * THIS is a really ugly method, but seems to be the fastest (but dirty) implementation
 	 * With this we implement two trajectories!
@@ -283,10 +286,10 @@ public class DarkFieldTensorGeometry {
 	 */
 	public PointND calculateRotatedVector(double u_worldX, double u_worldY, double v_worldZ){
 
-		if(trajectoryFlag.equals("001")){
+		if(trajectoryFlag == TrajectoryType.HORIZONTAL){
 		// Calculate Point when Rotation Axis is standard y - axis
 		return new PointND(u_worldX,u_worldY,v_worldZ);
-	}	else if(trajectoryFlag.equals("010")){
+	}	else if(trajectoryFlag == TrajectoryType.VERTICAL){
 		return new PointND(-v_worldZ,u_worldY,u_worldX);
 	}else{
 		return null;

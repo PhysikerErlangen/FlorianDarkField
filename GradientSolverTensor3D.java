@@ -8,6 +8,7 @@ package edu.stanford.rsl.science.darkfield.FlorianDarkField;
 // Specialized backprojector and projector methods are required for solving the system with gradient decent
 import java.io.File;
 
+
 import edu.stanford.rsl.science.darkfield.FlorianDarkField.ParallelDarkFieldBackprojector3DTensor;
 import edu.stanford.rsl.science.darkfield.FlorianDarkField.ParallelDarkFieldProjector3DTensor;
 import edu.stanford.rsl.science.darkfield.FlorianDarkField.DarkField3DTensorVolume;
@@ -38,8 +39,8 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry {
 
 	private int maxIt;
 
-	private DarkFieldScatterCoef scatterCoef1;
-	private DarkFieldScatterCoef scatterCoef2;
+	private DarkFieldScatterWeightsCalculator scatterCoef1;
+	private DarkFieldScatterWeightsCalculator scatterCoef2;
 
 
 	/**
@@ -96,12 +97,7 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry {
 		this.tensorConstraint = tensorConstraint;
 	}
 
-	public static enum TrajectoryType {
-		/** HORIZONTAL TRAJECTORY */
-		VERTICAL,
-		/** VERTICAL TRAJECTORY */
-		HORIZONTAL
-	}
+
 	
 	
 	/**
@@ -184,9 +180,9 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry {
 		 * Create instances of both scatter coef classes
 		 * One for each direction
 		 */
-		scatterCoef1 = new DarkFieldScatterCoef(configuration1,
+		scatterCoef1 = new DarkFieldScatterWeightsCalculator(configuration1,
 				numScatterVectors);
-		scatterCoef2 = new DarkFieldScatterCoef(configuration2,
+		scatterCoef2 = new DarkFieldScatterWeightsCalculator(configuration2,
 				numScatterVectors);
 
 		/*
@@ -250,11 +246,17 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry {
 					.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
 			System.out.println("Current Iteration: " + it);
 
+			/**
+			 * GRADIENT STEP FOR BOTH TRAJECTORIES
+			 * AT ITERATION IT
+			 */
 			doGradientStep(it);
 
 			
+			/**
+			 * CONSTRAINT ENFORCEMENT
+			 */
 			System.out.println("Enforce Hard Constraint on reconstructed scatter coefs: " + it);
-			
 			reconImage.enforceConstraint(tensorConstraint);
 			
 			
@@ -298,6 +300,7 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry {
 
 		double error = 0;
 		
+	
 		if(reconVertical){
 			double val =reconstructionTrajectory(TrajectoryType.VERTICAL,it); 
 		error = error +  val;
@@ -312,11 +315,16 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry {
 
 	}
 	
+	
+	
 	/**
 	 * @param type
 	 * @return
 	 */
 	private ParallelDarkFieldBackprojector3DTensor getBackProjector(TrajectoryType type){
+	
+		
+		
 		if(type == TrajectoryType.VERTICAL ){
 			return backProjector1;
 		} else if(type == TrajectoryType.HORIZONTAL ){

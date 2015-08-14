@@ -3,6 +3,7 @@ package edu.stanford.rsl.science.darkfield.FlorianDarkField;
 import static org.junit.Assert.*;
 
 import java.util.ArrayList;
+import java.util.Scanner;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -15,6 +16,13 @@ public class DarkFieldPointCloudViewerTest {
 
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
+	
+		  Scanner sc = new Scanner(System.in);
+		    System.out.print("Gib was ein: ");
+		    String eingabe = sc.next();
+		    System.out.println("Du hast " + eingabe + " eingegeben.");
+		    sc.close();
+	
 	}
 
 	@Before

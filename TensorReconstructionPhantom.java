@@ -11,6 +11,7 @@ import java.io.File;
 
 import com.jogamp.opengl.util.awt.ImageUtil;
 
+import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
 import edu.stanford.rsl.conrad.numerics.SimpleVector;
 import edu.stanford.rsl.conrad.utils.Configuration;
 
@@ -21,6 +22,7 @@ import edu.stanford.rsl.science.darkfield.FlorianDarkField.GradientSolverTensor3
 // Contains the reconstructed sample
 import edu.stanford.rsl.science.darkfield.FlorianDarkField.DarkField3DTensorVolume;
 import edu.stanford.rsl.science.darkfield.FlorianDarkField.ImageToSinogram3D;
+import edu.stanford.rsl.science.darkfield.FlorianDarkField.DarkFieldTensorGeometry.TrajectoryType;
 import ij.IJ;
 import ij.ImageJ;
 import ij.ImagePlus;
@@ -32,9 +34,19 @@ import ij.ImagePlus;
 public class TensorReconstructionPhantom{
 
 	public static void main (String [] args) throws Exception{
- 
-		String fileNameConfig1 = "E:\\fschiffers\\MeasuredData\\Phantom2\\PhantomHalfLarge_unsymetric.xml";
+
+		DarkFieldTensorPhantom phantomObject;
+
+		DarkFieldReconPipeline myDarkFieldPipeLine;
 		
+		int numScatterVectors;
+		
+		File folder;
+		
+		String fileNameConfig1 = "E:\\fschiffers\\MeasuredData\\Phantom2\\PhantomHalfLarge_unsymetricSmall.xml";
+		
+
+
 		// Load configuration wooden case
 
 		Configuration Configuration1 = Configuration.loadConfiguration(fileNameConfig1);
@@ -50,22 +62,23 @@ public class TensorReconstructionPhantom{
 		new ImageJ();
 		
 		// Number of scatter vectors
-		int numScatterVectors = 7;
+		numScatterVectors = 7;
 		
 		// Create Dark Field Phantom
-		DarkFieldTensorPhantom phantom = new DarkFieldTensorPhantom(Configuration1,numScatterVectors);
+		phantomObject = new DarkFieldTensorPhantom(Configuration1,numScatterVectors);
 
 		// display the phantom
-		phantom.getPhantom().show("Phantom Volume");
+		phantomObject.getPhantom().show("Phantom Volume");
 		
-		phantom.calculateDarkFieldProjection(Configuration1, Configuration2);
+		phantomObject.calculateDarkFieldProjection(Configuration1, Configuration2);
  		
 		/* 
 		 * Load dark field images
 		 */
 		
 		// Load dark field image of orientation 1
-		DarkField3DSinogram sinoDCI1   = phantom.getDarkFieldSinogram(0);		
+		DarkField3DSinogram sinoDCI1   = phantomObject.getDarkFieldSinogram(TrajectoryType.HORIZONTAL);		
+		DarkField3DSinogram sinoDCI2   = phantomObject.getDarkFieldSinogram(TrajectoryType.VERTICAL);
 		
 		boolean showFlag = true;
 		
@@ -76,6 +89,8 @@ public class TensorReconstructionPhantom{
 		// Show Stack of DarkField slices
 		sinoDCI1.showSinogram("Sinogram of dark field image 1");
 		// Show DarkField Projection Images
+		
+		
 		}
 
 		
@@ -85,16 +100,16 @@ public class TensorReconstructionPhantom{
 		
 		// Number of scatter vectors
 		//Step size for Gradient decent
-		float stepSize = 0.007f;
+		float stepSize = 0.02f;
 		// Number of maximal iterations in gradient decent
-		int maxIt = 1;
+		int maxIt =5;
 		
 		// Initialize the pipeline
-		DarkFieldReconPipeline myDarkFieldPipeLine = new DarkFieldReconPipeline(Configuration1,Configuration2,fileNameConfig1);
+		myDarkFieldPipeLine = new DarkFieldReconPipeline(Configuration1,Configuration2,fileNameConfig1);
 		
 		// Reconstruct DarkField Volume
 		
-		File folder = new File(fileNameConfig1);
+		folder = new File(fileNameConfig1);
 		
 		myDarkFieldPipeLine.reconstructDarkFieldVolume(numScatterVectors,maxIt,stepSize,folder,sinoDCI1,null);
 		
@@ -105,7 +120,17 @@ public class TensorReconstructionPhantom{
 		myDarkFieldPipeLine.calculateFiberOrientations(myParentFile);
 		
 		System.out.println("Fiber Orientations sucessfully saved.");
-
+		
+		
+		DarkField3DTensorVolume recon =  myDarkFieldPipeLine.getReconDarkField();
+		
+		DarkField3DTensorVolume  diffVolume  = DarkField3DTensorVolume.sub(recon, phantomObject.getPhantom());
+		
+		diffVolume.show("Difference between diffVolume and Phantom");
+		
+		SimpleMatrix myScatterMatrix = DarkFieldScatterDirection.getScatterDirectionMatrix(numScatterVectors);
+		
+		DarkFieldReconPipeline.calculateFiberOrientations(phantomObject.getPhantom(), myScatterMatrix, folder,"fiberDirectionsPhantom");
 	}
 
 }

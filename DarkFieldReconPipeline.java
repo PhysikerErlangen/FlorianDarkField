@@ -333,12 +333,16 @@ public void reconstructDarkFieldVolume(int numScatterVectors, int maxIt, float s
 }
 
 
+
 	/**
 	 * @param numScatterVectors
 	 * @param maxIt
 	 * @param stepSize
+	 * @param pathSaveDarkField
+	 * @param sinoDCI1
+	 * @param sinoDCI2
 	 */
-	public void reconstructDarkFieldVolume(int numScatterVectors, int maxIt, float stepSize, File pathDarkField,DarkField3DSinogram sinoDCI1,DarkField3DSinogram sinoDCI2){
+	public void reconstructDarkFieldVolume(int numScatterVectors, int maxIt, float stepSize, File pathSaveDarkField,DarkField3DSinogram sinoDCI1,DarkField3DSinogram sinoDCI2){
 		
 				
 		// Initialize the GradientSolver3D
@@ -352,8 +356,8 @@ public void reconstructDarkFieldVolume(int numScatterVectors, int maxIt, float s
 		// Execute the gradient decent
 		reconDarkField = gradientSolver.Gradient3D();
 
-		if(pathDarkField!=null){
-			String filePath = pathDarkField.getParent() + "\\DCI_volume.tif";
+		if(pathSaveDarkField!=null){
+			String filePath = pathSaveDarkField.getParent() + "\\DCI_volume.tif";
 			String volumeName = "Reconstructed DarkField Volume";
 			reconDarkField.write3DTensorToImage(filePath, volumeName);
 		}

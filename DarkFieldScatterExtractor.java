@@ -39,6 +39,15 @@ public class DarkFieldScatterExtractor {
 	}
 	
 	
+
+	
+	
+	/**
+	 * @param x
+	 * @param y
+	 * @param z
+	 * @return
+	 */
 	public SimpleVector calcProjectedScatterCoefficients(int x, int y, int z){
 		
 

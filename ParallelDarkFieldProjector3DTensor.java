@@ -22,9 +22,9 @@ import edu.stanford.rsl.conrad.utils.Configuration;
 public class ParallelDarkFieldProjector3DTensor extends  DarkFieldTensorGeometry {
 	
 
-	DarkFieldScatterCoef scatterCoefficients;
+	DarkFieldScatterWeightsCalculator scatterCoefficients;
 	
-	public ParallelDarkFieldProjector3DTensor(Configuration config, DarkFieldScatterCoef scatterCoefficients){
+	public ParallelDarkFieldProjector3DTensor(Configuration config, DarkFieldScatterWeightsCalculator scatterCoefficients){
 	
 		// Call super constructor
 		super(config,scatterCoefficients.numScatterVectors);
@@ -92,13 +92,13 @@ public class ParallelDarkFieldProjector3DTensor extends  DarkFieldTensorGeometry
 			for (int curU = 0; curU < maxU_index; ++curU) {
 
 				// Calculate distance from camera center and include possible offset
-				double s = calculateDetectorCoordinate(curU);
+				double s = calcU_world(curU);
 				
 				
 				// Go through all slices
 				for( int curV = 0; curV < this.maxV_index; curV ++){
 				
-					double curHeight = calculateHeight(curV);
+					double curHeight = curV_world(curV);
 									
 					// compute two points on the line through s and theta
 				

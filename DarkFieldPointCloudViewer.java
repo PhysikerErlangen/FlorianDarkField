@@ -45,7 +45,7 @@ public class DarkFieldPointCloudViewer {
 	}
 
 	
-public void initData(ArrayList<PointND> points, String title){
+private void initData(ArrayList<PointND> points, String title){
 	
 	this.points = points;
 	// Open new PointCloudViewer Object

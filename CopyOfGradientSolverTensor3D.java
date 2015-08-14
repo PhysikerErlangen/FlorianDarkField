@@ -29,8 +29,8 @@ public class CopyOfGradientSolverTensor3D extends DarkFieldTensorGeometry{
 	
 	int maxIt;
 		
-	DarkFieldScatterCoef scatterCoef1;
-	DarkFieldScatterCoef scatterCoef2;
+	DarkFieldScatterWeightsCalculator scatterCoef1;
+	DarkFieldScatterWeightsCalculator scatterCoef2;
 	
 	// MASKING Images for zero constraint
 	DarkField3DTensorVolume reconAMP1;
@@ -66,8 +66,8 @@ public class CopyOfGradientSolverTensor3D extends DarkFieldTensorGeometry{
 		
 		// Create instances of both scatter coef classes
 		// One for each direction
-		scatterCoef1 = new DarkFieldScatterCoef(configuration1,numScatterVectors);
-		scatterCoef2 = new DarkFieldScatterCoef(configuration2,numScatterVectors);
+		scatterCoef1 = new DarkFieldScatterWeightsCalculator(configuration1,numScatterVectors);
+		scatterCoef2 = new DarkFieldScatterWeightsCalculator(configuration2,numScatterVectors);
 	}
 	
 	/*

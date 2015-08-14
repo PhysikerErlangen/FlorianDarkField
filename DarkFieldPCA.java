@@ -86,7 +86,7 @@ public class DarkFieldPCA{
 	/**
 	 * contains the calculated scatter coefficient by tensor reconstruction
 	 */
-	private SimpleVector myScatterWeights;
+	private SimpleVector myScatterCoef;
 	
 	/**
 	 * covMatrix contains the entries covariance matrix of the given the data set
@@ -108,19 +108,22 @@ public class DarkFieldPCA{
 		return eigenValues;
 	}
 
+
 	/**
 	 * Constructor for DarkFieldPCA.
 	 * CAUTION: DarkFieldPCA needs special data, as no mean shift is performed, as the
 	 * data points are already assumed to have a mean of 0.
+	 * @param scatterDirections
+	 * @param myScatterCoef
 	 */
-	public DarkFieldPCA (SimpleMatrix scatterDirections, SimpleVector myScatterWeights){
+	public DarkFieldPCA (SimpleMatrix scatterDirections, SimpleVector myScatterCoef){
 
-		assert(scatterDirections.getCols() != myScatterWeights.getLen()) : new Exception("Dimensions do not match in DarkFieldPCA.");
+		assert(scatterDirections.getCols() != myScatterCoef.getLen()) : new Exception("Dimensions do not match in DarkFieldPCA.");
 		
 		// Save reference to the predefined scatterDirections
 		this.scatterDirections = scatterDirections;
 		
-		this.myScatterWeights = myScatterWeights;
+		this.myScatterCoef = myScatterCoef;
 		
 		// Get Dimensionality of one scatter direction
 		dimension = scatterDirections.getRows();
@@ -128,12 +131,12 @@ public class DarkFieldPCA{
 		// Get number of scatter points
 		// 2*numSamples because we take + and - direction of the scatter direction
 		// for calculating the PCA due to stability reasons (see paper of Vogel)
-		numPoints = 2*myScatterWeights.getLen();
+		numPoints = 2*myScatterCoef.getLen();
 		
 		// Calc the matrix used for PCA with dimension: 3 X 2*Num_Points
 		
-		
-		
+		// First calculate the "Dataset" that is used for PCA. This dataset has already by definition mean 0
+		calcSetOfScatterPoints();
 		
 	}
 		
@@ -144,16 +147,38 @@ public class DarkFieldPCA{
 	 * See eq. 15/16 of Vogel "Constrained X-Ray tensor tomography reconstruction" 2015
 	 */
 	private void calcSetOfScatterPoints(){
+		scatterPoints = calcSetOfScatterPoints(scatterDirections, myScatterCoef);
+	} // END calcSetOFScatterPoints
+	
+	
+	/**
+	 * Calculates set of 2K directions vectors corresponding to scatter coefficients and
+	 * the respective scatter directions
+	 * See eq. 15/16 of Vogel "Constrained X-Ray tensor tomography reconstruction" 2015
+	 */
+	public static SimpleMatrix calcSetOfScatterPoints(SimpleMatrix scatterDirections,
+			SimpleVector scatterCoef){
+		
+		// Check for inconsistency (different dimensions)
+				assert(scatterDirections.getCols()==scatterCoef.getLen()
+						&&scatterDirections.getRows()==3)
+						: new Exception("Dimension of data is wrong.");
+		
+		// Dimension of "world coordinates" should be 3!
+		int dimension = scatterDirections.getRows();
+		
+		// Number of ScatterPoints is twice number of scatter weights
+		int numPoints = 2*scatterDirections.getCols();
 		
 		// NumPoints is 2*Number of scatter directions
-		scatterPoints = new SimpleMatrix(dimension,numPoints);
+		SimpleMatrix scatterPoints = new SimpleMatrix(dimension,numPoints);
 		
 		// Loop through all scatter directions
-		for (int direction = 0; direction < myScatterWeights.getLen(); direction++){
+		for (int direction = 0; direction < scatterCoef.getLen(); direction++){
 			
 			// Scattering coefficients are extracted after reconstruction of all n_k
 			// by component-wise application of the square root:
-			double myWeight = Math.sqrt(Math.abs(myScatterWeights.getElement(direction)));
+			double myWeight = Math.sqrt(Math.abs(scatterCoef.getElement(direction)));
 			
 			// Samples are created by multiplying each scatter directions with
 			// its respective scatter coefficients
@@ -163,8 +188,12 @@ public class DarkFieldPCA{
 			
 			scatterPoints.setColValue(2*direction, vec1);
 			scatterPoints.setColValue(2*direction + 1, vec2);
+			
 		}
+		
+		return scatterPoints;
 	} // END calcSetOFScatterPoints
+	
 	
 	
 	/**
@@ -222,8 +251,7 @@ public class DarkFieldPCA{
 	public void run(){
 		assert(scatterPoints != null) : new Exception("Initialize data array fist.");
 		
-		// First calculate the "Dataset" that is used for PCA. This dataset has already by definition mean 0
-		calcSetOfScatterPoints();
+
 		
 		// Calculate covariance matrix of given dataset
 		calcCovarianceMatrix();

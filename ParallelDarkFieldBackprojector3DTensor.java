@@ -37,7 +37,7 @@ public class ParallelDarkFieldBackprojector3DTensor extends  DarkFieldTensorGeom
 	// Sampling rate of line integral
 	final double samplingRate = 3.d;
 	
-	DarkFieldScatterCoef scatterCoefficients;
+	DarkFieldScatterWeightsCalculator scatterCoefficients;
 	
 	
 	
@@ -49,7 +49,7 @@ public class ParallelDarkFieldBackprojector3DTensor extends  DarkFieldTensorGeom
 	 * @param pxSzUMM
 	 * @param pxSzVMM
 	 */
-	public ParallelDarkFieldBackprojector3DTensor(Configuration config, DarkFieldScatterCoef scatterCoefficients) {
+	public ParallelDarkFieldBackprojector3DTensor(Configuration config, DarkFieldScatterWeightsCalculator scatterCoefficients) {
 	
 		// Open super operator of geometry class
 		super(config,scatterCoefficients.numScatterVectors);
@@ -104,13 +104,13 @@ public class ParallelDarkFieldBackprojector3DTensor extends  DarkFieldTensorGeom
 			for (int curU = 0; curU < this.maxU_index; curU++) {
 			
 				// Calculate distance from camera center and include possible offset
-				double s = calculateDetectorCoordinate(curU);
+				double s = calcU_world(curU);
 				
 				// Loop through all slices of detector
 				for(int curV = 0; curV < this.maxV_index; curV++){
 				
 				// Calculate vertical distance from camera center and include a possible offset
-				double curHeight = calculateHeight(curV);
+				double curHeight = curV_world(curV);
 					
 				// compute two points on the line through s and theta
 				// We use PointND for Points in 3D space and SimpleVector for

@@ -23,11 +23,7 @@ import edu.stanford.rsl.conrad.numerics.SimpleVector.VectorNormType;
  */
 public class DarkFieldPCA_Test {
 
-	DarkFieldPCA testPCA;
 	
-	SimpleMatrix eigenVecFromMatlab;
-	SimpleVector eigenValuesFromMatlab;
-
 	/**
 	 * @throws java.lang.Exception
 	 */
@@ -36,6 +32,15 @@ public class DarkFieldPCA_Test {
 	 */
 	@Before
 	public void setUp() throws Exception {
+		
+	
+		
+	}
+
+
+
+	@Test
+	public void testEigenVectors() {
 		
 		// Values taken from example out of corresponding Matlab file
 		double[][] data = new double[][]{
@@ -61,6 +66,12 @@ public class DarkFieldPCA_Test {
 			    {0.9903  ,  0.1360  , -0.0276},
 			    {-0.0839 ,   0.7452 ,   0.6615}
 		};
+		
+		DarkFieldPCA testPCA;
+		
+		SimpleMatrix eigenVecFromMatlab;
+		SimpleVector eigenValuesFromMatlab;
+
 		eigenVecFromMatlab = new SimpleMatrix(eigenVecMatlab);
 		// Eigenvalues calculated by matlab
 		eigenValuesFromMatlab = new SimpleVector(  245.6525,  65.6918,  6.4250);
@@ -79,12 +90,7 @@ public class DarkFieldPCA_Test {
 		
 		testPCA.run();
 		
-	}
-
-
-
-	@Test
-	public void testEigenVectors() {
+		
 		SimpleMatrix eigenVectors = testPCA.getEigenVectors();
 		
 		System.out.println("EigenVectors are: "+eigenVectors.transposed());
@@ -99,29 +105,32 @@ public class DarkFieldPCA_Test {
 		double myNorm = diffMatrix.norm(MatrixNormType.MAT_NORM_FROBENIUS);
 		System.out.println("The norm of differences is: " + myNorm);
 		
-		double th = 0.1;
+		double thEigenVector = 0.1;
 		
 		
-		assertTrue("Norm of Eigenvector difference matrix is too large",myNorm < th);
+		assertTrue("Norm of Eigenvector difference matrix is too large",myNorm < thEigenVector);
+		
+		SimpleVector eigenValues = 	testPCA.getEigenValues();
+		System.out.println("EigenValues in descending order: " + eigenValues);
+		
+		SimpleVector diffVector = SimpleOperators.subtract(eigenValues,eigenValuesFromMatlab);
+		
+		double norm = diffVector.norm(VectorNormType.VEC_NORM_L1);
+		double thEigenVal = 20;
+		System.out.println("Norm of differnces: " +norm);
+		assertTrue("This works fine",norm < thEigenVal);
+		
 	}
 	
 	@Test
 	public void testEigenValues() {
 		
-		SimpleVector eigenValues = 	testPCA.getEigenValues();
-		System.out.println("EigenValues in descending order: " + eigenValues);
-		
-		SimpleVector diffMatrix = SimpleOperators.subtract(eigenValues,eigenValuesFromMatlab);
-		
-		double norm = diffMatrix.norm(VectorNormType.VEC_NORM_L1);
-		double th = 20;
-		System.out.println("Norm of differnces: " +norm);
-		assertTrue("This works fine",norm < th);
+
 	}
 	
 	@Test
 	public void testShowDataPoints() {
-		testPCA.showDataPoints();
+		
 	}
 	
 	

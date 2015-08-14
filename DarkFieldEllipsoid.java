@@ -72,6 +72,17 @@ private SimpleVector halfAxisLengths;
 	 * @return
 	 */
 	private SimpleVector transformPointIntoEigenVectorSystem(SimpleVector myPoint){
+		SimpleVector transformed = transformPointIntoEigenVectorSystem(myPoint, eigenVectors);
+		return transformed;
+	}
+	
+	/**
+	 * Transforms one point into the ellipsoid's coordinate frame
+	 * thus obtaining a vector [x,y,z] = V'*r
+	 * @param myPoint - has to be of dimension 3
+	 * @return
+	 */
+	public static SimpleVector transformPointIntoEigenVectorSystem(SimpleVector myPoint, SimpleMatrix eigenVectors){
 		SimpleVector transformed = SimpleOperators.multiply(eigenVectors.transposed(), myPoint);
 		return transformed;
 	}

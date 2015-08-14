@@ -105,7 +105,7 @@ private SimpleVector halfAxisLengths;
 			curCoef = 0;
 		} else {
 		SimpleVector scaledPoint = SimpleOperators.divideElementWise(point,halfAxisLengths);
-		 curCoef = 1/scaledPoint.normL2();
+		 curCoef = 1/(scaledPoint.normL2()*scaledPoint.normL2());
 		}
 		
 		projScatterCoef.setElementValue(channel, curCoef);

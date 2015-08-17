@@ -268,6 +268,7 @@ public class DarkField3DTensorVolume extends DarkFieldGrid3DTensor{
 	
 	public void enforceConstraint(TensorConstraintType type){
 		if(type == TensorConstraintType.HARD_CONSTRAINT ){
+			System.out.println("Enforce Hard Constraint on reconstructed scatter coefs: ");
 			enforceHardConstraint();
 		} else if (type == TensorConstraintType.SOFT_CONSTRAINT){
 			// TODO NOT YET IMPLEMENTED

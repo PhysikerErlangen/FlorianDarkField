@@ -22,6 +22,7 @@ import edu.stanford.rsl.science.darkfield.FlorianDarkField.GradientSolverTensor3
 // Contains the reconstructed sample
 import edu.stanford.rsl.science.darkfield.FlorianDarkField.DarkField3DTensorVolume;
 import edu.stanford.rsl.science.darkfield.FlorianDarkField.ImageToSinogram3D;
+import edu.stanford.rsl.science.darkfield.FlorianDarkField.DarkField3DTensorVolume.TensorConstraintType;
 import edu.stanford.rsl.science.darkfield.FlorianDarkField.DarkFieldTensorGeometry.TrajectoryType;
 import ij.IJ;
 import ij.ImageJ;
@@ -100,18 +101,20 @@ public class TensorReconstructionPhantom{
 		
 		// Number of scatter vectors
 		//Step size for Gradient decent
-		float stepSize = 0.02f;
+		float stepSize = 0.005f;
 		// Number of maximal iterations in gradient decent
-		int maxIt =5;
+		int maxIt =1;
 		
 		// Initialize the pipeline
-		myDarkFieldPipeLine = new DarkFieldReconPipeline(Configuration1,Configuration2,fileNameConfig1);
+		myDarkFieldPipeLine = new DarkFieldReconPipeline(Configuration1,Configuration2,fileNameConfig1,TensorConstraintType.NO_CONSTRAINT);
 		
 		// Reconstruct DarkField Volume
 		
 		folder = new File(fileNameConfig1);
 		
-		myDarkFieldPipeLine.reconstructDarkFieldVolume(numScatterVectors,maxIt,stepSize,folder,sinoDCI1,null);
+		boolean writeVtkInEveryStep = false;
+		
+		myDarkFieldPipeLine.reconstructDarkFieldVolume(numScatterVectors,maxIt,stepSize,folder,sinoDCI1,null,writeVtkInEveryStep);
 		
 		System.out.println(" DarkField Reconstruction was successfully created and saved.");
 		

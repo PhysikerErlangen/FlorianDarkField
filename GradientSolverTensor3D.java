@@ -114,10 +114,10 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry {
 			Configuration configuration2,
 			DarkField3DSinogram darkFieldSinogram1,
 			DarkField3DSinogram darkFieldSinogram2, float stepSize, int maxIt,
-			int numScatterVectors, File pathToSaveVtk) {
+			int numScatterVectors, File pathToSaveVtk,TensorConstraintType type) {
 		this(configuration1, configuration2, darkFieldSinogram1,
 				darkFieldSinogram2, stepSize, maxIt, numScatterVectors, pathToSaveVtk, null,
-				null);
+				null,type);
 	}
 
 	/**
@@ -137,7 +137,7 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry {
 			DarkField3DSinogram darkFieldSinogram1,
 			DarkField3DSinogram darkFieldSinogram2, float stepSize, int maxIt,
 			int numScatterVectors,  File pathToSaveVtk, DarkField3DTensorVolume maskAMP1,
-			DarkField3DTensorVolume maskAMP2) {
+			DarkField3DTensorVolume maskAMP2,TensorConstraintType type) {
 
 		// Open super operator of geometry class
 		super(configuration1, numScatterVectors);
@@ -201,6 +201,8 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry {
 		projector2 = new ParallelDarkFieldProjector3DTensor(configuration2,
 				scatterCoef2);
 		
+		setTensorConstraint(type);
+		
 	}
 
 	/**
@@ -209,10 +211,10 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry {
 	 * 
 	 * @return reconstructed DarkField Tensor volume
 	 */
-	public DarkField3DTensorVolume Gradient3D() {
+	public DarkField3DTensorVolume Gradient3D(boolean writeVtkInEveryStep) {
 
 		debug = true;
-		writeVtkInEveryStep = true;
+
 
 		// Initialize to be constructed volume
 		reconImage = new DarkField3DTensorVolume(imgSizeX, imgSizeY, imgSizeZ,
@@ -256,7 +258,6 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry {
 			/**
 			 * CONSTRAINT ENFORCEMENT
 			 */
-			System.out.println("Enforce Hard Constraint on reconstructed scatter coefs: " + it);
 			reconImage.enforceConstraint(tensorConstraint);
 			
 			

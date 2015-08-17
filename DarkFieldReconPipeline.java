@@ -6,6 +6,7 @@ import ij.ImagePlus;
 import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
 import edu.stanford.rsl.conrad.numerics.SimpleVector;
 import edu.stanford.rsl.conrad.utils.Configuration;
+import edu.stanford.rsl.science.darkfield.FlorianDarkField.DarkField3DTensorVolume.TensorConstraintType;
 
 import java.io.File;
 
@@ -34,6 +35,8 @@ public class DarkFieldReconPipeline {
 	private File fileDCI2;
 	
 	private File saveFolder;
+	
+	private TensorConstraintType constraintType;
 	
 	boolean debug = true;
 
@@ -98,14 +101,14 @@ public class DarkFieldReconPipeline {
 	 * @param fileNameAMP2
 	 */
 	public DarkFieldReconPipeline(String fileNameConfig1, String fileNameDCI1, String fileNameDCI2, 
-			String fileNameSaveFolder){
+			String fileNameSaveFolder, TensorConstraintType type){
 		Configuration config1 = Configuration.loadConfiguration(fileNameConfig1);
 		Configuration config2 = Configuration.loadConfiguration(fileNameConfig1);
 		// Reset rotation axis for Config2
 		
 		SimpleVector rotationAxis2 = new SimpleVector(0.0d,1.0d,0.0);
 		config2.getGeometry().setRotationAxis(rotationAxis2);
-		initData(config1, config2, fileNameDCI1, fileNameDCI2,fileNameSaveFolder);
+		initData(config1, config2, fileNameDCI1, fileNameDCI2,fileNameSaveFolder, type);
 		
 	}
 	
@@ -118,10 +121,10 @@ public class DarkFieldReconPipeline {
 	 * @param fileNameAMP2
 	 */
 	public DarkFieldReconPipeline(String fileNameConfig1, String fileNameConfig2, String fileNameDCI1, String fileNameDCI2, 
-			String fileNameSaveFolder){
+			String fileNameSaveFolder, TensorConstraintType type){
 		Configuration config1 = Configuration.loadConfiguration(fileNameConfig1);
 		Configuration config2 = Configuration.loadConfiguration(fileNameConfig2);
-		initData(config1, config2, fileNameDCI1, fileNameDCI2,fileNameSaveFolder);
+		initData(config1, config2, fileNameDCI1, fileNameDCI2,fileNameSaveFolder, type);
 	}
 
 	
@@ -134,9 +137,9 @@ public class DarkFieldReconPipeline {
 	 * @param fileNameAMP1
 	 * @param fileNameAMP2
 	 */
-	public DarkFieldReconPipeline(Configuration config1, Configuration config2,String fileNameSaveFolder){
+	public DarkFieldReconPipeline(Configuration config1, Configuration config2,String fileNameSaveFolder, TensorConstraintType type){
 		
-		initData(config1, config2, null, null,fileNameSaveFolder);
+		initData(config1, config2, null, null,fileNameSaveFolder, type);
 	}
 	
 	
@@ -151,7 +154,7 @@ public class DarkFieldReconPipeline {
 	 */
 	private void initData(Configuration config1, Configuration config2, 
 			String fileNameDCI1, String fileNameDCI2, 
-			String fileNameSaveFolder){
+			String fileNameSaveFolder,TensorConstraintType type){
 		
 		if(fileNameSaveFolder==null){
 			saveFolder = null;	
@@ -179,7 +182,7 @@ public class DarkFieldReconPipeline {
 				fileDCI2 = new File(fileNameDCI2);
 			}
 		
-	
+		this.constraintType = type;
 		
 		// Initialize the reconstruction mask to be null
 		reconMask = null;
@@ -297,7 +300,7 @@ public void reconstructMaskForZeroConstraint(float th_lower, float th_higher, bo
  * @param stepSize
  * @param pathDarkField
  */
-public void reconstructDarkFieldVolume(int numScatterVectors, int maxIt, float stepSize, File pathDarkField){
+public void reconstructDarkFieldVolume(int numScatterVectors, int maxIt, float stepSize, File pathDarkField,boolean writeVtkInEveryStep){
 	
 	
 	/*
@@ -327,7 +330,7 @@ public void reconstructDarkFieldVolume(int numScatterVectors, int maxIt, float s
 		imgDCI2 = null;
 	}
 
-	reconstructDarkFieldVolume(numScatterVectors, maxIt, stepSize, pathDarkField, sinoDCI1, sinoDCI2);
+	reconstructDarkFieldVolume(numScatterVectors, maxIt, stepSize, pathDarkField, sinoDCI1, sinoDCI2,writeVtkInEveryStep);
 	
 	
 }
@@ -342,19 +345,19 @@ public void reconstructDarkFieldVolume(int numScatterVectors, int maxIt, float s
 	 * @param sinoDCI1
 	 * @param sinoDCI2
 	 */
-	public void reconstructDarkFieldVolume(int numScatterVectors, int maxIt, float stepSize, File pathSaveDarkField,DarkField3DSinogram sinoDCI1,DarkField3DSinogram sinoDCI2){
+	public void reconstructDarkFieldVolume(int numScatterVectors, int maxIt, float stepSize, File pathSaveDarkField,DarkField3DSinogram sinoDCI1,DarkField3DSinogram sinoDCI2,boolean writeVtkInEveryStep){
 		
 				
 		// Initialize the GradientSolver3D
 		// Can even deal with reconMask == null, as GradientSolver knows how to deal with this.
 		// If mask should be used, it should be created prior to execution of this method
-		GradientSolverTensor3D gradientSolver = new GradientSolverTensor3D(config1, config2, sinoDCI1, sinoDCI2, stepSize, maxIt, numScatterVectors,saveFolder, reconMask,reconMask);
+		GradientSolverTensor3D gradientSolver = new GradientSolverTensor3D(config1, config2, sinoDCI1, sinoDCI2, stepSize, maxIt, numScatterVectors,saveFolder, reconMask,reconMask,constraintType);
 		
 		// Save the scatter directions into a matrix
 		scatterDirMatrix =  DarkFieldScatterDirection.getScatterDirectionMatrix(numScatterVectors);
 		
 		// Execute the gradient decent
-		reconDarkField = gradientSolver.Gradient3D();
+		reconDarkField = gradientSolver.Gradient3D(writeVtkInEveryStep);
 
 		if(pathSaveDarkField!=null){
 			String filePath = pathSaveDarkField.getParent() + "\\DCI_volume.tif";
@@ -367,7 +370,7 @@ public void reconstructDarkFieldVolume(int numScatterVectors, int maxIt, float s
 	/**
 	 * @param saveVTK - if true saves the fiber Direcitons into a vtk file.
 	 */
-	public DarkFieldFiberDirectionClass calculateFiberOrientations(boolean saveVTK){
+	public DarkFieldTensorClass calculateFiberOrientations(boolean saveVTK){
 	
 		if(saveVTK == false)
 			return calculateFiberOrientations(reconDarkField, scatterDirMatrix, null);
@@ -382,7 +385,7 @@ public void reconstructDarkFieldVolume(int numScatterVectors, int maxIt, float s
 	/**
 	 * @param saveVTK - if true saves the fiber Direcitons into a vtk file.
 	 */
-	public DarkFieldFiberDirectionClass calculateFiberOrientations(File pathFile){
+	public DarkFieldTensorClass calculateFiberOrientations(File pathFile){
 	
 		return calculateFiberOrientations(reconDarkField, scatterDirMatrix, pathFile);
 	
@@ -396,7 +399,7 @@ public void reconstructDarkFieldVolume(int numScatterVectors, int maxIt, float s
 	 * @param fiberDirectionClass
 	 * @param pathFile
 	 */
-	public static DarkFieldFiberDirectionClass calculateFiberOrientations(DarkField3DTensorVolume reconDarkField, SimpleMatrix scatterDirMatrix, File pathFile){
+	public static DarkFieldTensorClass calculateFiberOrientations(DarkField3DTensorVolume reconDarkField, SimpleMatrix scatterDirMatrix, File pathFile){
 		
 		return calculateFiberOrientations(reconDarkField, scatterDirMatrix, pathFile,"fiberDirections");
 		
@@ -410,7 +413,7 @@ public void reconstructDarkFieldVolume(int numScatterVectors, int maxIt, float s
 	 * @param scatterDirMatrix
 	 * @return
 	 */
-	public static DarkFieldFiberDirectionClass calculateFiberOrientations(DarkField3DTensorVolume reconDarkField, SimpleMatrix scatterDirMatrix){
+	public static DarkFieldTensorClass calculateFiberOrientations(DarkField3DTensorVolume reconDarkField, SimpleMatrix scatterDirMatrix){
 		
 		return calculateFiberOrientations(reconDarkField, scatterDirMatrix, null,null);
 		
@@ -423,14 +426,14 @@ public void reconstructDarkFieldVolume(int numScatterVectors, int maxIt, float s
 	 * @param pathFile
 	 * @param fileName - without file type, as .vtk is added automatically
 	 */
-	public static DarkFieldFiberDirectionClass calculateFiberOrientations(DarkField3DTensorVolume reconDarkField, SimpleMatrix scatterDirMatrix, File pathFile, String fileName){
+	public static DarkFieldTensorClass calculateFiberOrientations(DarkField3DTensorVolume reconDarkField, SimpleMatrix scatterDirMatrix, File pathFile, String fileName){
 		
 		assert(reconDarkField != null) : new Exception("Reconstructed is NULL and needs to be calculated first.");
 		assert(scatterDirMatrix != null) : new Exception("Scatter Dir Matrix needs to be calculated first.");
 		
 		DarkFieldScatterExtractor scatterDirExtractor = new DarkFieldScatterExtractor(reconDarkField, scatterDirMatrix);
 		
-		DarkFieldFiberDirectionClass fiberDirectionClass = new DarkFieldFiberDirectionClass
+		DarkFieldTensorClass fiberDirectionClass = new DarkFieldTensorClass
 				(reconDarkField.imgSizeX, reconDarkField.imgSizeY, reconDarkField.imgSizeZ,
 						reconDarkField.getSpacing(), reconDarkField.getOrigin());
 		

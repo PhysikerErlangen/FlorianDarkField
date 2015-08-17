@@ -21,6 +21,7 @@ import edu.stanford.rsl.science.darkfield.FlorianDarkField.GradientSolverTensor3
 // Contains the reconstructed sample
 import edu.stanford.rsl.science.darkfield.FlorianDarkField.DarkField3DTensorVolume;
 import edu.stanford.rsl.science.darkfield.FlorianDarkField.ImageToSinogram3D;
+import edu.stanford.rsl.science.darkfield.FlorianDarkField.DarkField3DTensorVolume.TensorConstraintType;
 import ij.IJ;
 import ij.ImageJ;
 import ij.ImagePlus;
@@ -68,7 +69,7 @@ public class TensorReconstructionCutResolution{
 		new ImageJ();
 		
 		// Initialize the pipeline
-		DarkFieldReconPipeline myDarkFieldPipeLine = new DarkFieldReconPipeline(fileNameConfig1, fileNameDCI1, null,fileNameConfig1);
+		DarkFieldReconPipeline myDarkFieldPipeLine = new DarkFieldReconPipeline(fileNameConfig1, fileNameDCI1, null,fileNameConfig1,TensorConstraintType.NO_CONSTRAINT);
 		
 		// Create the Absorption Mask
 		boolean saveAMP = true;
@@ -82,8 +83,11 @@ public class TensorReconstructionCutResolution{
 		
 		System.out.println("Reconstruction mask was successfully created and saved.");
 		
+		
+		boolean writeVtkInEveryStep = true;
+		
 		// Reconstruct DarkField Volume
-		myDarkFieldPipeLine.reconstructDarkFieldVolume(numScatterVectors, maxIt, stepSize, folder);
+		myDarkFieldPipeLine.reconstructDarkFieldVolume(numScatterVectors, maxIt, stepSize, folder,writeVtkInEveryStep);
 		
 		System.out.println(" DarkField Reconstruction was successfully created and saved.");
 		

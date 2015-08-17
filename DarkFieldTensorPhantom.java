@@ -124,16 +124,17 @@ public class DarkFieldTensorPhantom  extends  DarkFieldTensorGeometry  {
 	
 	public static SimpleVector calculateEllipsoidFromFiberOrientation(SimpleVector fiberDir, SimpleMatrix scatterDirections){
 	
-		SimpleVector eigenValues = new SimpleVector(5,5,1);
+		SimpleVector eigenValues = new SimpleVector(7,7,1);
 		SimpleMatrix eigenVectors = null;
 		
 				
 		if(SimpleOperators.equalElementWise(fiberDir, fiberDirX,0.01)){
-			//double[][] myEigenVectors ={ {0,1,0},{0,0,1},{1,0,0}};
+			// I define the columns of the SimpleMatrix to be the eigenVectors
 			double[][] myEigenVectors ={ {0,0,1},{1,0,0},{0,1,0}};
 			eigenVectors = new SimpleMatrix(myEigenVectors);
 			
 		} else if(SimpleOperators.equalElementWise(fiberDir, fiberDirY,0.01)){
+			// I define the columns of the SimpleMatrix to be the eigenVectors
 			double[][] myEigenVectors ={ {1,0,0},{0,0,1},{0,1,0}};
 			eigenVectors = new SimpleMatrix(myEigenVectors);
 		}
@@ -173,7 +174,7 @@ public class DarkFieldTensorPhantom  extends  DarkFieldTensorGeometry  {
 		
 		
 		
-		System.out.println("a:" + aX + "b: " + bX);
+		// System.out.println("a:" + aX + "b: " + bX);
 		
 		for(int x = aX; x < bX; x ++){
 			for(int y = aY; y < bY; y ++){

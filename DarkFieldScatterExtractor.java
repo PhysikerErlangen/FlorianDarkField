@@ -9,20 +9,14 @@ public class DarkFieldScatterExtractor {
 	private DarkField3DTensorVolume darkFieldVolume;
 	private SimpleMatrix scatterMatrix;
 	
-	private DarkFieldFiberDirectionClass fiberDirections;
+	private DarkFieldTensorClass tensorClass;
 	
 	private int imgSizeX;
 	private int imgSizeY;
 	private int imgSizeZ;
 	
 	
-	/**
-	 * Threshold that checks, if 3 component of eigenvalues is too small
-	 * If 3 component is too small, don't consider it as a fiber orientation
-	 * and ignore it
-	 */
-	double th = 1E-10;
-	
+
 	/**
 	 * @param darkFieldVolume - reference to the reconstructed dark field volume
 	 * @param scatterMatrix - Contains the scatter directions in a 3 X NumScattervectors Matrix
@@ -76,22 +70,22 @@ public class DarkFieldScatterExtractor {
 	 * We use the ClassDarkFieldPCA to calculate the directions
 	 * @return
 	 */
-	public DarkFieldFiberDirectionClass calcFiberOrientations( ){
+	public DarkFieldTensorClass calcFiberOrientations( ){
 		
-		fiberDirections = new DarkFieldFiberDirectionClass(imgSizeX, imgSizeY, imgSizeZ, darkFieldVolume.getSpacing(),darkFieldVolume.getOrigin());
+		tensorClass = new DarkFieldTensorClass(imgSizeX, imgSizeY, imgSizeZ, darkFieldVolume.getSpacing(),darkFieldVolume.getOrigin());
 		
 		for(int x = 0; x < imgSizeX; x++){
 			for(int y = 0; y <imgSizeY; y++){
 				for(int z = 0; z <imgSizeZ; z++){
 					// Calculate the scatter direction at given voxel
-					SimpleVector fiberDir = calcScatterDirection(x, y, z);
+					DarkFieldPCA myPCA = getPCA_Result(x, y, z);
 					// Add fiber direction to the ScatterDirectionObject
-					fiberDirections.setFiberDirection(x, y, z, fiberDir);
+					tensorClass.setData(x,y,z,myPCA);
 				} // End loop z
 			} // End loop y
 		} // End loop z
 		
-		return fiberDirections;
+		return tensorClass;
 		
 	}
 	
@@ -102,7 +96,7 @@ public class DarkFieldScatterExtractor {
 	 * @param z
 	 * @return Scatter Direction
 	 */
-	private SimpleVector calcScatterDirection(int x, int y, int z){
+	private DarkFieldPCA getPCA_Result(int x, int y, int z){
 		
 		// Initializes the PCA objects
 		SimpleVector scatterCoef = darkFieldVolume.getSimpleVectorAtIndex(x, y, z);
@@ -110,20 +104,12 @@ public class DarkFieldScatterExtractor {
 		// Performs PCA
 		myPCA.run();
 		// Extract Scatter Direction as smallest component of the ellipsoid.
-		
-		
-		
-		SimpleVector fiberDir;
-		if(myPCA.getEigenValues().getElement(2)<th){
-			fiberDir = new SimpleVector(3);
-		}else{
-			fiberDir = myPCA.getEigenVectors().getCol(2).normalizedL2();
-			fiberDir.multiplyBy(myPCA.getEigenValues().getElement(2));
-		}
-		
-		
-		return fiberDir;
+	
+		return myPCA;
 	}
 
+	
+
+	
 	
 }

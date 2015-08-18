@@ -240,6 +240,38 @@ public class DarkField3DTensorVolume extends DarkFieldGrid3DTensor{
 		return sub;
 	}
 	
+
+	/**
+	 * Return 
+	 * @param A
+	 * @param B
+	 * @return result = A - B;
+	 */
+	public static DarkField3DTensorVolume add(  DarkField3DTensorVolume A, DarkField3DTensorVolume B){
+
+		// Check for inconsistency (different dimensions)
+		assert(A.imgSizeX == B.imgSizeX
+				&&A.imgSizeY == B.imgSizeY
+				&&A.imgSizeZ == B.imgSizeZ
+				): new Exception("Dimension of data is wrong.");
+		
+		DarkField3DTensorVolume add = new DarkField3DTensorVolume(A.imgSizeX,A.imgSizeY, A.imgSizeX,
+				A.getNumberOfChannels(), A.spacing, A.origin);
+		
+		for(int x = 0; x <A.imgSizeX; x++){
+			for(int y = 0; y <A.imgSizeY; y++){
+				for(int z = 0; z <A.imgSizeZ; z++){
+					
+					SimpleVector vecA = A.getSimpleVectorAtIndex(x, y, z);
+					SimpleVector vecB = B.getSimpleVectorAtIndex(x, y, z);
+					SimpleVector values = SimpleOperators.add(vecA, vecB);
+					add.setDarkFieldScatterTensor(x, y, z, values);
+				} // End loop z
+			} // End loop y
+		} // End loop z
+	
+		return add;
+	}
 	
 
 	/**

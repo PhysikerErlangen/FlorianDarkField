@@ -19,6 +19,7 @@ public class DarkFieldTensorPhantomTest {
 
 	DarkFieldTensorPhantom myPhantom;
 	
+	DarkFieldTensorPhantom myMask;
 	
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
@@ -68,6 +69,8 @@ public class DarkFieldTensorPhantomTest {
 		
 		
 		myPhantom = new DarkFieldTensorPhantom(myConfig, numScatterVectors);
+		
+		
 		
 		myPhantom.calcPhantom();
 		

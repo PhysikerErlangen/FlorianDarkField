@@ -279,18 +279,19 @@ public class DarkFieldTensorGeometry {
 	/**
 	 * THIS is a really ugly method, but seems to be the fastest (but dirty) implementation
 	 * With this we implement two trajectories!
-	 * @param u_worldX - [real world coordinates eg. mm]
-	 * @param u_worldY - [real world coordinates eg. mm]
- 	 * @param v_worldZ - [real world coordinates eg. mm]
+	 * @param x - [real world coordinates eg. mm]
+	 * @param y - [real world coordinates eg. mm]
+ 	 * @param z - [real world coordinates eg. mm]
 	 * @return
 	 */
-	public PointND calculateRotatedVector(double u_worldX, double u_worldY, double v_worldZ){
+	public PointND calculateRotatedVector(double x, double y, double z){
 
 		if(trajectoryFlag == TrajectoryType.HORIZONTAL){
 		// Calculate Point when Rotation Axis is standard y - axis
-		return new PointND(u_worldX,u_worldY,v_worldZ);
+		return new PointND(x,y,z);
 	}	else if(trajectoryFlag == TrajectoryType.VERTICAL){
-		return new PointND(-v_worldZ,u_worldY,u_worldX);
+		//return new PointND(-v_worldZ,u_worldY,u_worldX);
+		return new PointND(x,z,-y);
 	}else{
 		return null;
 	}

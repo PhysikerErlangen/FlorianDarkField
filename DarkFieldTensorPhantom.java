@@ -31,6 +31,24 @@ public class DarkFieldTensorPhantom  extends  DarkFieldTensorGeometry  {
 	private ArrayList<DarkField3DSinogram> sinogramList;
 	private ArrayList<ImagePlus> projectionList;
 	
+	private DarkField3DTensorVolume phantomMask;
+	
+	/**
+	 * @return the phantomMask
+	 */
+	public DarkField3DTensorVolume getPhantomMask() {
+		return phantomMask;
+	}
+
+
+
+	/**
+	 * @param phantomMask the phantomMask to set
+	 */
+	public void setPhantomMask(DarkField3DTensorVolume phantomMask) {
+		this.phantomMask = phantomMask;
+	}
+
 	private DarkField3DTensorVolume phantom;
 	
 	/**
@@ -113,7 +131,11 @@ public class DarkFieldTensorPhantom  extends  DarkFieldTensorGeometry  {
 		// Call super constructor of TensorGeometry
 		super(config,numScatterVectors);
 		
+		// Init Phantom Volume
 		phantom = new DarkField3DTensorVolume(this.imgSizeX,this.imgSizeY, this.imgSizeZ, numScatterVectors,this.getSpacing(),this.getOrigin());
+		
+		// Init Mask! Caution! numScatterVectors equals 1 as we have an "absorption" volume
+		phantomMask = new DarkField3DTensorVolume(this.imgSizeX,this.imgSizeY, this.imgSizeZ,1,this.getSpacing(),this.getOrigin());
 		
 		sinogramList = new ArrayList<DarkField3DSinogram>();
 		
@@ -191,6 +213,8 @@ public class DarkFieldTensorPhantom  extends  DarkFieldTensorGeometry  {
 					} else if(z<l5){
 						phantom.setDarkFieldScatterTensor(x, y, z, scatterCoefDir2);
 					}  
+					
+					phantomMask.setDarkFieldScatterTensor(x, y, z, new SimpleVector(1f));
 
 				} // END X 
 		} // END Y

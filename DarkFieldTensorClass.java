@@ -184,14 +184,20 @@ public class DarkFieldTensorClass{
 				
 				bufWriter.write("POINT_DATA  " + indexListe.size());
 				bufWriter.write(System.getProperty( "line.separator" ));
-				bufWriter.write("SCALARS scalarvalue float 1");
+				bufWriter.write("SCALARS eigenValues float 3");
 				bufWriter.write(System.getProperty( "line.separator" ));
 				bufWriter.write("LOOKUP_TABLE default");
 				bufWriter.write(System.getProperty( "line.separator" ));
 				
 				// Write scalars
-				for(int i = 0; i < indexListe.size(); i++){
-					bufWriter.write(1 +"");
+				for(int pointIdx = 0; pointIdx < indexListe.size(); pointIdx++){
+					
+					Index3D coordIdx = indexListe.get(pointIdx);
+					SimpleVector vec1 = fieldList.get(0).getSimpleVectorAtIndex(coordIdx.x, coordIdx.y, coordIdx.z);
+					SimpleVector vec2 = fieldList.get(1).getSimpleVectorAtIndex(coordIdx.x, coordIdx.y, coordIdx.z);
+					SimpleVector vec3 = fieldList.get(2).getSimpleVectorAtIndex(coordIdx.x, coordIdx.y, coordIdx.z);
+					
+					bufWriter.write(vec1.normL2() +" " + vec2.normL2() +" " + vec3.normL2());
 					bufWriter.write(System.getProperty( "line.separator" ));
 				}
 				
@@ -236,6 +242,7 @@ public class DarkFieldTensorClass{
 					bufWriter.write(System.getProperty( "line.separator" ));
 					bufWriter.write(curEigVec.getElement(0) + " " + curEigVec.getElement(1)+" "+"" +curEigVec.getElement(2));
 				}
+				bufWriter.write(System.getProperty( "line.separator" ));
 				}
 				
 

@@ -94,6 +94,10 @@ public class TensorReconstructionPhantom{
 		
 		}
 
+		DarkField3DTensorVolume mask = phantomObject.getPhantomMask();
+		// mask.show("Mask volume");
+		
+		
 		
 		/*
 		 * INITILIAZATION OF SOME DATA
@@ -101,18 +105,19 @@ public class TensorReconstructionPhantom{
 		
 		// Number of scatter vectors
 		//Step size for Gradient decent
-		float stepSize = 0.005f;
+		float stepSize = 0.01f;
 		// Number of maximal iterations in gradient decent
-		int maxIt =1;
+		int maxIt =50;
 		
 		// Initialize the pipeline
 		myDarkFieldPipeLine = new DarkFieldReconPipeline(Configuration1,Configuration2,fileNameConfig1,TensorConstraintType.NO_CONSTRAINT);
+		myDarkFieldPipeLine.setReconMask(mask);
 		
 		// Reconstruct DarkField Volume
 		
 		folder = new File(fileNameConfig1);
 		
-		boolean writeVtkInEveryStep = false;
+		boolean writeVtkInEveryStep = true;
 		
 		myDarkFieldPipeLine.reconstructDarkFieldVolume(numScatterVectors,maxIt,stepSize,folder,sinoDCI1,null,writeVtkInEveryStep);
 		

@@ -63,7 +63,7 @@ public class TensorReconstructionPhantom{
 		new ImageJ();
 		
 		// Number of scatter vectors
-		numScatterVectors = 7;
+		numScatterVectors = 13;
 		
 		// Create Dark Field Phantom
 		phantomObject = new DarkFieldTensorPhantom(Configuration1,numScatterVectors);
@@ -119,7 +119,7 @@ public class TensorReconstructionPhantom{
 		
 		boolean writeVtkInEveryStep = true;
 		
-		myDarkFieldPipeLine.reconstructDarkFieldVolume(numScatterVectors,maxIt,stepSize,folder,sinoDCI1,null,writeVtkInEveryStep);
+		myDarkFieldPipeLine.reconstructDarkFieldVolume(numScatterVectors,maxIt,stepSize,folder,sinoDCI1,sinoDCI2,writeVtkInEveryStep);
 		
 		System.out.println(" DarkField Reconstruction was successfully created and saved.");
 		

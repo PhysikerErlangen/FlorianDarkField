@@ -19,7 +19,7 @@ public class DarkFieldScatterDirection {
 		scatterMatrix.setColValue(2, new SimpleVector(0f,0f,1f));
 	}	
 	
-	if(numScatterVectors == 7){
+	if(numScatterVectors == 13){
 		
 		scatterMatrix.setColValue(0, new SimpleVector(1f,0f,0f).normalizedL2());
 		scatterMatrix.setColValue(1, new SimpleVector(0f,1f,0f).normalizedL2());
@@ -29,6 +29,14 @@ public class DarkFieldScatterDirection {
 		scatterMatrix.setColValue(5, new SimpleVector(1f,-1f,1f).normalizedL2());
 		scatterMatrix.setColValue(6, new SimpleVector(-1f,1f,1f).normalizedL2());
 		
+		scatterMatrix.setColValue(7, new SimpleVector(1f,1f,0f).normalizedL2());
+		scatterMatrix.setColValue(8, new SimpleVector(-1f,1f,0f).normalizedL2());
+		
+		scatterMatrix.setColValue(9, new SimpleVector(0f,1f,1f).normalizedL2());
+		scatterMatrix.setColValue(10, new SimpleVector(0f,-1f,1f).normalizedL2());
+		
+		scatterMatrix.setColValue(11, new SimpleVector(1f,0f,1f).normalizedL2());
+		scatterMatrix.setColValue(12, new SimpleVector(-1f,0f,1f).normalizedL2());
 	}
 	
 	else if(numScatterVectors == 1){

@@ -161,7 +161,12 @@ public class DarkFieldTensorPhantom  extends  DarkFieldTensorGeometry  {
 			eigenVectors = new SimpleMatrix(myEigenVectors);
 		}
 		
-		SimpleVector scatterCoef = new SimpleVector(1f,1f,1f,1f,1f,1f,1f); 
+		int numScatterVectors = scatterDirections.getCols();
+		
+		SimpleVector scatterCoef = new SimpleVector(numScatterVectors);
+		for(int channel = 0; channel < numScatterVectors; channel++){
+			scatterCoef.setElementValue(channel, 1);
+		}
 		
 		DarkFieldEllipsoid myEllipsoid = new DarkFieldEllipsoid(scatterDirections, scatterCoef, eigenValues, eigenVectors);
 		

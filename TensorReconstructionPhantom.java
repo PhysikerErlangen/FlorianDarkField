@@ -16,6 +16,7 @@ import edu.stanford.rsl.conrad.numerics.SimpleVector;
 import edu.stanford.rsl.conrad.utils.Configuration;
 
 
+import edu.stanford.rsl.science.darkfield.FlorianDarkField.DarkFieldTensorPhantom.PhantomType;
 // Used for solving the 3D Gradientsolver in the tensor framework
 import edu.stanford.rsl.science.darkfield.FlorianDarkField.GradientSolverTensor3D;
 
@@ -66,11 +67,16 @@ public class TensorReconstructionPhantom{
 		numScatterVectors = 13;
 		
 		// Create Dark Field Phantom
-		phantomObject = new DarkFieldTensorPhantom(Configuration1,numScatterVectors);
+		phantomObject = new DarkFieldTensorPhantom(Configuration1,numScatterVectors,PhantomType.WOODEN_BLOCK_PHANTOM);
 
 		// display the phantom
 		phantomObject.getPhantom().show("Phantom Volume");
 		
+		folder = new File(fileNameConfig1);
+		SimpleMatrix myScatterMatrix = DarkFieldScatterDirection.getScatterDirectionMatrix(numScatterVectors);
+		DarkFieldReconPipeline.calculateFiberOrientations(phantomObject.getPhantom(), myScatterMatrix, folder,"fiberDirectionsPhantom");
+		
+		System.out.println("Start calculating Phantom DarkField Projections");
 		phantomObject.calculateDarkFieldProjection(Configuration1, Configuration2);
  		
 		/* 
@@ -78,8 +84,10 @@ public class TensorReconstructionPhantom{
 		 */
 		
 		// Load dark field image of orientation 1
-		DarkField3DSinogram sinoDCI1   = phantomObject.getDarkFieldSinogram(TrajectoryType.HORIZONTAL);		
+		DarkField3DSinogram sinoDCI1   = phantomObject.getDarkFieldSinogram(TrajectoryType.HORIZONTAL);
+		sinoDCI1.writeDarkFieldSinogramToImage(folder, "DarkFieldSinoGram1.tif","DarkField Sinogram 1");
 		DarkField3DSinogram sinoDCI2   = phantomObject.getDarkFieldSinogram(TrajectoryType.VERTICAL);
+		sinoDCI2.writeDarkFieldSinogramToImage(folder, "DarkFieldSinoGram2.tif","DarkField Sinogram 2");
 		
 		boolean showFlag = true;
 		
@@ -90,6 +98,13 @@ public class TensorReconstructionPhantom{
 		// Show Stack of DarkField slices
 		sinoDCI1.showSinogram("Sinogram of dark field image 1");
 		// Show DarkField Projection Images
+		
+		// Show DarkField Projection Images
+		sinoDCI2.show("Dark field image 2");
+		// Show Stack of DarkField slices
+		sinoDCI2.showSinogram("Sinogram of dark field image 2");
+		// Show DarkField Projection Images
+
 		
 		
 		}
@@ -105,7 +120,7 @@ public class TensorReconstructionPhantom{
 		
 		// Number of scatter vectors
 		//Step size for Gradient decent
-		float stepSize = 0.01f;
+		float stepSize = 0.03f;
 		// Number of maximal iterations in gradient decent
 		int maxIt =50;
 		
@@ -115,7 +130,7 @@ public class TensorReconstructionPhantom{
 		
 		// Reconstruct DarkField Volume
 		
-		folder = new File(fileNameConfig1);
+		
 		
 		boolean writeVtkInEveryStep = true;
 		
@@ -136,9 +151,7 @@ public class TensorReconstructionPhantom{
 		
 		diffVolume.show("Difference between diffVolume and Phantom");
 		
-		SimpleMatrix myScatterMatrix = DarkFieldScatterDirection.getScatterDirectionMatrix(numScatterVectors);
 		
-		DarkFieldReconPipeline.calculateFiberOrientations(phantomObject.getPhantom(), myScatterMatrix, folder,"fiberDirectionsPhantom");
 	}
 
 }

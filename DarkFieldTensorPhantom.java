@@ -3,16 +3,19 @@ package edu.stanford.rsl.science.darkfield.FlorianDarkField;
 import java.util.ArrayList;
 
 import weka.core.pmml.jaxbbindings.GaussianDistribution;
+import weka.core.pmml.jaxbbindings.VectorFields;
 import ij.IJ;
 import ij.ImageJ;
 import ij.ImagePlus;
 import edu.stanford.rsl.apps.gui.opengl.PointCloudViewer;
 import edu.stanford.rsl.conrad.data.numeric.Grid2D;
 import edu.stanford.rsl.conrad.data.numeric.Grid3D;
+import edu.stanford.rsl.conrad.geometry.General;
 import edu.stanford.rsl.conrad.geometry.shapes.simple.PointND;
 import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
 import edu.stanford.rsl.conrad.numerics.SimpleOperators;
 import edu.stanford.rsl.conrad.numerics.SimpleVector;
+import edu.stanford.rsl.conrad.parallel.SimpleParallelThread;
 import edu.stanford.rsl.conrad.utils.Configuration;
 import edu.stanford.rsl.conrad.utils.FileUtil;
 import edu.stanford.rsl.conrad.utils.RegKeys;
@@ -70,63 +73,47 @@ public class DarkFieldTensorPhantom  extends  DarkFieldTensorGeometry  {
 		return scatterDirections;
 	}
 
-	final static SimpleVector fiberDirX = new SimpleVector(1f,0f,0f);
-	final static SimpleVector fiberDirY = new SimpleVector(0f,1f,0f);
+	final static SimpleVector fiberDir1 = new SimpleVector(1f,0f,0f).normalizedL2();
+	final static SimpleVector fiberDir2 = new SimpleVector(0f,1f,0f).normalizedL2();
+	final static SimpleVector fiberDir3 = new SimpleVector(1f,1f,0f).normalizedL2();
+	final static SimpleVector fiberDir4 = new SimpleVector(-1,1f,0f).normalizedL2();
 	
-//	public static void main (String [] args) throws Exception{
-//	
-//		String fileNameConfig1 = "E:\\fschiffers\\MeasuredData\\Phantom2\\PhantomHalfLarge_unsymetric.xml";
-//		// Load configuration wooden case
-//		Configuration config = Configuration.loadConfiguration(fileNameConfig1);
-//		Configuration Configuration2 = Configuration.loadConfiguration(fileNameConfig1);
-//		// Reset rotation axis for Config2
-//		SimpleVector rotationAxis2 = new SimpleVector(0.0d,1.0d,0.0);
-//		Configuration2.getGeometry().setRotationAxis(rotationAxis2);
-//		
-//		
-//		DarkFieldTensorPhantom myPhantom = new DarkFieldTensorPhantom(config);
-//
-//		ImagePlus myImage = DarkField3DTensorVolume.wrapDarkFieldGrid3DTensorToImagePlus(myPhantom.phantom, "test");
-//		
-//		// Load ImageJ
-//		new ImageJ();
-//		
-//		myImage.show();
-//		
-//		
-////		new ImageJ();
-////		
-////		myPhantom.phantom.show();
-////		
-////		myPhantom.calculateDarkFieldProjection(config,Configuration2);
-////		
-////		myPhantom.getDarkFieldSinogram(0).show();
-////		myPhantom.getDarkFieldSinogram(1).show();
-////		
-////		myPhantom.getDarkFieldSinogram(0).showSinogram();
-////		myPhantom.getDarkFieldSinogram(1).showSinogram();
-////		
-////		
-////		System.out.println("Phaton created");
-//	}
-
-
-
 	
-	/**
-	 * @param config
-	 */
-	public DarkFieldTensorPhantom(Configuration config){
-		this(config,7);
+	public static enum PhantomType {
+		/**
+		 * TODO DESCRIPTION
+		 */
+		WOODEN_BLOCK_PHANTOM,
+		/**
+		 * TODO DESCRIPTION 
+		 */
+		CURL_VECTOR_FIELD_PHANTOM,
+		/**
+		 * TODO DESCRIPTION 
+		 */
+		PATCHY_PHANTOM,
+		/**
+		 * TODO DESCRIPTION 
+		 */
+		WHATEVER_PHANTOM,
+		/**
+		 * TODO DESCRIPTION
+		 */
+		MY_CRAZY_PHANTOM2
 	}
 	
-
+	
+	
+	/**
+	 * CONSTRUCTORS
+	 */
+	
 	
 	/**
 	 * @param config
 	 * @param numScatterVectors
 	 */
-	public DarkFieldTensorPhantom(Configuration config, int numScatterVectors){
+	public DarkFieldTensorPhantom(Configuration config, int numScatterVectors,PhantomType myPhantomType){
 
 		// Call super constructor of TensorGeometry
 		super(config,numScatterVectors);
@@ -141,25 +128,47 @@ public class DarkFieldTensorPhantom  extends  DarkFieldTensorGeometry  {
 		
 		scatterDirections = DarkFieldScatterDirection.getScatterDirectionMatrix(numScatterVectors);
 		
-		calcPhantom();
+		calcWoodenBlockPhantom();
 	}
 	
-	public static SimpleVector calculateEllipsoidFromFiberOrientation(SimpleVector fiberDir, SimpleMatrix scatterDirections){
-	
-		SimpleVector eigenValues = new SimpleVector(7,7,1);
-		SimpleMatrix eigenVectors = null;
+
+	/**
+	 * @param myPhantomType
+	 */
+	private void calcPhantom(PhantomType myPhantomType){
 		
-				
-		if(SimpleOperators.equalElementWise(fiberDir, fiberDirX,0.01)){
-			// I define the columns of the SimpleMatrix to be the eigenVectors
-			double[][] myEigenVectors ={ {0,0,1},{1,0,0},{0,1,0}};
-			eigenVectors = new SimpleMatrix(myEigenVectors);
-			
-		} else if(SimpleOperators.equalElementWise(fiberDir, fiberDirY,0.01)){
-			// I define the columns of the SimpleMatrix to be the eigenVectors
-			double[][] myEigenVectors ={ {1,0,0},{0,0,1},{0,1,0}};
-			eigenVectors = new SimpleMatrix(myEigenVectors);
+	}
+	
+	/**
+	 * @param fiberDir
+	 * @param scatterDirections
+	 * @return
+	 */
+	public static SimpleVector calculateEllipsoidFromFiberOrientation(SimpleVector fiberDir, SimpleMatrix scatterDirections){
+
+		// First normalize the vector in case this is not done yet
+		fiberDir = fiberDir.normalizedL2();
+		
+		if(Double.isNaN(fiberDir.getElement(0))){
+			fiberDir = new SimpleVector(0,0,0);
 		}
+		
+		// helper is vector linear independent to fiberDir
+		SimpleVector helper;
+		// to ensure linear independence check first
+		if(SimpleOperators.equalElementWise(fiberDir.normalizedL2().absoluted(),fiberDir1,0.0001)){
+			 helper = fiberDir2;
+		} else{
+			helper = fiberDir1;
+		}
+		SimpleVector eigenVec1 = General.crossProduct(helper, fiberDir).normalizedL2();
+		SimpleVector eigenVec2 = General.crossProduct(eigenVec1, fiberDir).normalizedL2(); 
+		
+		SimpleMatrix eigenVectors = new SimpleMatrix(3,3);
+		
+		eigenVectors.setColValue(0, eigenVec1);
+		eigenVectors.setColValue(1, eigenVec2);
+		eigenVectors.setColValue(2, fiberDir);
 		
 		int numScatterVectors = scatterDirections.getCols();
 		
@@ -167,6 +176,7 @@ public class DarkFieldTensorPhantom  extends  DarkFieldTensorGeometry  {
 		for(int channel = 0; channel < numScatterVectors; channel++){
 			scatterCoef.setElementValue(channel, 1);
 		}
+		SimpleVector eigenValues = new SimpleVector(7,7,1);
 		
 		DarkFieldEllipsoid myEllipsoid = new DarkFieldEllipsoid(scatterDirections, scatterCoef, eigenValues, eigenVectors);
 		
@@ -176,16 +186,39 @@ public class DarkFieldTensorPhantom  extends  DarkFieldTensorGeometry  {
 	}
 	
 	
-	/**
-	 * 
-	 */
-	public void calcPhantom(){
+	private SimpleVector[][] calcCurlLayer(int imgSizeX, int imgSizeY){
 		
-		SimpleVector fiberDir1 = new SimpleVector(1f,0f,0f);
-		SimpleVector fiberDir2 = new SimpleVector(0f,1f,0f);
+		SimpleVector eX = new SimpleVector(1,0,0);
+		SimpleVector eY = new SimpleVector(0,1,0);
 		
-		SimpleVector scatterCoefDir1 = calculateEllipsoidFromFiberOrientation(fiberDir1, scatterDirections);
-		SimpleVector scatterCoefDir2 = calculateEllipsoidFromFiberOrientation(fiberDir2, scatterDirections);
+		SimpleVector[][] myVectorField = new SimpleVector[imgSizeX][imgSizeY];
+		
+		for(int x = 0; x < imgSizeX; x++){
+			for(int y = 0; y < imgSizeY; y++){
+				
+				SimpleVector vec = SimpleOperators.subtract(eX.multipliedBy(y-imgSizeY/2.0),eY.multipliedBy(x-imgSizeX/2.0));
+				vec.normalizeL2();
+				// Vec is 0-Vector normalization will result in NaN, so we have to check for that
+				if(Double.isNaN(vec.getElement(0))){
+					vec = new SimpleVector(1,0,0);
+				}
+				SimpleVector scatterCoef = calculateEllipsoidFromFiberOrientation(vec, scatterDirections);
+				if(Double.isNaN(scatterCoef.getElement(0))){
+					// TEst
+					System.out.println("NaN - Entry. Something went wrong! Better check this!");
+				}
+				myVectorField[x][y] = scatterCoef;
+				
+			}
+		}
+		
+		return myVectorField;
+	}
+	
+	
+	public void calcCurlyPhantom(){
+	
+		SimpleVector[][] myCurlVector = calcCurlLayer(imgSizeX, imgSizeY);
 		
 		int aX = (int)( 0.3*imgSizeX);
 		int bX = (int) (0.7*imgSizeX);
@@ -199,16 +232,51 @@ public class DarkFieldTensorPhantom  extends  DarkFieldTensorGeometry  {
 		int l4 = (int) (0.7*imgSizeZ);
 		int l5 = (int) (0.9*imgSizeZ);
 		
+		for(int x = aX; x < bX; x ++){
+			for(int y = aY; y < bY; y ++){
+				for(int z = l1; z <= l5; z ++){
+					// Creates a phantom of 3 Layers, each Layer contains voxel with a constant scatter direction!
+					if(z<l2){
+						phantom.setDarkFieldScatterTensor(x, y, z, myCurlVector[x][y]);	
+					} else if(z<l3){
+						phantom.setDarkFieldScatterTensor(x, y, z, myCurlVector[x][y]);
+					} else if(z<l4){
+						phantom.setDarkFieldScatterTensor(x, y, z, myCurlVector[x][y]);
+					} else if(z<l5){
+						phantom.setDarkFieldScatterTensor(x, y, z, myCurlVector[x][y]);
+					}  
+					phantomMask.setDarkFieldScatterTensor(x, y, z, new SimpleVector(1f));
+				} // END X 
+		} // END Y
+	} // END Z
+	
 		
+	}
+	
+	/**
+	 * 
+	 */
+	public void calcWoodenBlockPhantom(){
 		
-		// System.out.println("a:" + aX + "b: " + bX);
+		SimpleVector scatterCoefDir1 = calculateEllipsoidFromFiberOrientation(new SimpleVector(1,0,0).normalizedL2(), scatterDirections);
+		SimpleVector scatterCoefDir2 = calculateEllipsoidFromFiberOrientation(new SimpleVector(0,1,0).normalizedL2(), scatterDirections);
+		
+		int aX = (int)( 0.3*imgSizeX);
+		int bX = (int) (0.7*imgSizeX);
+		
+		int aY = (int)( 0.4*imgSizeY);
+		int bY = (int) (0.6*imgSizeY);
+		
+		int l1 = (int)( 0.1*imgSizeZ);
+		int l2 = (int) (0.3*imgSizeZ);
+		int l3 = (int) (0.5*imgSizeZ);
+		int l4 = (int) (0.7*imgSizeZ);
+		int l5 = (int) (0.9*imgSizeZ);
 		
 		for(int x = aX; x < bX; x ++){
 			for(int y = aY; y < bY; y ++){
 				for(int z = l1; z <= l5; z ++){
-
 					// Creates a phantom of 3 Layers, each Layer contains voxel with a constant scatter direction!
-				
 					if(z<l2){
 						phantom.setDarkFieldScatterTensor(x, y, z, scatterCoefDir1);	
 					} else if(z<l3){
@@ -218,9 +286,8 @@ public class DarkFieldTensorPhantom  extends  DarkFieldTensorGeometry  {
 					} else if(z<l5){
 						phantom.setDarkFieldScatterTensor(x, y, z, scatterCoefDir2);
 					}  
-					
+					// Set Phantom Mask
 					phantomMask.setDarkFieldScatterTensor(x, y, z, new SimpleVector(1f));
-
 				} // END X 
 		} // END Y
 	} // END Z
@@ -228,6 +295,72 @@ public class DarkFieldTensorPhantom  extends  DarkFieldTensorGeometry  {
 
 } // End calcPhantom()
 	
+	
+	private SimpleVector[][][] calcPathyDirections(){
+		
+		SimpleVector[][][] myDirMatrix = new SimpleVector[imgSizeX][imgSizeY][imgSizeZ];
+		
+//		for(int x = 0; x < 4; x++){
+//			for(int y = 0; y < imgSizeY; y++){
+//				for(int z = 0; z < imgSizeZ; z++){
+//					double a =  
+//					double b = 
+//					double c = 
+//					SimpleVector dir = new SimpleVector(a,b,c);
+//						
+//					}
+//				}
+//			}
+		
+		return myDirMatrix;
+		
+	}
+	
+	public void calcPatchyPhantom(){
+		
+		SimpleVector scatterCoefDir1 = calculateEllipsoidFromFiberOrientation(new SimpleVector(18,0,0).normalizedL2(), scatterDirections);
+		SimpleVector scatterCoefDir2 = calculateEllipsoidFromFiberOrientation(new SimpleVector(0,1,0).normalizedL2(), scatterDirections);
+		SimpleVector scatterCoefDir3 = calculateEllipsoidFromFiberOrientation(new SimpleVector(1,1,0).normalizedL2(), scatterDirections);
+		SimpleVector scatterCoefDir4 = calculateEllipsoidFromFiberOrientation(new SimpleVector(1,-1,0).normalizedL2(), scatterDirections);
+		SimpleVector scatterCoefDir5 = calculateEllipsoidFromFiberOrientation(new SimpleVector(2,0,0).normalizedL2(), scatterDirections);
+		SimpleVector scatterCoefDir6 = calculateEllipsoidFromFiberOrientation(new SimpleVector(1,0,0).normalizedL2(), scatterDirections);
+		SimpleVector scatterCoefDir7 = calculateEllipsoidFromFiberOrientation(new SimpleVector(1,0,0).normalizedL2(), scatterDirections);
+		SimpleVector scatterCoefDir8 = calculateEllipsoidFromFiberOrientation(new SimpleVector(1,0,0).normalizedL2(), scatterDirections);
+		SimpleVector scatterCoefDir9 = calculateEllipsoidFromFiberOrientation(new SimpleVector(1,0,0).normalizedL2(), scatterDirections);
+		
+		int aX = (int)( 0.3*imgSizeX);
+		int bX = (int) (0.7*imgSizeX);
+		
+		int aY = (int)( 0.4*imgSizeY);
+		int bY = (int) (0.6*imgSizeY);
+		
+		int l1 = (int)( 0.1*imgSizeZ);
+		int l2 = (int) (0.3*imgSizeZ);
+		int l3 = (int) (0.5*imgSizeZ);
+		int l4 = (int) (0.7*imgSizeZ);
+		int l5 = (int) (0.9*imgSizeZ);
+		
+		for(int x = aX; x < bX; x ++){
+			for(int y = aY; y < bY; y ++){
+				for(int z = l1; z <= l5; z ++){
+					// Creates a phantom of 3 Layers, each Layer contains voxel with a constant scatter direction!
+					if(z<l2){
+						phantom.setDarkFieldScatterTensor(x, y, z, scatterCoefDir1);	
+					} else if(z<l3){
+						phantom.setDarkFieldScatterTensor(x, y, z, scatterCoefDir2);
+					} else if(z<l4){
+						phantom.setDarkFieldScatterTensor(x, y, z, scatterCoefDir1);
+					} else if(z<l5){
+						phantom.setDarkFieldScatterTensor(x, y, z, scatterCoefDir2);
+					}  
+					// Set Phantom Mask
+					phantomMask.setDarkFieldScatterTensor(x, y, z, new SimpleVector(1f));
+				} // END X 
+		} // END Y
+	} // END Z
+	
+
+} // End calcPhantom()
 	
 	
 	

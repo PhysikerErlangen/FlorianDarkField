@@ -6,6 +6,8 @@
 package edu.stanford.rsl.science.darkfield.FlorianDarkField;
 
 
+import java.io.File;
+
 import ij.IJ;
 import ij.ImagePlus;
 import edu.stanford.rsl.conrad.data.numeric.Grid3D;
@@ -61,6 +63,10 @@ public class DarkField3DSinogram extends Grid3D {
 		this.maxThetaIndex = maxThetaIndex;
 		
 	}
+	@Override
+	public float getAtIndex(int curU, int curV, int thetaIdx){
+		return super.getAtIndex(curU, curV, thetaIdx);
+	}
 	
 	/**
 	 * Multiplies the whole grid with a given factor
@@ -72,6 +78,7 @@ public class DarkField3DSinogram extends Grid3D {
 			for(int v = 0; v <this.getSize()[1]; v++){
 				for(int theta = 0; theta <this.getSize()[0]; theta++){
 					multiplyAtIndex(u,v,theta,factor);
+					
 				} // End loop theta
 			} // End loop v
 		} // End loop u
@@ -106,27 +113,32 @@ public class DarkField3DSinogram extends Grid3D {
 	 * @param title is the title of the sinogram
 	 */
 	public void showSinogram(String title){
-		
-		Grid3D mySinoGrid = new Grid3D(maxThetaIndex,maxU,maxV);
-		
-		double[] mySpacing = this.getSpacing();
-		mySinoGrid.setSpacing(mySpacing[2],mySpacing[1],mySpacing[0]);
-		
-		double[] myOrigin = this.getOrigin();
-		
-		mySinoGrid.setOrigin(getOrigin());
-		
-		for(int curTheta = 0; curTheta < maxThetaIndex; curTheta++){ // Start with Stack 1 so Matlab convention
-			for(int curU = 0; curU < maxU; curU++){
-				for(int curV = 0; curV < maxV; curV++){
-					mySinoGrid.setAtIndex(curTheta,curU,curV,getAtIndex(curU, curV, curTheta));
-				}
-			}
-		}
 
-		ImagePlus img = ImageUtil.wrapGrid3D(mySinoGrid, title);
+		ImagePlus img = ImageUtil.wrapGrid3D(this, title);
+	
+		IJ.run(img, "Reslice [/]...", "output=1.000 start=Top rotate avoid");
 		
-		img.show();
+		
+//		Grid3D mySinoGrid = new Grid3D(maxThetaIndex,maxU,maxV);
+//		
+//		double[] mySpacing = this.getSpacing();
+//		mySinoGrid.setSpacing(mySpacing[2],mySpacing[1],mySpacing[0]);
+//		
+//		double[] myOrigin = this.getOrigin();
+//		
+//		mySinoGrid.setOrigin(myOrigin[2],myOrigin[1],myOrigin[0]);
+//		
+//		for(int curTheta = 0; curTheta < maxThetaIndex; curTheta++){ // Start with Stack 1 so Matlab convention
+//			for(int curU = 0; curU < maxU; curU++){
+//				for(int curV = 0; curV < maxV; curV++){
+//					mySinoGrid.setAtIndex(curTheta,curU,curV,getAtIndex(curU, curV, curTheta));
+//				}
+//			}
+//		}
+//
+//		ImagePlus img = ImageUtil.wrapGrid3D(mySinoGrid, title);
+//		
+//		img.show();
 	}
 	
 	/**
@@ -166,6 +178,32 @@ public class DarkField3DSinogram extends Grid3D {
 		}
 		return false;
 	}
+
+	/**
+	 * @return
+	 */
+	public double norm1(){
+		return norm1(this);
+	}
+	
+	
+	/**
+	 * @param sinogram
+	 * @return
+	 */
+	public static double norm1(DarkField3DSinogram sinogram) {
+		double result=0.d;
+		
+		for(int thetaIdx=0;thetaIdx<sinogram.maxThetaIndex;thetaIdx++){
+			for(int curU=0;curU<sinogram.maxU;curU++){
+				for(int curV=0;curV<sinogram.maxV; curV++){
+					result+= Math.abs(sinogram.getAtIndex(curU, curV, thetaIdx));
+				}
+			}
+		}
+		return result;
+	}
+
 	
 	
 	/**
@@ -219,9 +257,38 @@ public class DarkField3DSinogram extends Grid3D {
 		return C;
 	}
 	
-
+	
+	/**
+	 * writes the file to a given file specified by filePath
+	 * The name of the Image is not further defined, so default ""
+	 * @param folderPath - Path where Volume should be saved
+	 */
+	public void writeDarkFieldSinogramToImage(String folderPath){
+		writeDarkFieldSinogramToImage(folderPath, "DarkFieldSinogram");
+	}
 	
 	
+	/**
+	 * @param folderPath - "C\\User\\MyFolder\\"
+	 * @param sinogramName - "MySinogramTitle"
+	 * FileName is created out of sinogram Name
+	 */
+	public void writeDarkFieldSinogramToImage(String folderPath, String sinogramName){
+		String fileName = sinogramName + ".vtk";
+		writeDarkFieldSinogramToImage(new File(folderPath),fileName,sinogramName);
+		}
+	
+	
+	/**
+	 * @param folderPath   - e.g. "C\\User\\MyFolder\\"
+	 * @param fileName     - e.g. "DarkFieldSinogram1.tif"
+	 * @param sinogramName - e.g. "MyDarkFieldSignal1"
+	 */
+	public void writeDarkFieldSinogramToImage(File folderPath, String fileName,  String sinogramName){
+		ImagePlus img = ImageUtil.wrapGrid3D(this, sinogramName);
+		String totalPath = folderPath.getParent() + "\\" + fileName;
+		IJ.save(img,totalPath);
+	}
 	
 	
 	

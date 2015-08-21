@@ -9,11 +9,15 @@ package edu.stanford.rsl.science.darkfield.FlorianDarkField;
 import java.io.File;
 
 
+
+
 import edu.stanford.rsl.science.darkfield.FlorianDarkField.ParallelDarkFieldBackprojector3DTensor;
 import edu.stanford.rsl.science.darkfield.FlorianDarkField.ParallelDarkFieldProjector3DTensor;
 import edu.stanford.rsl.science.darkfield.FlorianDarkField.DarkField3DTensorVolume;
 import edu.stanford.rsl.science.darkfield.FlorianDarkField.DarkField3DTensorVolume.TensorConstraintType;
 import edu.stanford.rsl.science.darkfield.iterative.OpMath;
+import edu.stanford.rsl.tutorial.iterative.GridOp;
+import edu.stanford.rsl.conrad.data.numeric.NumericGridOperator;
 import edu.stanford.rsl.conrad.data.numeric.NumericPointwiseOperators;
 import edu.stanford.rsl.conrad.data.numeric.iterators.NumericPointwiseIteratorND;
 import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
@@ -303,7 +307,7 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry {
 		
 	
 		if(reconVertical){
-			double val =reconstructionTrajectory(TrajectoryType.VERTICAL,it); 
+		double val =reconstructionTrajectory(TrajectoryType.VERTICAL,it);
 		error = error +  val;
 		}
 		
@@ -421,7 +425,8 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry {
 		/*
 		 * Multiply diffVolume with stepSize of Gradient
 		 */
-		diffVolume.multiply(stepSize);
+		float curStepize = (float) Math.pow(0.97, iteration)*stepSize;
+		diffVolume.multiply(curStepize);
 		
 		/*
 		 * Mask the Image with the volume.
@@ -434,8 +439,12 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry {
 		/*
 		 * Calculate error between observed and reconstruction sinograms
 		 */
-		double error= OpMath.norm2(differenceSinogram);
+		
+		 
+		double error = differenceSinogram.norm1();
 		return error;
 	}
 
+	
+	
 }

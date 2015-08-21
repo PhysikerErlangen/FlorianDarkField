@@ -11,6 +11,7 @@ import edu.stanford.rsl.conrad.data.PointwiseIterator;
 import edu.stanford.rsl.conrad.data.numeric.Grid2D;
 import edu.stanford.rsl.conrad.data.numeric.Grid4D;
 import edu.stanford.rsl.conrad.data.numeric.NumericPointwiseOperators;
+import edu.stanford.rsl.conrad.geometry.General;
 import edu.stanford.rsl.conrad.geometry.shapes.simple.Point3D;
 import edu.stanford.rsl.conrad.geometry.shapes.simple.PointND;
 import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
@@ -210,21 +211,25 @@ public class DarkFieldTensorClass{
 				for(int pointIdx = 0; pointIdx < indexListe.size(); pointIdx++){
 
 					Index3D coordIdx = indexListe.get(pointIdx);
-					SimpleVector curEigVec = fieldList.get(2).getSimpleVectorAtIndex(coordIdx.x, coordIdx.y, coordIdx.z);
+					SimpleVector fiberDir = fieldList.get(2).getSimpleVectorAtIndex(coordIdx.x, coordIdx.y, coordIdx.z);
+					// Set z component to 0, as we don't care about this in the visualization.
+					fiberDir.setElementValue(2, 0);
 					
-					curEigVec = curEigVec.absoluted();
+					/*
+					 * Reference vector for scalar value for plot visualization in vtk.
+					 * Scalar value is calculated by scalar product with two vectors 
+					 */
+					SimpleVector refVec = new SimpleVector(1f,0,0);
+					double angle = Math.abs(General.angle(fiberDir,refVec));
 					
-					if(curEigVec.max() == curEigVec.getElement(0)){
-					bufWriter.write("0");
+					angle = Math.abs(angle);
+					if(angle >= Math.PI){
+						
 					}
-					else if(curEigVec.max() == curEigVec.getElement(1)){
-					bufWriter.write("0.5");
-					}	
-					else{
-							bufWriter.write("1");
-						}
 					
+					bufWriter.write(angle+"");
 					bufWriter.write(System.getProperty( "line.separator" ));
+					
 				}
 				
 	

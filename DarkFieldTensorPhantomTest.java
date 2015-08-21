@@ -14,6 +14,7 @@ import edu.stanford.rsl.conrad.geometry.trajectories.Trajectory;
 import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
 import edu.stanford.rsl.conrad.numerics.SimpleVector;
 import edu.stanford.rsl.conrad.utils.Configuration;
+import edu.stanford.rsl.science.darkfield.FlorianDarkField.DarkFieldTensorPhantom.PhantomType;
 
 public class DarkFieldTensorPhantomTest {
 
@@ -68,12 +69,9 @@ public class DarkFieldTensorPhantomTest {
 		geo.setRotationAxis(rotAxis);
 		
 		
-		myPhantom = new DarkFieldTensorPhantom(myConfig, numScatterVectors);
+		myPhantom = new DarkFieldTensorPhantom(myConfig, numScatterVectors,PhantomType.WOODEN_BLOCK_PHANTOM);
 		
-		
-		
-		myPhantom.calcPhantom();
-		
+				
 		new ImageJ();
 	}
 

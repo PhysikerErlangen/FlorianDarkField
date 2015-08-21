@@ -67,7 +67,7 @@ public class TensorReconstructionPhantom{
 		numScatterVectors = 13;
 		
 		// Create Dark Field Phantom
-		phantomObject = new DarkFieldTensorPhantom(Configuration1,numScatterVectors,PhantomType.WOODEN_BLOCK_PHANTOM);
+		phantomObject = new DarkFieldTensorPhantom(Configuration1,numScatterVectors,PhantomType.CURL_VECTOR_FIELD_PHANTOM);
 
 		// display the phantom
 		phantomObject.getPhantom().show("Phantom Volume");
@@ -120,9 +120,9 @@ public class TensorReconstructionPhantom{
 		
 		// Number of scatter vectors
 		//Step size for Gradient decent
-		float stepSize = 0.03f;
+		float stepSize = 0.02f;
 		// Number of maximal iterations in gradient decent
-		int maxIt =50;
+		int maxIt =4;
 		
 		// Initialize the pipeline
 		myDarkFieldPipeLine = new DarkFieldReconPipeline(Configuration1,Configuration2,fileNameConfig1,TensorConstraintType.NO_CONSTRAINT);

@@ -250,6 +250,45 @@ public class DarkFieldTensorClass{
 				bufWriter.write(System.getProperty( "line.separator" ));
 				}
 				
+				
+					
+				
+					bufWriter.write("TENSORS tensorData float");
+						
+					// Write scalars
+					for(int pointIdx = 0; pointIdx < indexListe.size(); pointIdx++){
+				
+						Index3D coordIdx = indexListe.get(pointIdx);
+						
+						SimpleVector eigVec1 = fieldList.get(0).getSimpleVectorAtIndex(coordIdx.x, coordIdx.y, coordIdx.z);
+						SimpleVector eigVec2 = fieldList.get(1).getSimpleVectorAtIndex(coordIdx.x, coordIdx.y, coordIdx.z);
+						SimpleVector eigVec3 = fieldList.get(2).getSimpleVectorAtIndex(coordIdx.x, coordIdx.y, coordIdx.z);
+						
+						
+						SimpleMatrix mat1 = SimpleOperators.multiplyOuterProd(eigVec1, eigVec1).multipliedBy(1/eigVec1.normL2());
+						SimpleMatrix mat2 = SimpleOperators.multiplyOuterProd(eigVec2, eigVec2).multipliedBy(1/eigVec2.normL2());
+						SimpleMatrix mat3 = SimpleOperators.multiplyOuterProd(eigVec3, eigVec3).multipliedBy(1/eigVec3.normL2());
+						
+						SimpleMatrix cov = SimpleOperators.add(mat1,mat2,mat3);
+						
+						bufWriter.write(System.getProperty( "line.separator" ));
+						bufWriter.write(cov.getElement(0, 0) + " " + cov.getElement(1, 0) + " " + cov.getElement(2, 0) + " ");
+						bufWriter.write(System.getProperty( "line.separator" ));
+						bufWriter.write(cov.getElement(0, 1) + " " + cov.getElement(1, 1) + " " + cov.getElement(2, 1) + " ");
+						bufWriter.write(System.getProperty( "line.separator" ));
+						bufWriter.write(cov.getElement(0, 2) + " " + cov.getElement(1, 2) + " " + cov.getElement(2, 2) + " ");
+						bufWriter.write(System.getProperty( "line.separator" ));
+						
+//						bufWriter.write(System.getProperty( "line.separator" ));
+//						bufWriter.write(eigVec1.getElement(0) + " " + eigVec1.getElement(1) + " " + eigVec1.getElement(2));
+//						bufWriter.write(System.getProperty( "line.separator" ));
+//						bufWriter.write(eigVec2.getElement(0) + " " + eigVec2.getElement(1) + " " + eigVec2.getElement(2));
+//						bufWriter.write(System.getProperty( "line.separator" ));
+//						bufWriter.write(eigVec3.getElement(0) + " " + eigVec3.getElement(1) + " " + eigVec3.getElement(2));
+//						bufWriter.write(System.getProperty( "line.separator" ));
+					}
+					
+					
 
 			bufWriter.flush();
 			foStream.close();

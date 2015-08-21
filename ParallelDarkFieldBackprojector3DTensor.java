@@ -211,7 +211,7 @@ public class ParallelDarkFieldBackprojector3DTensor extends  DarkFieldTensorGeom
 
 	
 	
-	public	DarkField3DTensorVolume backprojectPixelDriven(DarkField3DSinogram sino3D) {
+	public	DarkField3DTensorVolume backprojectPixelDriven(DarkField3DSinogram sino3D,DarkField3DTensorVolume ampMASK) {
 		
 		boolean debug = false;
 		
@@ -247,6 +247,12 @@ public class ParallelDarkFieldBackprojector3DTensor extends  DarkFieldTensorGeom
 				for (int x = 0; x < imgSizeX; x++) {
 					for (int y = 0; y < imgSizeY; y++) {
 						for (int z = 0; z < imgSizeZ; z++) {
+							
+					if((ampMASK!=null)){
+						if(ampMASK.getAtIndex(x, y, z, 0) == 0){
+						continue;
+						}
+					}
 							
 					// compute world coordinate of current pixel
 					double[] w = grid.indexToPhysical(x, y,z);

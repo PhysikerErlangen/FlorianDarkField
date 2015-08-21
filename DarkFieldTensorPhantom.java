@@ -128,7 +128,8 @@ public class DarkFieldTensorPhantom  extends  DarkFieldTensorGeometry  {
 		
 		scatterDirections = DarkFieldScatterDirection.getScatterDirectionMatrix(numScatterVectors);
 		
-		calcWoodenBlockPhantom();
+		// calcWoodenBlockPhantom();
+		calcCurlyPhantom();
 	}
 	
 
@@ -397,8 +398,8 @@ public class DarkFieldTensorPhantom  extends  DarkFieldTensorGeometry  {
 		//DarkField3DSinogram sino1 = projector1.projectRayDriven(phantom);
 		//DarkField3DSinogram sino2 = projector2.projectRayDriven(phantom);
 		
-		DarkField3DSinogram sino1 = projector1.projectPixelDriven(phantom);
-		DarkField3DSinogram sino2 = projector2.projectPixelDriven(phantom);
+		DarkField3DSinogram sino1 = projector1.projectPixelDriven(phantom,phantomMask);
+		DarkField3DSinogram sino2 = projector2.projectPixelDriven(phantom,phantomMask);
 		
 		
 		

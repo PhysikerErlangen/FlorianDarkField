@@ -195,7 +195,7 @@ public class ParallelDarkFieldProjector3DTensor extends  DarkFieldTensorGeometry
 
 //// SHOULD NOT WORK
 // Project the Volume onto one projection
-public DarkField3DSinogram projectPixelDriven(DarkField3DTensorVolume darkFieldVolume) {
+public DarkField3DSinogram projectPixelDriven(DarkField3DTensorVolume darkFieldVolume,DarkField3DTensorVolume ampMASK) {
 	
 	boolean debug = false;
 	
@@ -224,6 +224,12 @@ for( int curTheta = 0; curTheta < maxTheta_index; curTheta++){
 	for ( int x = 0; x < imgSizeX; x++){
 		for(int y = 0; y < imgSizeY; y++){
 			for(int z = 0; z < imgSizeZ; z++){
+				
+			if((ampMASK!=null)){
+					if(ampMASK.getAtIndex(x, y, z, 0) == 0){
+					continue;
+					}
+			}
 				
 			// compute world coordinate of current pixel
 			 double[] w = darkFieldVolume.indexToPhysical(x, y,z);

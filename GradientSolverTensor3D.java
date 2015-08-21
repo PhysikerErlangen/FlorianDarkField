@@ -6,11 +6,21 @@
 package edu.stanford.rsl.science.darkfield.FlorianDarkField;
 
 // Specialized backprojector and projector methods are required for solving the system with gradient decent
+import ij.ImageJ;
+import ij.gui.Plot;
+import ij.gui.PlotWindow;
+
 import java.io.File;
 
 
 
 
+
+
+
+import java.util.ArrayList;
+
+import edu.stanford.rsl.science.convexsammon.MyException;
 import edu.stanford.rsl.science.darkfield.FlorianDarkField.ParallelDarkFieldBackprojector3DTensor;
 import edu.stanford.rsl.science.darkfield.FlorianDarkField.ParallelDarkFieldProjector3DTensor;
 import edu.stanford.rsl.science.darkfield.FlorianDarkField.DarkField3DTensorVolume;
@@ -22,7 +32,9 @@ import edu.stanford.rsl.conrad.data.numeric.NumericPointwiseOperators;
 import edu.stanford.rsl.conrad.data.numeric.iterators.NumericPointwiseIteratorND;
 import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
 import edu.stanford.rsl.conrad.numerics.SimpleOperators;
+import edu.stanford.rsl.conrad.numerics.SimpleVector;
 import edu.stanford.rsl.conrad.utils.Configuration;
+import edu.stanford.rsl.conrad.utils.VisualizationUtil;
 
 public class GradientSolverTensor3D extends DarkFieldTensorGeometry {
 
@@ -31,20 +43,37 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry {
 	boolean reconVertical = true;
 	boolean reconHorizontal = false;
 
+	/**
+	 * 
+	 */
 	boolean writeVtkInEveryStep = true;
 	
-	// private Configuration configuration1;
-	// private Configuration configuration2;
-
+	/**
+	 * 
+	 */
 	private DarkField3DSinogram darkFieldSinogram1;
 	private DarkField3DSinogram darkFieldSinogram2;
 
+	/**
+	 *  Stepsize for Gradient Descent
+	 */
 	private float stepSize;
 
+	/**
+	 * Maximum Number of Iterations
+	 */
 	private int maxIt;
+	
+	/**
+	 * Contains error of reconstruction in all steps
+	 */
+	SimpleVector errorVec;
 
-	private DarkFieldScatterWeightsCalculator scatterCoef1;
-	private DarkFieldScatterWeightsCalculator scatterCoef2;
+	/**
+	 * Scatter weights used for Tensor reconstruction
+	 */
+	private DarkFieldScatterWeightsCalculator scatterWeights1;
+	private DarkFieldScatterWeightsCalculator scatterWeights2;
 
 
 	/**
@@ -100,8 +129,7 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry {
 	public void setTensorConstraint(TensorConstraintType tensorConstraint) {
 		this.tensorConstraint = tensorConstraint;
 	}
-
-
+	
 	
 	
 	/**
@@ -184,29 +212,31 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry {
 		 * Create instances of both scatter coef classes
 		 * One for each direction
 		 */
-		scatterCoef1 = new DarkFieldScatterWeightsCalculator(configuration1,
+		scatterWeights1 = new DarkFieldScatterWeightsCalculator(configuration1,
 				numScatterVectors);
-		scatterCoef2 = new DarkFieldScatterWeightsCalculator(configuration2,
+		scatterWeights2 = new DarkFieldScatterWeightsCalculator(configuration2,
 				numScatterVectors);
 
 		/*
 		 * Create instances of the BackProjector
 		 */
 		backProjector1 = new ParallelDarkFieldBackprojector3DTensor(
-				configuration1, scatterCoef1);
+				configuration1, scatterWeights1);
 		backProjector2 = new ParallelDarkFieldBackprojector3DTensor(
-				configuration2, scatterCoef2);
+				configuration2, scatterWeights2);
 
 		/*
 		 * Create instances of the projectors
 		 */
 		projector1 = new ParallelDarkFieldProjector3DTensor(configuration1,
-				scatterCoef1);
+				scatterWeights1);
 		projector2 = new ParallelDarkFieldProjector3DTensor(configuration2,
-				scatterCoef2);
+				scatterWeights2);
 		
 		setTensorConstraint(type);
 		
+		errorVec = new SimpleVector(maxIt);
+
 	}
 
 	/**
@@ -280,6 +310,8 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry {
 
 		}
 
+		plotError(this.errorVec, this.maxIt);
+		
 		// Return the reconstruction result
 		return reconImage;
 
@@ -316,10 +348,22 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry {
 		error = error +  val;
 		}	
 	
+		errorVec.addToElement(it, error);
+		
+		
+		
 		System.out.println("Error (Difference of Sinograms): " + error);
 
 	}
 	
+	/**
+
+	 */
+	private void plotError(SimpleVector errorVec, int it){
+		double[] data = errorVec.getSubVec(0, it ).copyAsDoubleArray();
+		Plot myErrorPlot = VisualizationUtil.createPlot(data, "Error of Sinograms", "Iteration", "Error");
+		myErrorPlot.show();
+	}
 	
 	
 	/**
@@ -407,7 +451,7 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry {
 			projectionSinogram = new DarkField3DSinogram(maxU_index,
 				maxV_index, maxTheta_index);
 		} else{
-			projectionSinogram = projector.projectPixelDriven(reconImage);	
+			projectionSinogram = projector.projectPixelDriven(reconImage,getMask(type));	
 		}
 		
 		/*
@@ -420,19 +464,19 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry {
 		 * Backprojection of the projection difference between observation and reconstruction 
 		 */
 		DarkField3DTensorVolume diffVolume = backProjector
-				.backprojectPixelDriven(differenceSinogram);
+				.backprojectPixelDriven(differenceSinogram,getMask(type));
 
 		/*
 		 * Multiply diffVolume with stepSize of Gradient
 		 */
-		float curStepize = (float) Math.pow(0.97, iteration)*stepSize;
-		diffVolume.multiply(curStepize);
+		
+		diffVolume.multiply(calcStepSize(stepSize, iteration));
 		
 		/*
 		 * Mask the Image with the volume.
 		 * MaskWithVolume handles null data
 		 */
-		diffVolume.maskWithVolume(getMask(type));
+		//diffVolume.maskWithVolume(getMask(type));
 		
 		reconImage.sub(diffVolume);
 		
@@ -445,6 +489,15 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry {
 		return error;
 	}
 
+	/**
+	 * Calculates stepSize dependent on initial value and current iteration
+	 * @param alpha
+	 * @param it
+	 */
+	private float calcStepSize(float stepSize, int it) {
+		return stepSize;
+		// return  (float)( Math.pow(0.96, it)*stepSize);
+	}
 	
 	
 }

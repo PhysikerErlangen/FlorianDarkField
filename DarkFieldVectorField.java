@@ -7,7 +7,7 @@ import edu.stanford.rsl.conrad.numerics.SimpleVector;
  * Defines three dimensional vector field
  *
  */
-public class DarkFieldEigenVector extends Grid4D {
+public class DarkFieldVectorField extends Grid4D {
 
 
 	// Defines dimension of volume box
@@ -22,9 +22,11 @@ public class DarkFieldEigenVector extends Grid4D {
 	 * @param spacing_world
 	 * @param origin_world
 	 */
-	public DarkFieldEigenVector(int imgSizeX, int imgSizeY,int imgSizeZ, double[] spacing_world, double[] origin_world){
-		// Dimension of 4!
-		// 
+	public DarkFieldVectorField(int imgSizeX, int imgSizeY,int imgSizeZ, double[] spacing_world, double[] origin_world){
+		/**
+		 * Dimension 3.
+		 * Eigenvalue is encoded in norm of eigenvector
+		 */
 		super(imgSizeX, imgSizeY, imgSizeZ, 3);
 		
 		this.imgSizeX = imgSizeX;

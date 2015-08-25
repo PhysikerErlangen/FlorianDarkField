@@ -1,24 +1,15 @@
 package edu.stanford.rsl.science.darkfield.FlorianDarkField;
 
 import java.io.BufferedWriter;
-import java.io.DataOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 
-import edu.stanford.rsl.conrad.data.PointwiseIterator;
-import edu.stanford.rsl.conrad.data.numeric.Grid2D;
-import edu.stanford.rsl.conrad.data.numeric.Grid4D;
-import edu.stanford.rsl.conrad.data.numeric.NumericPointwiseOperators;
 import edu.stanford.rsl.conrad.geometry.General;
-import edu.stanford.rsl.conrad.geometry.shapes.simple.Point3D;
-import edu.stanford.rsl.conrad.geometry.shapes.simple.PointND;
 import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
 import edu.stanford.rsl.conrad.numerics.SimpleOperators;
 import edu.stanford.rsl.conrad.numerics.SimpleVector;
-import edu.stanford.rsl.science.darkfield.darkfieldgrid.DarkFieldPhantom;
-import edu.stanford.rsl.science.darkfield.iterative.PointwiseCorrection;
 
 public class DarkFieldTensorClass{
 
@@ -27,14 +18,13 @@ public class DarkFieldTensorClass{
 	protected int imgSizeY;
 	protected int imgSizeZ;
 	
-	private ArrayList<DarkFieldEigenVector> fieldList;
+	private ArrayList<DarkFieldVectorField> eigenVectorList;
 
 	/**
 	 * @param imgSizeX
 	 * @param imgSizeY
 	 * @param imgSizeZ
 	 * @param spacing_world
-	 * @param origin_world
 	 */
 	public DarkFieldTensorClass(int imgSizeX, int imgSizeY,int imgSizeZ, double[] spacing_world, double[] origin_world){
 		
@@ -43,18 +33,21 @@ public class DarkFieldTensorClass{
 		this.imgSizeZ = imgSizeZ;
 
 		// contain the eigenvectors (4th column is always the respective eigenvalue)
-		DarkFieldEigenVector eigenVec1 = new DarkFieldEigenVector(imgSizeX, imgSizeY, imgSizeZ, spacing_world, origin_world);
-		DarkFieldEigenVector eigenVec2 = new DarkFieldEigenVector(imgSizeX, imgSizeY, imgSizeZ, spacing_world, origin_world);
-		DarkFieldEigenVector eigenVec3 = new DarkFieldEigenVector(imgSizeX, imgSizeY, imgSizeZ, spacing_world, origin_world);
+		DarkFieldVectorField eigenVec1 = new DarkFieldVectorField(imgSizeX, imgSizeY, imgSizeZ, spacing_world, origin_world);
+		DarkFieldVectorField eigenVec2 = new DarkFieldVectorField(imgSizeX, imgSizeY, imgSizeZ, spacing_world, origin_world);
+		DarkFieldVectorField eigenVec3 = new DarkFieldVectorField(imgSizeX, imgSizeY, imgSizeZ, spacing_world, origin_world);
 		
-		fieldList = new ArrayList<DarkFieldEigenVector>(3);
-		fieldList.add(eigenVec1);
-		fieldList.add(eigenVec2);
-		fieldList.add(eigenVec3);
+		eigenVectorList = new ArrayList<DarkFieldVectorField>(3);
+		eigenVectorList.add(eigenVec1);
+		eigenVectorList.add(eigenVec2);
+		eigenVectorList.add(eigenVec3);
 		
 
 	}
 	
+	public DarkFieldVectorField getFiberDirection(){
+		return eigenVectorList.get(2);
+	}
 	
 	public void setData(int x, int y, int z, DarkFieldPCA myPCA){
 		
@@ -62,11 +55,11 @@ public class DarkFieldTensorClass{
 		SimpleMatrix eigenVectors = myPCA.getEigenVectors();
 		SimpleVector eigenValues = myPCA.getEigenValues();
 		
-		for(int i = 0; i < fieldList.size(); i++){
+		for(int i = 0; i < eigenVectorList.size(); i++){
 			SimpleVector eigenVec = eigenVectors.getCol(i);
 			double eigenVal = eigenValues.getElement(i);
 			eigenVec = eigenVec.multipliedBy(eigenVal);
-			fieldList.get(i).setVector(x, y, z, eigenVec);
+			eigenVectorList.get(i).setVector(x, y, z, eigenVec);
 		}
 		
 
@@ -122,7 +115,7 @@ public class DarkFieldTensorClass{
 				for (int z = 0; z < imgSizeZ; z++){
 				
 				// Get EigenVec of smallest eigenValue
-				SimpleVector direction = fieldList.get(2).getSimpleVectorAtIndex(x,y,z);
+				SimpleVector direction = eigenVectorList.get(2).getSimpleVectorAtIndex(x,y,z);
 				
 				double length = direction.normL2();
 				
@@ -194,9 +187,9 @@ public class DarkFieldTensorClass{
 				for(int pointIdx = 0; pointIdx < indexListe.size(); pointIdx++){
 					
 					Index3D coordIdx = indexListe.get(pointIdx);
-					SimpleVector vec1 = fieldList.get(0).getSimpleVectorAtIndex(coordIdx.x, coordIdx.y, coordIdx.z);
-					SimpleVector vec2 = fieldList.get(1).getSimpleVectorAtIndex(coordIdx.x, coordIdx.y, coordIdx.z);
-					SimpleVector vec3 = fieldList.get(2).getSimpleVectorAtIndex(coordIdx.x, coordIdx.y, coordIdx.z);
+					SimpleVector vec1 = eigenVectorList.get(0).getSimpleVectorAtIndex(coordIdx.x, coordIdx.y, coordIdx.z);
+					SimpleVector vec2 = eigenVectorList.get(1).getSimpleVectorAtIndex(coordIdx.x, coordIdx.y, coordIdx.z);
+					SimpleVector vec3 = eigenVectorList.get(2).getSimpleVectorAtIndex(coordIdx.x, coordIdx.y, coordIdx.z);
 					
 					bufWriter.write(vec1.normL2() +" " + vec2.normL2() +" " + vec3.normL2());
 					bufWriter.write(System.getProperty( "line.separator" ));
@@ -211,7 +204,7 @@ public class DarkFieldTensorClass{
 				for(int pointIdx = 0; pointIdx < indexListe.size(); pointIdx++){
 
 					Index3D coordIdx = indexListe.get(pointIdx);
-					SimpleVector fiberDir = fieldList.get(2).getSimpleVectorAtIndex(coordIdx.x, coordIdx.y, coordIdx.z);
+					SimpleVector fiberDir = eigenVectorList.get(2).getSimpleVectorAtIndex(coordIdx.x, coordIdx.y, coordIdx.z);
 					// Set z component to 0, as we don't care about this in the visualization.
 					fiberDir.setElementValue(2, 0);
 					
@@ -243,7 +236,7 @@ public class DarkFieldTensorClass{
 				for(int pointIdx = 0; pointIdx < indexListe.size(); pointIdx++){
 			
 					Index3D coordIdx = indexListe.get(pointIdx);
-					SimpleVector curEigVec = fieldList.get(eigIdx).getSimpleVectorAtIndex(coordIdx.x, coordIdx.y, coordIdx.z);
+					SimpleVector curEigVec = eigenVectorList.get(eigIdx).getSimpleVectorAtIndex(coordIdx.x, coordIdx.y, coordIdx.z);
 					bufWriter.write(System.getProperty( "line.separator" ));
 					bufWriter.write(curEigVec.getElement(0) + " " + curEigVec.getElement(1)+" "+"" +curEigVec.getElement(2));
 				}
@@ -260,9 +253,9 @@ public class DarkFieldTensorClass{
 				
 						Index3D coordIdx = indexListe.get(pointIdx);
 						
-						SimpleVector eigVec1 = fieldList.get(0).getSimpleVectorAtIndex(coordIdx.x, coordIdx.y, coordIdx.z);
-						SimpleVector eigVec2 = fieldList.get(1).getSimpleVectorAtIndex(coordIdx.x, coordIdx.y, coordIdx.z);
-						SimpleVector eigVec3 = fieldList.get(2).getSimpleVectorAtIndex(coordIdx.x, coordIdx.y, coordIdx.z);
+						SimpleVector eigVec1 = eigenVectorList.get(0).getSimpleVectorAtIndex(coordIdx.x, coordIdx.y, coordIdx.z);
+						SimpleVector eigVec2 = eigenVectorList.get(1).getSimpleVectorAtIndex(coordIdx.x, coordIdx.y, coordIdx.z);
+						SimpleVector eigVec3 = eigenVectorList.get(2).getSimpleVectorAtIndex(coordIdx.x, coordIdx.y, coordIdx.z);
 						
 						
 						SimpleMatrix mat1 = SimpleOperators.multiplyOuterProd(eigVec1, eigVec1).multipliedBy(1/eigVec1.normL2());

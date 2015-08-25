@@ -2,29 +2,12 @@ package edu.stanford.rsl.science.darkfield.FlorianDarkField;
 
 import java.util.ArrayList;
 
-import weka.core.pmml.jaxbbindings.GaussianDistribution;
-import weka.core.pmml.jaxbbindings.VectorFields;
-import ij.IJ;
-import ij.ImageJ;
 import ij.ImagePlus;
-import edu.stanford.rsl.apps.gui.opengl.PointCloudViewer;
-import edu.stanford.rsl.conrad.data.numeric.Grid2D;
-import edu.stanford.rsl.conrad.data.numeric.Grid3D;
 import edu.stanford.rsl.conrad.geometry.General;
-import edu.stanford.rsl.conrad.geometry.shapes.simple.PointND;
 import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
 import edu.stanford.rsl.conrad.numerics.SimpleOperators;
 import edu.stanford.rsl.conrad.numerics.SimpleVector;
-import edu.stanford.rsl.conrad.parallel.SimpleParallelThread;
 import edu.stanford.rsl.conrad.utils.Configuration;
-import edu.stanford.rsl.conrad.utils.FileUtil;
-import edu.stanford.rsl.conrad.utils.RegKeys;
-import edu.stanford.rsl.science.darkfield.darkfieldgrid.DarkFieldPhantom;
-import edu.stanford.rsl.science.darkfield.darkfieldgrid.ImageToGrid3D;
-import edu.stanford.rsl.science.darkfield.iterative.GradientSolver;
-import edu.stanford.rsl.science.darkfield.reconstruction.WriteToVectorField;
-import edu.stanford.rsl.tutorial.basics.MHDImageLoader;
-import edu.stanford.rsl.tutorial.basics.PointCloudMaker;
 
 
 
@@ -129,7 +112,7 @@ public class DarkFieldTensorPhantom  extends  DarkFieldTensorGeometry  {
 		scatterDirections = DarkFieldScatterDirection.getScatterDirectionMatrix(numScatterVectors);
 		
 		// calcWoodenBlockPhantom();
-		calcCurlyPhantom();
+		calcPhantom(myPhantomType);
 	}
 	
 
@@ -137,6 +120,21 @@ public class DarkFieldTensorPhantom  extends  DarkFieldTensorGeometry  {
 	 * @param myPhantomType
 	 */
 	private void calcPhantom(PhantomType myPhantomType){
+		
+		switch(myPhantomType){
+		case CURL_VECTOR_FIELD_PHANTOM:
+			calcCurlyPhantom();
+			break;
+		case PATCHY_PHANTOM:
+			calcPatchyPhantom();
+			break;
+		case WOODEN_BLOCK_PHANTOM:
+			calcWoodenBlockPhantom();
+			break;
+		default:
+		calcWoodenBlockPhantom();
+		break;
+		}
 		
 	}
 	
@@ -177,7 +175,12 @@ public class DarkFieldTensorPhantom  extends  DarkFieldTensorGeometry  {
 		for(int channel = 0; channel < numScatterVectors; channel++){
 			scatterCoef.setElementValue(channel, 1);
 		}
-		SimpleVector eigenValues = new SimpleVector(7,7,1);
+		double ratio = 7;
+		double lambda3 = 1;
+		double lambda2 = ratio*lambda3;
+		double lambda1 = ratio*lambda3;
+		
+		SimpleVector eigenValues = new SimpleVector(lambda1,lambda2,lambda3);
 		
 		DarkFieldEllipsoid myEllipsoid = new DarkFieldEllipsoid(scatterDirections, scatterCoef, eigenValues, eigenVectors);
 		
@@ -187,6 +190,11 @@ public class DarkFieldTensorPhantom  extends  DarkFieldTensorGeometry  {
 	}
 	
 	
+	/**
+	 * @param imgSizeX
+	 * @param imgSizeY
+	 * @return
+	 */
 	private SimpleVector[][] calcCurlLayer(int imgSizeX, int imgSizeY){
 		
 		SimpleVector eX = new SimpleVector(1,0,0);
@@ -196,14 +204,22 @@ public class DarkFieldTensorPhantom  extends  DarkFieldTensorGeometry  {
 		
 		for(int x = 0; x < imgSizeX; x++){
 			for(int y = 0; y < imgSizeY; y++){
-				
+				/**
+				 * Calculate vector field
+				 */
 				SimpleVector vec = SimpleOperators.subtract(eX.multipliedBy(y-imgSizeY/2.0),eY.multipliedBy(x-imgSizeX/2.0));
+				
 				vec.normalizeL2();
 				// Vec is 0-Vector normalization will result in NaN, so we have to check for that
 				if(Double.isNaN(vec.getElement(0))){
 					vec = new SimpleVector(1,0,0);
 				}
+				
+				/*
+				 * Calculate scatter coefficients
+				 */
 				SimpleVector scatterCoef = calculateEllipsoidFromFiberOrientation(vec, scatterDirections);
+				
 				if(Double.isNaN(scatterCoef.getElement(0))){
 					// TEst
 					System.out.println("NaN - Entry. Something went wrong! Better check this!");
@@ -217,6 +233,9 @@ public class DarkFieldTensorPhantom  extends  DarkFieldTensorGeometry  {
 	}
 	
 	
+	/**
+	 * Calculates a Dark Field Phantom containg a curly layer
+	 */
 	public void calcCurlyPhantom(){
 	
 		SimpleVector[][] myCurlVector = calcCurlLayer(imgSizeX, imgSizeY);

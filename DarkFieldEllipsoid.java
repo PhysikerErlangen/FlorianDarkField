@@ -5,13 +5,10 @@
 
 package edu.stanford.rsl.science.darkfield.FlorianDarkField;
 
-import edu.stanford.rsl.conrad.data.numeric.NumericPointwiseOperators;
 import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
 import edu.stanford.rsl.conrad.numerics.SimpleOperators;
 import edu.stanford.rsl.conrad.numerics.SimpleVector;
-import edu.stanford.rsl.conrad.numerics.Solvers;
 import edu.stanford.rsl.conrad.numerics.SimpleVector.VectorNormType;
-import edu.stanford.rsl.conrad.numerics.test.SimpleOperatorsTest;
 
 public class DarkFieldEllipsoid {
 

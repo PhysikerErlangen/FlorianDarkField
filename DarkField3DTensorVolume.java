@@ -4,20 +4,13 @@
 //
 package edu.stanford.rsl.science.darkfield.FlorianDarkField;
 import java.io.File;
-import java.util.ArrayList;
-
 import ij.IJ;
 import ij.ImageJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.measure.Calibration;
-import edu.stanford.rsl.conrad.data.numeric.Grid3D;
-import edu.stanford.rsl.conrad.data.numeric.Grid4D;
-import edu.stanford.rsl.conrad.geometry.General;
-import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
 import edu.stanford.rsl.conrad.numerics.SimpleOperators;
 import edu.stanford.rsl.conrad.numerics.SimpleVector;
-import edu.stanford.rsl.conrad.utils.ImageUtil;
 
 
 public class DarkField3DTensorVolume extends DarkFieldGrid3DTensor{
@@ -182,6 +175,10 @@ public class DarkField3DTensorVolume extends DarkFieldGrid3DTensor{
 	}
 	}		
 	
+	@Override
+	public float getAtIndex(int x, int y, int z, int channel) {
+		return super.getAtIndex(x, y,z,channel);
+	}
 	
 	
 	/**
@@ -326,6 +323,58 @@ public class DarkField3DTensorVolume extends DarkFieldGrid3DTensor{
 				
 	}
 
+	
+	/**
+	 * @return
+	 */
+	public double norm1(){
+		return norm1(this);
+	}
+	
+	
+	
+	/**
+	 * @param volume
+	 * @return
+	 */
+	public static double norm1(DarkField3DTensorVolume volume) {
+		double result=0.d;
+		
+		for(int x = 0; x < volume.imgSizeX; x ++)
+			for(int y = 0; y < volume.imgSizeY; y ++)
+				for(int z = 0; z < volume.imgSizeZ; z ++)
+					for(int channel = 0; channel < volume.getNumberOfChannels(); channel++)
+						result+= Math.abs(volume.getAtIndex(x, y, z, channel));
+		return result;
+	}
+	
+	/**
+	 * @return
+	 */
+	public double norm2(){
+		return norm2(this);
+	}
+	
+	/**
+	 * @param volume
+	 * @return
+	 */
+	public static double norm2(DarkField3DTensorVolume volume) {
+		/*
+		 * result2 is the squared result
+		 */
+		double result2=0.d;
+		
+		for(int x = 0; x < volume.imgSizeX; x ++)
+			for(int y = 0; y < volume.imgSizeY; y ++)
+				for(int z = 0; z < volume.imgSizeZ; z ++)
+					for(int channel = 0; channel < volume.getNumberOfChannels(); channel++)
+						result2+= Math.pow(Math.abs(volume.getAtIndex(x, y, z, channel)),2);
+
+		return Math.sqrt(result2);
+	}
+	
+	
 	
 //	
 //	@Override

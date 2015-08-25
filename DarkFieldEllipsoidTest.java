@@ -10,7 +10,6 @@ import org.junit.Test;
 import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
 import edu.stanford.rsl.conrad.numerics.SimpleOperators;
 import edu.stanford.rsl.conrad.numerics.SimpleVector;
-import edu.stanford.rsl.science.darkfield.iterative.OpMath;
 
 public class DarkFieldEllipsoidTest {
 

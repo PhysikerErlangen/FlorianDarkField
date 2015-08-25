@@ -1,7 +1,6 @@
 package edu.stanford.rsl.science.darkfield.FlorianDarkField;
 
 import ij.IJ;
-import ij.ImageJ;
 import ij.ImagePlus;
 import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
 import edu.stanford.rsl.conrad.numerics.SimpleVector;
@@ -351,7 +350,7 @@ public void reconstructDarkFieldVolume(int numScatterVectors, int maxIt, float s
 		// Initialize the GradientSolver3D
 		// Can even deal with reconMask == null, as GradientSolver knows how to deal with this.
 		// If mask should be used, it should be created prior to execution of this method
-		GradientSolverTensor3D gradientSolver = new GradientSolverTensor3D(config1, config2, sinoDCI1, sinoDCI2, stepSize, maxIt, numScatterVectors,saveFolder, reconMask,reconMask,constraintType);
+		DarkFieldGradientSolverTensor gradientSolver = new DarkFieldGradientSolverTensor(config1, config2, sinoDCI1, sinoDCI2, stepSize, maxIt, numScatterVectors,saveFolder, reconMask,reconMask,constraintType);
 		
 		// Save the scatter directions into a matrix
 		scatterDirMatrix =  DarkFieldScatterDirection.getScatterDirectionMatrix(numScatterVectors);

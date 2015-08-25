@@ -9,22 +9,8 @@ package edu.stanford.rsl.science.darkfield.FlorianDarkField;
 
 import java.io.File;
 
-import com.jogamp.opengl.util.awt.ImageUtil;
-
-import edu.stanford.rsl.conrad.numerics.SimpleVector;
-import edu.stanford.rsl.conrad.utils.Configuration;
-
-
-// Used for solving the 3D Gradientsolver in the tensor framework
-import edu.stanford.rsl.science.darkfield.FlorianDarkField.GradientSolverTensor3D;
-
-// Contains the reconstructed sample
-import edu.stanford.rsl.science.darkfield.FlorianDarkField.DarkField3DTensorVolume;
-import edu.stanford.rsl.science.darkfield.FlorianDarkField.ImageToSinogram3D;
 import edu.stanford.rsl.science.darkfield.FlorianDarkField.DarkField3DTensorVolume.TensorConstraintType;
-import ij.IJ;
 import ij.ImageJ;
-import ij.ImagePlus;
 
 
 

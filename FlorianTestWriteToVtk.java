@@ -1,7 +1,6 @@
 package edu.stanford.rsl.science.darkfield.FlorianDarkField;
 
 import java.io.BufferedWriter;
-import java.io.DataOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;

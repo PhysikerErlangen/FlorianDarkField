@@ -6,11 +6,8 @@
 package edu.stanford.rsl.science.darkfield.FlorianDarkField;
 
 
-import edu.stanford.rsl.conrad.geometry.Projection.CameraAxisDirection;
-import edu.stanford.rsl.conrad.geometry.shapes.simple.Point3D;
 import edu.stanford.rsl.conrad.geometry.shapes.simple.PointND;
 import edu.stanford.rsl.conrad.geometry.trajectories.Trajectory;
-import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
 import edu.stanford.rsl.conrad.numerics.SimpleOperators;
 import edu.stanford.rsl.conrad.numerics.SimpleVector;
 import edu.stanford.rsl.conrad.utils.Configuration;

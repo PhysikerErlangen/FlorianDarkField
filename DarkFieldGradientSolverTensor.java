@@ -5,11 +5,7 @@
 
 package edu.stanford.rsl.science.darkfield.FlorianDarkField;
 
-// Specialized backprojector and projector methods are required for solving the system with gradient decent
-import ij.ImageJ;
 import ij.gui.Plot;
-import ij.gui.PlotWindow;
-
 import java.io.File;
 
 
@@ -18,25 +14,17 @@ import java.io.File;
 
 
 
-import java.util.ArrayList;
-
-import edu.stanford.rsl.science.convexsammon.MyException;
+import edu.stanford.rsl.science.darkfield.FlorianDarkField.DarkFieldErrorMeasures.DarkFieldNormType;
 import edu.stanford.rsl.science.darkfield.FlorianDarkField.ParallelDarkFieldBackprojector3DTensor;
 import edu.stanford.rsl.science.darkfield.FlorianDarkField.ParallelDarkFieldProjector3DTensor;
 import edu.stanford.rsl.science.darkfield.FlorianDarkField.DarkField3DTensorVolume;
 import edu.stanford.rsl.science.darkfield.FlorianDarkField.DarkField3DTensorVolume.TensorConstraintType;
-import edu.stanford.rsl.science.darkfield.iterative.OpMath;
-import edu.stanford.rsl.tutorial.iterative.GridOp;
-import edu.stanford.rsl.conrad.data.numeric.NumericGridOperator;
-import edu.stanford.rsl.conrad.data.numeric.NumericPointwiseOperators;
-import edu.stanford.rsl.conrad.data.numeric.iterators.NumericPointwiseIteratorND;
 import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
-import edu.stanford.rsl.conrad.numerics.SimpleOperators;
 import edu.stanford.rsl.conrad.numerics.SimpleVector;
 import edu.stanford.rsl.conrad.utils.Configuration;
 import edu.stanford.rsl.conrad.utils.VisualizationUtil;
 
-public class GradientSolverTensor3D extends DarkFieldTensorGeometry {
+public class DarkFieldGradientSolverTensor extends DarkFieldTensorGeometry {
 
 	boolean debug = false;
 
@@ -67,7 +55,7 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry {
 	/**
 	 * Contains error of reconstruction in all steps
 	 */
-	SimpleVector errorVec;
+	SimpleMatrix errorMat;
 
 	/**
 	 * Scatter weights used for Tensor reconstruction
@@ -142,7 +130,7 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry {
 	 * @param numScatterVectors
 	 * @param pathToSaveVtk
 	 */
-	public GradientSolverTensor3D(Configuration configuration1,
+	public DarkFieldGradientSolverTensor(Configuration configuration1,
 			Configuration configuration2,
 			DarkField3DSinogram darkFieldSinogram1,
 			DarkField3DSinogram darkFieldSinogram2, float stepSize, int maxIt,
@@ -164,7 +152,7 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry {
 	 * @param maskAMP1
 	 * @param maskAMP2
 	 */
-	public GradientSolverTensor3D(Configuration configuration1,
+	public DarkFieldGradientSolverTensor(Configuration configuration1,
 			Configuration configuration2,
 			DarkField3DSinogram darkFieldSinogram1,
 			DarkField3DSinogram darkFieldSinogram2, float stepSize, int maxIt,
@@ -235,7 +223,7 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry {
 		
 		setTensorConstraint(type);
 		
-		errorVec = new SimpleVector(maxIt);
+		errorMat = new SimpleMatrix(maxIt,2);
 
 	}
 
@@ -310,7 +298,9 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry {
 
 		}
 
-		plotError(this.errorVec, this.maxIt);
+		plotError(this.errorMat, this.maxIt);
+		
+		DarkFieldErrorMeasures.writeErrorToTxt(pathToSaveVtk, "error.txt", errorMat);
 		
 		// Return the reconstruction result
 		return reconImage;
@@ -348,9 +338,9 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry {
 		error = error +  val;
 		}	
 	
-		errorVec.addToElement(it, error);
+		errorMat.setRowValue(it, new SimpleVector(it,error));
 		
-		
+		plotError(errorMat, it+1);
 		
 		System.out.println("Error (Difference of Sinograms): " + error);
 
@@ -359,8 +349,8 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry {
 	/**
 
 	 */
-	private void plotError(SimpleVector errorVec, int it){
-		double[] data = errorVec.getSubVec(0, it ).copyAsDoubleArray();
+	private void plotError(SimpleMatrix errorMatrix, int it){
+		double[] data = errorMat.getCol(1).getSubVec(0, it ).copyAsDoubleArray();
 		Plot myErrorPlot = VisualizationUtil.createPlot(data, "Error of Sinograms", "Iteration", "Error");
 		myErrorPlot.show();
 	}
@@ -483,9 +473,9 @@ public class GradientSolverTensor3D extends DarkFieldTensorGeometry {
 		/*
 		 * Calculate error between observed and reconstruction sinograms
 		 */
+
+		double error = DarkFieldErrorMeasures.errorSinogam(differenceSinogram,darkFieldSinogram.norm2(),DarkFieldNormType.NORM_L2);
 		
-		 
-		double error = differenceSinogram.norm1();
 		return error;
 	}
 

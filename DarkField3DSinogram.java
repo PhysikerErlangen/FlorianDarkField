@@ -203,6 +203,30 @@ public class DarkField3DSinogram extends Grid3D {
 		}
 		return result;
 	}
+	
+	/**
+	 * @return
+	 */
+	public double norm2(){
+		return norm2(this);
+	}
+	
+	/**
+	 * @param sinogram
+	 * @return
+	 */
+	public static double norm2(DarkField3DSinogram sinogram) {
+		double result2=0.d;
+		
+		for(int thetaIdx=0;thetaIdx<sinogram.maxThetaIndex;thetaIdx++){
+			for(int curU=0;curU<sinogram.maxU;curU++){
+				for(int curV=0;curV<sinogram.maxV; curV++){
+					result2+= Math.pow(Math.abs(sinogram.getAtIndex(curU, curV, thetaIdx)),2);
+				}
+			}
+		}
+		return Math.sqrt(result2);
+	}
 
 	
 	

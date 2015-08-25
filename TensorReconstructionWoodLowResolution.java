@@ -20,7 +20,7 @@ import edu.stanford.rsl.conrad.utils.Configuration;
 
 
 // Used for solving the 3D Gradientsolver in the tensor framework
-import edu.stanford.rsl.science.darkfield.FlorianDarkField.GradientSolverTensor3D;
+import edu.stanford.rsl.science.darkfield.FlorianDarkField.DarkFieldGradientSolverTensor;
 
 // Contains the reconstructed sample
 import edu.stanford.rsl.science.darkfield.FlorianDarkField.DarkField3DTensorVolume;

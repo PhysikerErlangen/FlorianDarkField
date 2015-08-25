@@ -27,7 +27,6 @@ import edu.stanford.rsl.conrad.geometry.shapes.simple.PointND;
 import edu.stanford.rsl.conrad.geometry.shapes.simple.StraightLine;
 import edu.stanford.rsl.conrad.geometry.transforms.Transform;
 import edu.stanford.rsl.conrad.geometry.transforms.Translation;
-import edu.stanford.rsl.conrad.numerics.SimpleOperators;
 import edu.stanford.rsl.conrad.numerics.SimpleVector;
 import edu.stanford.rsl.conrad.utils.Configuration;
 

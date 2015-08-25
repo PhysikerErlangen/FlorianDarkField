@@ -6,7 +6,6 @@ import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
 import edu.stanford.rsl.conrad.numerics.SimpleOperators;
 import edu.stanford.rsl.conrad.numerics.SimpleVector;
 import edu.stanford.rsl.conrad.utils.Configuration;
-import edu.stanford.rsl.science.overexposure.CrossCalibration;
 
 
 

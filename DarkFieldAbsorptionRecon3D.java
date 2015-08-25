@@ -2,13 +2,10 @@ package edu.stanford.rsl.science.darkfield.FlorianDarkField;
 
 import edu.stanford.rsl.conrad.data.numeric.Grid1D;
 import edu.stanford.rsl.conrad.data.numeric.Grid2D;
-import edu.stanford.rsl.conrad.data.numeric.Grid3D;
 import edu.stanford.rsl.conrad.data.numeric.InterpolationOperators;
 import edu.stanford.rsl.conrad.data.numeric.NumericPointwiseOperators;
 import edu.stanford.rsl.conrad.numerics.SimpleVector;
 import edu.stanford.rsl.conrad.utils.Configuration;
-import edu.stanford.rsl.science.darkfield.darkfieldgrid.ImageToGrid3D;
-import edu.stanford.rsl.science.darkfield.parallel.ParallelBackprojectorAMP2D;
 import edu.stanford.rsl.tutorial.filters.RamLakKernel;
 
 public class DarkFieldAbsorptionRecon3D  extends  DarkFieldTensorGeometry  {

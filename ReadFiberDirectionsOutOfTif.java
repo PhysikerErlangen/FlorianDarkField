@@ -3,7 +3,6 @@ package edu.stanford.rsl.science.darkfield.FlorianDarkField;
 import java.io.File;
 
 import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
-import edu.stanford.rsl.conrad.utils.Configuration;
 import ij.IJ;
 import ij.ImageJ;
 import ij.ImagePlus;

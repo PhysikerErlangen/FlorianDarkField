@@ -1,6 +1,5 @@
 package edu.stanford.rsl.science.darkfield.FlorianDarkField;
 
-import static org.junit.Assert.*;
 import ij.ImageJ;
 
 import java.util.Scanner;

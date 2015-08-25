@@ -8,12 +8,6 @@ package edu.stanford.rsl.science.darkfield.FlorianDarkField;
 import ij.ImageJ;
 import ij.gui.Plot;
 
-import java.util.ArrayList;
-
-import edu.mines.jtk.dsp.Eigen;
-import edu.stanford.rsl.conrad.data.numeric.NumericPointwiseOperators;
-import edu.stanford.rsl.conrad.geometry.shapes.activeshapemodels.PCA;
-import edu.stanford.rsl.conrad.geometry.shapes.mesh.DataMatrix;
 import edu.stanford.rsl.conrad.numerics.DecompositionSVD;
 import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
 import edu.stanford.rsl.conrad.numerics.SimpleOperators;

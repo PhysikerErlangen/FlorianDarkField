@@ -5,10 +5,7 @@ package edu.stanford.rsl.science.darkfield.FlorianDarkField;
 
 import static org.junit.Assert.*;
 
-import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import edu.stanford.rsl.conrad.numerics.SimpleMatrix;

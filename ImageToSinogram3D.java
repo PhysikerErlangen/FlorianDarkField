@@ -5,8 +5,6 @@
 package edu.stanford.rsl.science.darkfield.FlorianDarkField;
 
 import ij.ImagePlus;
-import edu.stanford.rsl.conrad.data.numeric.Grid2D;
-import edu.stanford.rsl.conrad.data.numeric.Grid3D;
 import edu.stanford.rsl.science.darkfield.FlorianDarkField.DarkField3DSinogram;
 
 

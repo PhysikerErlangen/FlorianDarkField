@@ -3,7 +3,6 @@ package edu.stanford.rsl.science.darkfield.FlorianDarkField;
 import java.util.ArrayList;
 
 import edu.stanford.rsl.apps.gui.opengl.PointCloudViewer;
-import edu.stanford.rsl.conrad.data.numeric.Grid3D;
 import edu.stanford.rsl.conrad.geometry.shapes.simple.PointND;
 import edu.stanford.rsl.conrad.numerics.SimpleMatrix;
 

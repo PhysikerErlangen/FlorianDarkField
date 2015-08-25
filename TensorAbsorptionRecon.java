@@ -3,10 +3,8 @@ package edu.stanford.rsl.science.darkfield.FlorianDarkField;
 import ij.IJ;
 import ij.ImageJ;
 import ij.ImagePlus;
-import edu.stanford.rsl.conrad.data.numeric.Grid2D;
 import edu.stanford.rsl.conrad.numerics.SimpleVector;
 import edu.stanford.rsl.conrad.utils.Configuration;
-import edu.stanford.rsl.science.darkfield.darkfieldgrid.ImageToGrid3D;
 
 public class TensorAbsorptionRecon {
 

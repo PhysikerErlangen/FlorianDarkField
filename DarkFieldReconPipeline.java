@@ -344,25 +344,29 @@ public void reconstructDarkFieldVolume(int numScatterVectors, int maxIt, float s
 	 * @param sinoDCI1
 	 * @param sinoDCI2
 	 */
-	public void reconstructDarkFieldVolume(int numScatterVectors, int maxIt, float stepSize, File pathSaveDarkField,DarkField3DSinogram sinoDCI1,DarkField3DSinogram sinoDCI2,boolean writeVtkInEveryStep){
+	public SimpleMatrix reconstructDarkFieldVolume(int numScatterVectors, int maxIt, float stepSize, File pathSaveDarkField,DarkField3DSinogram sinoDCI1,DarkField3DSinogram sinoDCI2,boolean writeVtkInEveryStep){
 		
 				
 		// Initialize the GradientSolver3D
 		// Can even deal with reconMask == null, as GradientSolver knows how to deal with this.
 		// If mask should be used, it should be created prior to execution of this method
-		DarkFieldGradientSolverTensor gradientSolver = new DarkFieldGradientSolverTensor(config1, config2, sinoDCI1, sinoDCI2, stepSize, maxIt, numScatterVectors,saveFolder, reconMask,reconMask,constraintType);
+		DarkFieldGradientSolverTensor gradientSolver = new DarkFieldGradientSolverTensor(config1, config2, sinoDCI1, sinoDCI2, stepSize, maxIt, numScatterVectors,pathSaveDarkField, reconMask,reconMask,constraintType);
 		
 		// Save the scatter directions into a matrix
 		scatterDirMatrix =  DarkFieldScatterDirection.getScatterDirectionMatrix(numScatterVectors);
 		
 		// Execute the gradient decent
 		reconDarkField = gradientSolver.Gradient3D(writeVtkInEveryStep);
+		
+		
 
 		if(pathSaveDarkField!=null){
 			String filePath = pathSaveDarkField.getParent() + "\\DCI_volume.tif";
 			String volumeName = "Reconstructed DarkField Volume";
 			reconDarkField.write3DTensorToImage(filePath, volumeName);
 		}
+		
+		return gradientSolver.errorMat;
 	}
 	
 

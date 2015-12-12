@@ -96,6 +96,7 @@ else if(numScatterVectors == 7){
 			z = z - dz;
 			l = l + s/r;
 			
+			
 			scatterMatrix.setColValue(k, vec);
 			
 		

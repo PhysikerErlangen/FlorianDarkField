@@ -21,10 +21,6 @@ import edu.stanford.rsl.science.darkfield.FlorianDarkField.DarkField3DTensorVolu
 import edu.stanford.rsl.science.darkfield.FlorianDarkField.DarkFieldTensorGeometry.TrajectoryType;
 import ij.ImageJ;
 
-
-
-
-
 public class TensorReconstructionPhantom{
 
 	public static void main (String [] args) throws Exception{
@@ -38,11 +34,8 @@ public class TensorReconstructionPhantom{
 		File folder;
 		
 		String fileNameConfig1 = "E:\\fschiffers\\MeasuredData\\Phantom2\\PhantomHalfLarge_unsymetricSmall.xml";
-		
-
 
 		// Load configuration wooden case
-
 		Configuration Configuration1 = Configuration.loadConfiguration(fileNameConfig1);
 		System.out.println("Configuration 1 loaded.");
 
@@ -56,17 +49,17 @@ public class TensorReconstructionPhantom{
 		new ImageJ();
 		
 		// Number of scatter vectors
-		numScatterVectors = 9;
+		numScatterVectors = 13;
 		
 		// Create Dark Field Phantom
-		phantomObject = new DarkFieldTensorPhantom(Configuration1,numScatterVectors,PhantomType.CURL_VECTOR_FIELD_PHANTOM);
+		phantomObject = new DarkFieldTensorPhantom(Configuration1,numScatterVectors,PhantomType.WOODEN_BLOCK_PHANTOM);
 
 		// display the phantom
 		phantomObject.getPhantom().show("Phantom Volume");
 		
 		folder = new File(fileNameConfig1);
 		SimpleMatrix myScatterMatrix = DarkFieldScatterDirection.getScatterDirectionMatrix(numScatterVectors);
-		DarkFieldReconPipeline.calculateFiberOrientations(phantomObject.getPhantom(), myScatterMatrix, folder,"fiberDirectionsPhantom");
+		DarkFieldTensorClass phantomFiberDirection = DarkFieldReconPipeline.calculateFiberOrientations(phantomObject.getPhantom(), myScatterMatrix, folder,"fiberDirectionsPhantom");
 		
 		System.out.println("Start calculating Phantom DarkField Projections");
 		phantomObject.calculateDarkFieldProjection(Configuration1, Configuration2);
@@ -114,7 +107,7 @@ public class TensorReconstructionPhantom{
 		//Step size for Gradient decent
 		float stepSize = 0.02f;
 		// Number of maximal iterations in gradient decent
-		int maxIt =3;
+		int maxIt = 5;
 		
 		// Initialize the pipeline
 		myDarkFieldPipeLine = new DarkFieldReconPipeline(Configuration1,Configuration2,fileNameConfig1,TensorConstraintType.NO_CONSTRAINT);
@@ -128,11 +121,18 @@ public class TensorReconstructionPhantom{
 		
 		myDarkFieldPipeLine.reconstructDarkFieldVolume(numScatterVectors,maxIt,stepSize,folder,sinoDCI1,sinoDCI2,writeVtkInEveryStep);
 		
+		
+		
+		
 		System.out.println(" DarkField Reconstruction was successfully created and saved.");
 		
 		File myParentFile = new File(fileNameConfig1);
 		
-		myDarkFieldPipeLine.calculateFiberOrientations(myParentFile);
+		DarkFieldTensorClass tensorReko =  myDarkFieldPipeLine.calculateFiberOrientations(myParentFile);
+		
+		double angularError = DarkFieldErrorMeasures.errorAngularDistance(phantomFiberDirection,tensorReko,mask);
+		
+		System.out.println("Angular Error: " +angularError);
 		
 		System.out.println("Fiber Orientations sucessfully saved.");
 		

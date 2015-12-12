@@ -280,12 +280,14 @@ public class DarkFieldTensorPhantom  extends  DarkFieldTensorGeometry  {
 		
 		SimpleVector scatterCoefDir1 = calculateEllipsoidFromFiberOrientation(new SimpleVector(1,0,0).normalizedL2(), scatterDirections);
 		SimpleVector scatterCoefDir2 = calculateEllipsoidFromFiberOrientation(new SimpleVector(0,1,0).normalizedL2(), scatterDirections);
+		SimpleVector scatterCoefDir3 = calculateEllipsoidFromFiberOrientation(new SimpleVector(0,0,1).normalizedL2(), scatterDirections);
+		SimpleVector scatterCoefDir4 = calculateEllipsoidFromFiberOrientation(new SimpleVector(1,1,1).normalizedL2(), scatterDirections);
 		
-		int aX = (int)( 0.3*imgSizeX);
-		int bX = (int) (0.7*imgSizeX);
+		int aX = (int)( 0.1*imgSizeX);
+		int bX = (int) (0.9*imgSizeX);
 		
-		int aY = (int)( 0.4*imgSizeY);
-		int bY = (int) (0.6*imgSizeY);
+		int aY = (int)( 0.1*imgSizeY);
+		int bY = (int) (0.9*imgSizeY);
 		
 		int l1 = (int)( 0.1*imgSizeZ);
 		int l2 = (int) (0.3*imgSizeZ);
@@ -302,9 +304,9 @@ public class DarkFieldTensorPhantom  extends  DarkFieldTensorGeometry  {
 					} else if(z<l3){
 						phantom.setDarkFieldScatterTensor(x, y, z, scatterCoefDir2);
 					} else if(z<l4){
-						phantom.setDarkFieldScatterTensor(x, y, z, scatterCoefDir1);
+						phantom.setDarkFieldScatterTensor(x, y, z, scatterCoefDir3);
 					} else if(z<l5){
-						phantom.setDarkFieldScatterTensor(x, y, z, scatterCoefDir2);
+						phantom.setDarkFieldScatterTensor(x, y, z, scatterCoefDir4);
 					}  
 					// Set Phantom Mask
 					phantomMask.setDarkFieldScatterTensor(x, y, z, new SimpleVector(1f));

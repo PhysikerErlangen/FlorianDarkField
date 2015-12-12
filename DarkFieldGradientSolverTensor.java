@@ -340,7 +340,7 @@ public class DarkFieldGradientSolverTensor extends DarkFieldTensorGeometry {
 	
 		errorMat.setRowValue(it, new SimpleVector(it,error));
 		
-		plotError(errorMat, it+1);
+		//plotError(errorMat, it+1);
 		
 		System.out.println("Error (Difference of Sinograms): " + error);
 
@@ -485,8 +485,13 @@ public class DarkFieldGradientSolverTensor extends DarkFieldTensorGeometry {
 	 * @param it
 	 */
 	private float calcStepSize(float stepSize, int it) {
-		return stepSize;
-		// return  (float)( Math.pow(0.96, it)*stepSize);
+		//return stepSize;
+		int itTh = 4;
+		if(it < itTh){
+			return stepSize;
+		} else {
+		return  (float)( Math.pow(0.96, it)*stepSize);
+		}
 	}
 	
 	

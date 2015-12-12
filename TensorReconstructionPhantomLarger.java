@@ -24,6 +24,7 @@ import edu.stanford.rsl.science.darkfield.FlorianDarkField.DarkField3DTensorVolu
 import edu.stanford.rsl.science.darkfield.FlorianDarkField.ImageToSinogram3D;
 import edu.stanford.rsl.science.darkfield.FlorianDarkField.DarkField3DTensorVolume.TensorConstraintType;
 import edu.stanford.rsl.science.darkfield.FlorianDarkField.DarkFieldTensorGeometry.TrajectoryType;
+import edu.stanford.rsl.science.darkfield.FlorianDarkField.DarkFieldTensorPhantom.PhantomType;
 import ij.IJ;
 import ij.ImageJ;
 import ij.ImagePlus;
@@ -44,7 +45,7 @@ public class TensorReconstructionPhantomLarger{
 		
 		File folder;
 		
-		String fileNameConfig1 = "E:\\fschiffers\\MeasuredData\\PhantomLarge\\PhantomLarge.xml";
+		String fileNameConfig1 = "E:\\fschiffers\\MeasuredData\\PhantomLarge\\PhantomVeryLarge.xml";
 		
 
 
@@ -63,10 +64,10 @@ public class TensorReconstructionPhantomLarger{
 		new ImageJ();
 		
 		// Number of scatter vectors
-		numScatterVectors = 13;
+		numScatterVectors = 20;
 		
 		// Create Dark Field Phantom
-		phantomObject = new DarkFieldTensorPhantom(Configuration1,numScatterVectors);
+		phantomObject = new DarkFieldTensorPhantom(Configuration1,numScatterVectors,PhantomType.WOODEN_BLOCK_PHANTOM);
 
 		// display the phantom
 		phantomObject.getPhantom().show("Phantom Volume");

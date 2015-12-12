@@ -36,7 +36,7 @@ public class DarkFieldScatterDirectionTest {
 	@Test
 	public void testIsotropicCoefficients() {
 		
-		for(int k = 13; k < 14; k++){
+		for(int k = 25; k < 26; k++){
 		
 		SimpleMatrix scatterDirections = DarkFieldScatterDirection.getScatterDirectionMatrix(k);
 		

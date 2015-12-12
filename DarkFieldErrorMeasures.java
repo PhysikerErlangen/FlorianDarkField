@@ -27,7 +27,7 @@ public class DarkFieldErrorMeasures {
 	 * @param B
 	 * @return
 	 */
-	public static Grid3D errorAngularDistanceGrid(DarkFieldTensorClass A, DarkFieldTensorClass B){
+	public static Grid3D errorAngularDistanceGrid(DarkFieldTensorClass A, DarkFieldTensorClass B,DarkField3DTensorVolume mask){
 		
 		// Check for inconsistency (different dimensions)
 				assert(A.imgSizeX == B.imgSizeX
@@ -40,9 +40,14 @@ public class DarkFieldErrorMeasures {
 	DarkFieldVectorField dirA = A.getFiberDirection();
 	DarkFieldVectorField dirB = B.getFiberDirection();
 	
+	
 	 for(int x = 0; x < A.imgSizeX; x ++){
 		 for(int y = 0; y < A.imgSizeY; y++){
 			 for(int z = 0; z < A.imgSizeZ; z++){
+				
+				 if(mask.getAtIndex(x, y, z, 0) == 0){
+					 	angularDiffGrid.setAtIndex(x,y,z,0f);
+					} else {
 				 
 				 SimpleVector vecA  = dirA.getSimpleVectorAtIndex(x, y, z).normalizedL2();
 				 SimpleVector vecB  = dirB.getSimpleVectorAtIndex(x, y, z).normalizedL2();
@@ -57,7 +62,7 @@ public class DarkFieldErrorMeasures {
 				  * Calculate angle and set it to grid
 				  */
 				 angularDiffGrid.setAtIndex(x,y,z,(float)Math.acos(inner));
-				 
+				}
 			 }
 		 }
 	 }
@@ -71,10 +76,14 @@ public class DarkFieldErrorMeasures {
 	 * @param B
 	 * @return
 	 */
-	public static double errorAngularDistance(DarkFieldTensorClass A, DarkFieldTensorClass B){
+	public static double errorAngularDistance(DarkFieldTensorClass A, DarkFieldTensorClass B, DarkField3DTensorVolume mask){
 		
-		Grid3D diff = errorAngularDistanceGrid(A,B);
-		double norm = NumericGridOperator.getInstance().normL1(diff);
+		// Get number of non zero elements
+		double normFactor = NumericGridOperator.getInstance().normL1(mask);
+		
+		Grid3D diff = errorAngularDistanceGrid(A,B,mask);
+		double norm = NumericGridOperator.getInstance().normL1(diff)/normFactor;
+		
 		return norm;
 	}
 	
@@ -110,17 +119,20 @@ public class DarkFieldErrorMeasures {
 	 * @return
 	 */
 	public static double errorSinogam(DarkField3DSinogram diff, double normFactor,DarkFieldNormType normType){
+
+		double residualNorm;
+		
 		if(normType == DarkFieldNormType.NORM_L1){
-		double residualNorm = diff.norm1();
-		double normalisedResidualNorm = residualNorm/normFactor;
-		return normalisedResidualNorm;
+		residualNorm = diff.norm1();
 		} else if(normType == DarkFieldNormType.NORM_L2){
-		double residualNorm = diff.norm2();
-		double normalisedResidualNorm = residualNorm/normFactor;
-		return normalisedResidualNorm;
+		residualNorm = diff.norm2();
+		
 		}else{
 			return Double.NaN;
 		}
+		
+		double normalisedResidualNorm = residualNorm/normFactor;
+		return normalisedResidualNorm;
 	}
 	
 
@@ -128,7 +140,7 @@ public class DarkFieldErrorMeasures {
 	 * Normalised mean updates
 	 * (see eq. 22 of Vogel - constrained XTT)
 	 * @param A
-	 * @param B - Normalized in respect to B
+	 * @param B - Normalized with respect to B
 	 * @return
 	 */
 	public static double errorDarkFieldCoefficients(DarkField3DTensorVolume A, DarkField3DTensorVolume B,DarkFieldNormType normType ){
